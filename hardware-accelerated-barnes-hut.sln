@@ -4,6 +4,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 17.14.36811.4
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AsteroidSimulation", "AsteroidSimulation\AsteroidSimulation.vcxproj", "{A5D56E4C-5D79-4F90-AFCF-2E330DD763BE}"
+	ProjectSection(ProjectDependencies) = postProject
+		{9994816D-6B9D-4C52-86FE-9F9F8471998E} = {9994816D-6B9D-4C52-86FE-9F9F8471998E}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "IvyyyEngine", "IvyyyEngine\IvyyyEngine\IvyyyEngine.vcxproj", "{9994816D-6B9D-4C52-86FE-9F9F8471998E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +26,14 @@ Global
 		{A5D56E4C-5D79-4F90-AFCF-2E330DD763BE}.Release|x64.Build.0 = Release|x64
 		{A5D56E4C-5D79-4F90-AFCF-2E330DD763BE}.Release|x86.ActiveCfg = Release|Win32
 		{A5D56E4C-5D79-4F90-AFCF-2E330DD763BE}.Release|x86.Build.0 = Release|Win32
+		{9994816D-6B9D-4C52-86FE-9F9F8471998E}.Debug|x64.ActiveCfg = Debug|x64
+		{9994816D-6B9D-4C52-86FE-9F9F8471998E}.Debug|x64.Build.0 = Debug|x64
+		{9994816D-6B9D-4C52-86FE-9F9F8471998E}.Debug|x86.ActiveCfg = Debug|Win32
+		{9994816D-6B9D-4C52-86FE-9F9F8471998E}.Debug|x86.Build.0 = Debug|Win32
+		{9994816D-6B9D-4C52-86FE-9F9F8471998E}.Release|x64.ActiveCfg = Release|x64
+		{9994816D-6B9D-4C52-86FE-9F9F8471998E}.Release|x64.Build.0 = Release|x64
+		{9994816D-6B9D-4C52-86FE-9F9F8471998E}.Release|x86.ActiveCfg = Release|Win32
+		{9994816D-6B9D-4C52-86FE-9F9F8471998E}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
