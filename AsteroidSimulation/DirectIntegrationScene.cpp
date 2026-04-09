@@ -14,5 +14,8 @@ void DirectIntegrationScene::Init()
 	light->GetTransform()->SetParent(Camera::MainCamera()->GetTransform());
 	light->SetColor(Color(1.f, 1.f, 1.f, 1.0f));
 
-	Asteroid* obj = AddGameObject <Asteroid>();
+	AddGameObject <Asteroid>()->transform.SetPosition (Vector3::Right);
+	AddGameObject <Asteroid>()->transform.SetPosition (Vector3::Left);
+	AddGameObject <Asteroid>()->transform.SetPosition (Vector3::Up);
+	AddGameObject <Asteroid>()->transform.SetPosition (Vector3::Down);
 }

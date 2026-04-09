@@ -2,6 +2,8 @@
 
 #include <IvyyyMeshRenderer.h>
 #include <IvyyyPhysicObject.h>
+#include <IvyyyCircleCollider.h>
+#include <IvyyyPhysicObjectGravityGenerator.h>
 
 #include "Asteroid.h"
 #include "ColorMaterial.h"
@@ -19,4 +21,13 @@ Asteroid::Asteroid()
 
 	//Physics
 	auto physic = AddComponent<PhysicObject>();
+
+	//Collider
+	auto collider = AddComponent<CircleCollider>();
+	collider->SetRadius (0.5f);
+
+	//Add Force Generator
+	AddComponent<PhysicObjectGravityGenerator>();
+
+	transform.SetLocalScale ({0.2f, 0.2f, 0.2f});
 }
