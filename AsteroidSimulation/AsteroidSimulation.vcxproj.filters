@@ -33,7 +33,7 @@
     <ClCompile Include="ColorMaterial.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="DirectForceGenerator.cpp">
+    <ClCompile Include="Planet.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -50,7 +50,7 @@
     <ClInclude Include="ColorMaterial.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="DirectForceGenerator.h">
+    <ClInclude Include="Planet.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

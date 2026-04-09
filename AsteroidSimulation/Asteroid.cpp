@@ -21,6 +21,7 @@ Asteroid::Asteroid()
 
 	//Physics
 	auto physic = AddComponent<PhysicObject>();
+	physic->SetMass(0.1f);
 
 	//Collider
 	auto collider = AddComponent<CircleCollider>();
@@ -29,5 +30,5 @@ Asteroid::Asteroid()
 	//Add Force Generator
 	AddComponent<PhysicObjectGravityGenerator>();
 
-	transform.SetLocalScale ({0.2f, 0.2f, 0.2f});
+	transform.SetLocalScale ({0.05f, 0.05f, 0.05f});
 }

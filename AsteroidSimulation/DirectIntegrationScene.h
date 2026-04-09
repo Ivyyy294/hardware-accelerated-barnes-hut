@@ -9,5 +9,6 @@ class DirectIntegrationScene :
 	//Methods
 private:
 	void Init() override;
+	void SpawnAsteroids(int num, float dist, float speed);
 };
 
