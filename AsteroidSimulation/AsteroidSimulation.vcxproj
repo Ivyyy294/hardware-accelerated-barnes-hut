@@ -133,6 +133,8 @@
   <ItemGroup>
     <ClCompile Include="Asteroid.cpp" />
     <ClCompile Include="ColorMaterial.cpp" />
+    <ClCompile Include="DebugInfo.cpp" />
+    <ClCompile Include="DebugInfoUi.cpp" />
     <ClCompile Include="DirectIntegrationScene.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="pch.cpp">
@@ -144,6 +146,8 @@
   <ItemGroup>
     <ClInclude Include="Asteroid.h" />
     <ClInclude Include="ColorMaterial.h" />
+    <ClInclude Include="DebugInfo.h" />
+    <ClInclude Include="DebugInfoUi.h" />
     <ClInclude Include="DirectIntegrationScene.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="Planet.h" />

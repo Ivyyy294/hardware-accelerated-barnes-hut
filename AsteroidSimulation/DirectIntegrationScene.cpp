@@ -7,6 +7,7 @@
 #include "DirectIntegrationScene.h"
 #include "Asteroid.h"
 #include "Planet.h"
+#include "DebugInfoUi.h"
 
 
 void DirectIntegrationScene::Init()
@@ -15,6 +16,9 @@ void DirectIntegrationScene::Init()
 	auto light = AddGameObject<GameObject>()->AddComponent<DirectionalLight>();
 	light->GetTransform()->SetParent(Camera::MainCamera()->GetTransform());
 	light->SetColor(Color(1.f, 1.f, 1.f, 1.0f));
+
+	//Add Debug UI
+	AddGameObject<DebugInfoUi>();
 
 	//Add Asteroids
 	SpawnAsteroids(64, 4.f, 0.5f);
