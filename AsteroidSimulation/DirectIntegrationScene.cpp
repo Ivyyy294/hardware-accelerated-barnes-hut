@@ -9,7 +9,6 @@
 #include "Planet.h"
 #include "DebugInfoUi.h"
 
-
 void DirectIntegrationScene::Init()
 {
 	//Add Light
@@ -24,8 +23,8 @@ void DirectIntegrationScene::Init()
 	SpawnAsteroids(64, 4.f, 0.5f);
 	SpawnAsteroids(128, 4.25f, 0.5f);
 	SpawnAsteroids(128, 4.5f, 0.5f);
-	SpawnAsteroids(256, 4.75f, 0.5f);
-	SpawnAsteroids(256, 5.f, 0.7f);
+	SpawnAsteroids(256, 4.75f, 0.48f);
+	SpawnAsteroids(256, 5.f, 0.45f);
 
 	//Add Planet
 	AddGameObject <Planet>();
@@ -44,7 +43,9 @@ void DirectIntegrationScene::SpawnAsteroids (int num, float dist, float speed)
 	{
 		Asteroid* asteroid = AddGameObject <Asteroid>();
 		asteroid->transform.SetPosition(pos);
-		asteroid->GetComponent<PhysicObject>()->SetVelocity(vel);
+		
+		PhysicObject* rb = asteroid->GetComponent<PhysicObject>().get();
+		rb->SetVelocity(vel);
 		pos = rotationOffset * pos;
 		vel = rotationOffset * vel;
 	}

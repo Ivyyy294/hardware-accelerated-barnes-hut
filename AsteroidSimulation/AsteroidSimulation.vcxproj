@@ -142,6 +142,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="Planet.cpp" />
+    <ClCompile Include="SpatialOctree.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Asteroid.h" />
@@ -151,6 +152,7 @@
     <ClInclude Include="DirectIntegrationScene.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="Planet.h" />
+    <ClInclude Include="SpatialOctree.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="color.hlsl">
