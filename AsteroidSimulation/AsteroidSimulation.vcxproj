@@ -132,6 +132,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Asteroid.cpp" />
+    <ClCompile Include="BarnesHutForceGenerator.cpp" />
     <ClCompile Include="ColorMaterial.cpp" />
     <ClCompile Include="DebugInfo.cpp" />
     <ClCompile Include="DebugInfoUi.cpp" />
@@ -146,6 +147,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Asteroid.h" />
+    <ClInclude Include="BarnesHutForceGenerator.h" />
     <ClInclude Include="ColorMaterial.h" />
     <ClInclude Include="DebugInfo.h" />
     <ClInclude Include="DebugInfoUi.h" />
