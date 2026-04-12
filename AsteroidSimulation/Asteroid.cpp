@@ -27,8 +27,5 @@ Asteroid::Asteroid()
 	auto collider = AddComponent<CircleCollider>();
 	collider->SetRadius (0.5f);
 
-	//Add Force Generator
-	AddComponent<PhysicObjectGravityGenerator>();
-
 	transform.SetLocalScale ({0.05f, 0.05f, 0.05f});
 }

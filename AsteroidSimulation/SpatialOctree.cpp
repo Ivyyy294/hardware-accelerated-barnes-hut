@@ -104,3 +104,43 @@ void SpatialOctree::DivideCells()
 
 	m_childCount = 8;
 }
+
+void SpatialOctree::Clear()
+{
+	m_physicObject = nullptr;
+	m_mass = 0.f;
+	m_centerOfMass = Vector3::Zero;
+
+	for (int i = 0; i < 8; ++i)
+	{
+		if (m_children[i] != nullptr)
+		{
+			m_children[i]->Clear();
+			delete m_children[i];
+			m_children[i] = nullptr;
+		}
+	}
+
+	m_childCount = 0;
+}
+
+void SpatialOctree::DrawGizmo()
+{
+	std::queue<SpatialOctree*> queue;
+
+	queue.push (this);
+
+	while (!queue.empty())
+	{
+		SpatialOctree* current = queue.front();
+		queue.pop();
+
+		if (current->m_physicObject != nullptr)
+			Gizmo::AddCube (current->m_center, current->m_halfExtents, Color::Green, Transform::Space::WORLD);
+		else
+		{
+			for (int i = 0; i < current->m_childCount; ++i)
+				queue.push(current->m_children[i]);
+		}
+	}
+}

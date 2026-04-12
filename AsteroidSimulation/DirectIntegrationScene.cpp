@@ -9,27 +9,38 @@
 #include "Planet.h"
 #include "DebugInfoUi.h"
 
+#include "BarnesHutForceGenerator.h"
+BarnesHutForceGenerator* bh;
+
 void DirectIntegrationScene::Init()
 {
+	Gizmo::Draw = true;
+
 	//Add Light
 	auto light = AddGameObject<GameObject>()->AddComponent<DirectionalLight>();
 	light->GetTransform()->SetParent(Camera::MainCamera()->GetTransform());
 	light->SetColor(Color(1.f, 1.f, 1.f, 1.0f));
 
 	//Add Debug UI
-	AddGameObject<DebugInfoUi>();
+	//AddGameObject<DebugInfoUi>();
+
+	bh = AddGameObject()->AddComponent<BarnesHutForceGenerator>().get();
 
 	//Add Asteroids
 	SpawnAsteroids(64, 4.f, 0.5f);
 	SpawnAsteroids(128, 4.25f, 0.5f);
 	SpawnAsteroids(128, 4.5f, 0.5f);
 	SpawnAsteroids(256, 4.75f, 0.48f);
-	SpawnAsteroids(256, 5.f, 0.45f);
+	SpawnAsteroids(512, 5.f, 0.45f);
+	//SpawnAsteroids(512, 5.25f, 0.45f);
+	//SpawnAsteroids(512, 5.5f, 0.45f);
+	//SpawnAsteroids(512, 5.75f, 0.45f);
 
 	//Add Planet
-	AddGameObject <Planet>();
+	//AddGameObject <Planet>();
 
 	IvyyyPhysic::SetGravitationalConstant(0.01f);
+	Time::SetTimeScale (0.5f);
 }
 
 void DirectIntegrationScene::SpawnAsteroids (int num, float dist, float speed)
@@ -48,5 +59,7 @@ void DirectIntegrationScene::SpawnAsteroids (int num, float dist, float speed)
 		rb->SetVelocity(vel);
 		pos = rotationOffset * pos;
 		vel = rotationOffset * vel;
+
+		bh->AddForceSource (rb);
 	}
 }
