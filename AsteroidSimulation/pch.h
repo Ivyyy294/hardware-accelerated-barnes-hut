@@ -9,6 +9,7 @@
 #include <IvyyyForceGenerator.h>
 #include <IvyyyTime.h>
 #include <IvyyyGizmo.h>
+#include <IvyyyInput.h>
 #include <array>
 #include <vector>
 #include <queue>

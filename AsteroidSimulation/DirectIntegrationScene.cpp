@@ -8,8 +8,9 @@
 #include "Asteroid.h"
 #include "Planet.h"
 #include "DebugInfoUi.h"
-
 #include "BarnesHutForceGenerator.h"
+#include "CameraMovement.h"
+
 BarnesHutForceGenerator* bh;
 
 void DirectIntegrationScene::Init()
@@ -21,8 +22,11 @@ void DirectIntegrationScene::Init()
 	light->GetTransform()->SetParent(Camera::MainCamera()->GetTransform());
 	light->SetColor(Color(1.f, 1.f, 1.f, 1.0f));
 
+	//Add Camera movement
+	Camera::MainCamera()->GetGameObject()->AddComponent<CameraMovement>();
+
 	//Add Debug UI
-	//AddGameObject<DebugInfoUi>();
+	AddGameObject<DebugInfoUi>();
 
 	bh = AddGameObject()->AddComponent<BarnesHutForceGenerator>().get();
 
@@ -40,7 +44,7 @@ void DirectIntegrationScene::Init()
 	//AddGameObject <Planet>();
 
 	IvyyyPhysic::SetGravitationalConstant(0.01f);
-	Time::SetTimeScale (0.5f);
+	//Time::SetTimeScale (0.5f);
 }
 
 void DirectIntegrationScene::SpawnAsteroids (int num, float dist, float speed)
