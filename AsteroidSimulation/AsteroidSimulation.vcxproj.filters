@@ -54,6 +54,9 @@
     <ClCompile Include="BaseAsteroidScene.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="BarnesHutScene.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DirectIntegrationScene.h">
@@ -87,6 +90,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="BaseAsteroidScene.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BarnesHutScene.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

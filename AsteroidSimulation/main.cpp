@@ -8,6 +8,7 @@
 #include <IvyyySceneHandler.h>
 
 #include "DirectIntegrationScene.h"
+#include "BarnesHutScene.h"
 
 using namespace Ivyyy;
 
@@ -17,6 +18,7 @@ int WINAPI WinMain (_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance,
 	Window::SetFullscreen (true);
 	Screen::SetResolution (Ivyyy::Resolution{ 1920, 1080 });
 	Renderer::SetMode (Renderer::Mode::DX11);
-	SceneHandler::AddScene <DirectIntegrationScene>();
+	//SceneHandler::AddScene <DirectIntegrationScene>();
+	SceneHandler::AddScene <BarnesHutScene>();
 	return Ivyyy::IvyyyEngine::Start (hInstance, nShowCmd);
 }
