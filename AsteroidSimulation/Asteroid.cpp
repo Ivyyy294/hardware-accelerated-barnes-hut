@@ -21,7 +21,7 @@ Asteroid::Asteroid()
 
 	//Physics
 	auto physic = AddComponent<PhysicObject>();
-	physic->SetMass(0.1f);
+	//physic->SetMass(0.1f);
 
 	//Collider
 	auto collider = AddComponent<CircleCollider>();

@@ -133,6 +133,7 @@
   <ItemGroup>
     <ClCompile Include="Asteroid.cpp" />
     <ClCompile Include="BarnesHutForceGenerator.cpp" />
+    <ClCompile Include="BaseAsteroidScene.cpp" />
     <ClCompile Include="CameraMovement.cpp" />
     <ClCompile Include="ColorMaterial.cpp" />
     <ClCompile Include="DebugInfo.cpp" />
@@ -149,6 +150,7 @@
   <ItemGroup>
     <ClInclude Include="Asteroid.h" />
     <ClInclude Include="BarnesHutForceGenerator.h" />
+    <ClInclude Include="BaseAsteroidScene.h" />
     <ClInclude Include="CameraMovement.h" />
     <ClInclude Include="ColorMaterial.h" />
     <ClInclude Include="DebugInfo.h" />

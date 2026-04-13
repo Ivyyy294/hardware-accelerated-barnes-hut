@@ -1,14 +1,15 @@
 #pragma once
-#include <IvyyyScene.h>
+
+#include "BaseAsteroidScene.h"
 
 using namespace Ivyyy;
 
 class DirectIntegrationScene :
-    public Scene
+    public BaseAsteroidScene
 {
-	//Methods
+//Methods
 private:
 	void Init() override;
-	void SpawnAsteroids(int num, float dist, float speed);
+	void OnOrbitalBodySpawned(GameObject* orbitalBody) override;
 };
 
