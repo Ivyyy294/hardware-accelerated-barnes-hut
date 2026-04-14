@@ -15,5 +15,7 @@ public:
 	void Exit() override;
 	void FixedUpdate() override;
 	void ApplyForceForObject(PhysicObject* physicObj) const override;
+	void Dispatch();
+	void ReadBack();
 };
 
