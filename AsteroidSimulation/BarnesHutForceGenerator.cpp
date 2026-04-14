@@ -2,17 +2,6 @@
 
 #include "BarnesHutForceGenerator.h"
 
-
-void BarnesHutForceGenerator::FixedUpdate()
-{
-	m_octTree.Clear();
-
-	for (size_t i = 0; i < m_objects.size(); ++i)
-		m_octTree.Insert (m_objects[i]);
-
-	m_octTree.CalculateMass();
-}
-
 void BarnesHutForceGenerator::OnDrawGizmo()
 {
 	m_octTree.DrawGizmo();
@@ -58,4 +47,14 @@ void BarnesHutForceGenerator::ApplyForceForObject(PhysicObject* physicObj) const
 				queue.push(current->Children()[i]);
 		}
 	}
+}
+
+void BarnesHutForceGenerator::BuildTree()
+{
+	m_octTree.Clear();
+
+	for (size_t i = 0; i < m_objects.size(); ++i)
+		m_octTree.Insert(m_objects[i]);
+
+	m_octTree.CalculateMass();
 }

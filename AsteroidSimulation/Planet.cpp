@@ -20,7 +20,7 @@ Planet::Planet()
 	//Physics
 	auto physic = AddComponent<PhysicObject>();
 	physic->SetMass (100);
-	//physic->SetStatic(true);
+	physic->SetStatic(true);
 
 	//Collider
 	auto collider = AddComponent<CircleCollider>();

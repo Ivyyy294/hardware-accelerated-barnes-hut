@@ -19,8 +19,8 @@ int WINAPI WinMain (_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance,
 	Window::SetFullscreen (true);
 	Screen::SetResolution (Ivyyy::Resolution{ 1920, 1080 });
 	Renderer::SetMode (Renderer::Mode::DX11);
-	//SceneHandler::AddScene <DirectIntegrationScene>();
-	SceneHandler::AddScene <BarnesHutScene>();
+	SceneHandler::AddScene <DirectIntegrationScene>();
+	//SceneHandler::AddScene <BarnesHutScene>();
 	//SceneHandler::AddScene <BarnesHutCSScene>();
 	return Ivyyy::IvyyyEngine::Start (hInstance, nShowCmd);
 }

@@ -18,10 +18,11 @@ private:
 public:
 	inline void AddForceSource (PhysicObject* obj) {m_objects.push_back(obj);};
 
-	void FixedUpdate() override;
 	void OnDrawGizmo() override;
 
 	// Inherited via ForceGenerator
 	void ApplyForceForObject(PhysicObject* physicObj) const override;
+
+	void BuildTree();
 };
 
