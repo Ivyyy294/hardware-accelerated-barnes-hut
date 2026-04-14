@@ -10,6 +10,7 @@
 #include <IvyyyTime.h>
 #include <IvyyyGizmo.h>
 #include <IvyyyInput.h>
+#include <IvyyyDebug.h>
 #include <array>
 #include <vector>
 #include <queue>

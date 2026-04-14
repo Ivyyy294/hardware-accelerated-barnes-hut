@@ -132,6 +132,9 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Asteroid.cpp" />
+    <ClCompile Include="BarnesHutCS.cpp" />
+    <ClCompile Include="BarnesHutCSForceGenerator.cpp" />
+    <ClCompile Include="BarnesHutCSScene.cpp" />
     <ClCompile Include="BarnesHutForceGenerator.cpp" />
     <ClCompile Include="BarnesHutScene.cpp" />
     <ClCompile Include="BaseAsteroidScene.cpp" />
@@ -150,6 +153,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Asteroid.h" />
+    <ClInclude Include="BarnesHutCS.h" />
+    <ClInclude Include="BarnesHutCSForceGenerator.h" />
+    <ClInclude Include="BarnesHutCSScene.h" />
     <ClInclude Include="BarnesHutForceGenerator.h" />
     <ClInclude Include="BarnesHutScene.h" />
     <ClInclude Include="BaseAsteroidScene.h" />
@@ -163,6 +169,18 @@
     <ClInclude Include="SpatialOctree.h" />
   </ItemGroup>
   <ItemGroup>
+    <FxCompile Include="BarnesHutCS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Compute</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">4.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Compute</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">4.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Compute</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">4.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Compute</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">4.0</ShaderModel>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
     <FxCompile Include="color.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
