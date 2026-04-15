@@ -11,16 +11,16 @@ void BarnesHutCS::ShutdownShader()
 {
 	ComputeShader::ShutdownShader();
 
-	if (m_inputBuffer)
+	if (m_positionBuffer)
 	{
-		m_inputBuffer->Release();
-		m_inputBuffer = nullptr;
+		m_positionBuffer->Release();
+		m_positionBuffer = nullptr;
 	}
 
-	if (m_inputBufferSrv)
+	if (m_positionBufferSrv)
 	{
-		m_inputBufferSrv->Release();
-		m_inputBufferSrv = nullptr;
+		m_positionBufferSrv->Release();
+		m_positionBufferSrv = nullptr;
 	}
 
 	if (m_outputBuffer)
@@ -60,9 +60,38 @@ void BarnesHutCS::CopyData()
 	}
 }
 
+void BarnesHutCS::SetShaderParameters(const std::vector<PhysicObject*>& objects)
+{
+	ID3D11DeviceContext* deviceContext = D3D::Instance().GetDeviceContext();
+	
+	if (deviceContext == nullptr)
+		return;
+
+	D3D11_MAPPED_SUBRESOURCE mappedResource;
+
+	HRESULT result = deviceContext->Map(m_positionBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+
+	if (FAILED(result))
+		return;
+
+	// Get a pointer to the data in the constant buffer.
+	XMFLOAT3* dataPtr = (XMFLOAT3*)mappedResource.pData;
+
+	for (int i = 0; i < objects.size() && i < m_maxSize; ++i)
+	{
+		Vector3 pos = objects[i]->GetTransform()->GetPosition();
+		dataPtr[i].x = pos.x;
+		dataPtr[i].y = pos.y;
+		dataPtr[i].z = pos.z;
+	}
+
+	// Unlock the constant buffer.
+	deviceContext->Unmap(m_positionBuffer, 0);
+}
+
 bool BarnesHutCS::BindShaderParameters (ID3D11DeviceContext* deviceContext)
 {
-	deviceContext->CSSetShaderResources (0, 1, &m_inputBufferSrv);
+	deviceContext->CSSetShaderResources (0, 1, &m_positionBufferSrv);
 	deviceContext->CSSetUnorderedAccessViews (0, 1, &m_outputBufferUav, nullptr);
 	return true;
 }
@@ -83,14 +112,14 @@ bool BarnesHutCS::InitShaderParameters (ID3D11Device* device)
 	//Input buffer
 	D3D11_BUFFER_DESC bufferDesc = {};
 	bufferDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
-	bufferDesc.ByteWidth = sizeof(int) * m_maxSize;
+	bufferDesc.ByteWidth = sizeof(XMFLOAT3) * m_maxSize;
 	bufferDesc.Usage = D3D11_USAGE_DYNAMIC;
 	bufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 	bufferDesc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
-	bufferDesc.StructureByteStride = sizeof(int);
+	bufferDesc.StructureByteStride = sizeof(XMFLOAT3);
 
 	// Create the constant buffer pointer so we can access the vertex shader constant buffer from within this class.
-	HRESULT result = device->CreateBuffer(&bufferDesc, NULL, &m_inputBuffer);
+	HRESULT result = device->CreateBuffer(&bufferDesc, NULL, &m_positionBuffer);
 
 	if (FAILED(result))
 		return false;
@@ -99,7 +128,7 @@ bool BarnesHutCS::InitShaderParameters (ID3D11Device* device)
 	srvDesc.ViewDimension = D3D11_SRV_DIMENSION_BUFFER;
 	srvDesc.Buffer.NumElements = 1;
 
-	result = device->CreateShaderResourceView(m_inputBuffer, &srvDesc, &m_inputBufferSrv);
+	result = device->CreateShaderResourceView(m_positionBuffer, &srvDesc, &m_positionBufferSrv);
 
 	if (FAILED(result))
 		return false;

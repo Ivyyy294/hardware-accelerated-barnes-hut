@@ -5,11 +5,17 @@
 class BarnesHutCS :
     public ComputeShader
 {
+	struct MyStruct
+	{
+
+	};
+
 //Variables
 	int m_maxSize {1};
+	Vector3 m_boundingVolume {Vector3::Zero};
 
-	ID3D11Buffer* m_inputBuffer{ nullptr };
-	ID3D11ShaderResourceView* m_inputBufferSrv = nullptr;
+	ID3D11Buffer* m_positionBuffer{ nullptr };
+	ID3D11ShaderResourceView* m_positionBufferSrv = nullptr;
 
 	ID3D11Buffer* m_outputBuffer{ nullptr };
 	ID3D11Buffer* m_outputResultBuffer{ nullptr };
@@ -22,6 +28,8 @@ public:
 
 	void CopyData();
 	inline void SetMaxSize (int size) {m_maxSize = size;};
+
+	void SetShaderParameters(const std::vector<PhysicObject*>& objects);
 
 private:
 	bool BindShaderParameters (ID3D11DeviceContext* deviceContext) override;
