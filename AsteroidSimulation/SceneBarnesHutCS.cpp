@@ -5,7 +5,7 @@
 void SceneBarnesHutCS::Init()
 {
 	m_forceGenerator = AddGameObject()->AddComponent<ForceGeneratorBarnesHutCS>().get();
-	BaseAsteroidScene::Init();
+	SceneAsteroidBase::Init();
 
 	AdjustFixedUpdateLoop();
 }
@@ -25,4 +25,10 @@ void SceneBarnesHutCS::AdjustFixedUpdateLoop()
 
 void SceneBarnesHutCS::OnOrbitalBodySpawned(GameObject* orbitalBody)
 {
+	PhysicObject* po = orbitalBody->GetComponent<PhysicObject>().get();
+
+	if (po == nullptr)
+		return;
+
+	m_forceGenerator->AddForceSource(po);
 }

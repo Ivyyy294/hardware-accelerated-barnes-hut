@@ -3,7 +3,7 @@
 #include <IvyyyScene.h>
 #include "Asteroid.h"
 
-class BaseAsteroidScene :
+class SceneAsteroidBase :
     public Scene
 {
 //Methods

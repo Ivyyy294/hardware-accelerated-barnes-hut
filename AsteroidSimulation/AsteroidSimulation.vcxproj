@@ -137,7 +137,7 @@
     <ClCompile Include="SceneBarnesHutCS.cpp" />
     <ClCompile Include="ForceGeneratorBarnesHut.cpp" />
     <ClCompile Include="SceneBarnesHut.cpp" />
-    <ClCompile Include="BaseAsteroidScene.cpp" />
+    <ClCompile Include="SceneAsteroidBase.cpp" />
     <ClCompile Include="CameraMovement.cpp" />
     <ClCompile Include="ColorMaterial.cpp" />
     <ClCompile Include="DebugInfo.cpp" />
@@ -159,7 +159,7 @@
     <ClInclude Include="SceneBarnesHutCS.h" />
     <ClInclude Include="ForceGeneratorBarnesHut.h" />
     <ClInclude Include="SceneBarnesHut.h" />
-    <ClInclude Include="BaseAsteroidScene.h" />
+    <ClInclude Include="SceneAsteroidBase.h" />
     <ClInclude Include="CameraMovement.h" />
     <ClInclude Include="ColorMaterial.h" />
     <ClInclude Include="DebugInfo.h" />

@@ -3,12 +3,12 @@
 #include <IvyyyDirectionalLight.h>
 #include <IvyyyCamera.h>
 
-#include "BaseAsteroidScene.h"
+#include "SceneAsteroidBase.h"
 #include "DebugInfoUi.h"
 #include "CameraMovement.h"
 #include "Planet.h"
 
-void BaseAsteroidScene::Init()
+void SceneAsteroidBase::Init()
 {
 	//Add Light
 	auto light = AddGameObject<GameObject>()->AddComponent<DirectionalLight>();
@@ -24,12 +24,12 @@ void BaseAsteroidScene::Init()
 	//Add Asteroids
 	SpawnAsteroids(64, 10.f, 0.5f);
 	SpawnAsteroids(128, 10.25f, 0.5f);
-	SpawnAsteroids(128, 10.5f, 0.5f);
-	SpawnAsteroids(256, 10.75f, 0.48f);
-	SpawnAsteroids(512, 16.f, 0.45f);
-	SpawnAsteroids(512, 16.25f, 0.45f);
-	SpawnAsteroids(512, 16.5f, 0.45f);
-	SpawnAsteroids(512, 16.75f, 0.45f);
+	//SpawnAsteroids(128, 10.5f, 0.5f);
+	//SpawnAsteroids(256, 10.75f, 0.48f);
+	//SpawnAsteroids(512, 16.f, 0.45f);
+	//SpawnAsteroids(512, 16.25f, 0.45f);
+	//SpawnAsteroids(512, 16.5f, 0.45f);
+	//SpawnAsteroids(512, 16.75f, 0.45f);
 
 	//Add Planet
 	Planet* planet = AddGameObject <Planet>();
@@ -38,7 +38,7 @@ void BaseAsteroidScene::Init()
 	IvyyyPhysic::SetGravitationalConstant(0.005f);
 }
 
-void BaseAsteroidScene::SpawnAsteroids(int num, float dist, float speed)
+void SceneAsteroidBase::SpawnAsteroids(int num, float dist, float speed)
 {
 	float angle = 360.f / ((float)num);
 	Quaternion rotationOffset = Quaternion::Euler(0.f, 0.f, angle);

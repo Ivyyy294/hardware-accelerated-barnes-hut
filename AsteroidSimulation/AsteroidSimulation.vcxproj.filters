@@ -51,7 +51,7 @@
     <ClCompile Include="CameraMovement.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="BaseAsteroidScene.cpp">
+    <ClCompile Include="SceneAsteroidBase.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="SceneBarnesHut.cpp">
@@ -101,7 +101,7 @@
     <ClInclude Include="CameraMovement.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="BaseAsteroidScene.h">
+    <ClInclude Include="SceneAsteroidBase.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="SceneBarnesHut.h">

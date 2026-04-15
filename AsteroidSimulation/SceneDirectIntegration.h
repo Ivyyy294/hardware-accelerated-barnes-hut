@@ -1,11 +1,11 @@
 #pragma once
 
-#include "BaseAsteroidScene.h"
+#include "SceneAsteroidBase.h"
 
 using namespace Ivyyy;
 
 class SceneDirectIntegration :
-    public BaseAsteroidScene
+    public SceneAsteroidBase
 {
 //Methods
 private:

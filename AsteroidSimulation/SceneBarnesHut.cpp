@@ -5,7 +5,7 @@
 void SceneBarnesHut::Init()
 {
 	m_forceGenerator = AddGameObject()->AddComponent<ForceGeneratorBarnesHut>().get();
-	BaseAsteroidScene::Init();
+	SceneAsteroidBase::Init();
 
 	AdjustFixedUpdateLoop();
 }

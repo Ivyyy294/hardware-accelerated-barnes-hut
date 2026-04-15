@@ -8,7 +8,7 @@
 
 void SceneDirectIntegration::Init()
 {
-	BaseAsteroidScene::Init();
+	SceneAsteroidBase::Init();
 }
 
 void SceneDirectIntegration::OnOrbitalBodySpawned(GameObject* orbitalBody)
