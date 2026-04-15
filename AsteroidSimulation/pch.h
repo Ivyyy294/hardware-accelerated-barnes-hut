@@ -1,6 +1,8 @@
 #pragma once
 
 #include <string>
+#include <algorithm>
+#include <cmath>
 
 #include <IvyyyGameObject.h>
 #include <IvyyyPhysicObject.h>

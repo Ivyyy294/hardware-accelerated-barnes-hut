@@ -1,14 +1,14 @@
 #pragma once
 
 #include "BaseAsteroidScene.h"
-#include "BarnesHutCSForceGenerator.h"
+#include "ForceGeneratorBarnesHutCS.h"
 
 class BarnesHutCSScene :
     public BaseAsteroidScene
 {
 //Variables
 private:
-	BarnesHutCSForceGenerator* m_forceGenerator {nullptr};
+	ForceGeneratorBarnesHutCS* m_forceGenerator {nullptr};
 	
 //Methods
 private:

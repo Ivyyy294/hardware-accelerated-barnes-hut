@@ -42,6 +42,7 @@ public:
 	inline const std::array <SpatialOctree*, 8>& Children() const {return m_children;}
 	inline float Length() const {return m_length;}
 	inline int ChildCount() const {return m_childCount;};
+	inline void SetHalfExtends (Vector3 halfExtends) {m_halfExtents = halfExtends;};
 private:
 	void DivideCells ();
 };

@@ -2,7 +2,7 @@
 
 #include "SpatialOctree.h"
 
-class BarnesHutForceGenerator
+class ForceGeneratorBarnesHut
 	: public ForceGenerator
 {
 //Variables
@@ -24,5 +24,9 @@ public:
 	void ApplyForceForObject(PhysicObject* physicObj) const override;
 
 	void BuildTree();
+
+private:
+	
+	float GetMaxCoordinate();
 };
 

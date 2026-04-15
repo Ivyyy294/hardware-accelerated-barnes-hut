@@ -133,9 +133,9 @@
   <ItemGroup>
     <ClCompile Include="Asteroid.cpp" />
     <ClCompile Include="BarnesHutCS.cpp" />
-    <ClCompile Include="BarnesHutCSForceGenerator.cpp" />
+    <ClCompile Include="ForceGeneratorBarnesHutCS.cpp" />
     <ClCompile Include="BarnesHutCSScene.cpp" />
-    <ClCompile Include="BarnesHutForceGenerator.cpp" />
+    <ClCompile Include="ForceGeneratorBarnesHut.cpp" />
     <ClCompile Include="BarnesHutScene.cpp" />
     <ClCompile Include="BaseAsteroidScene.cpp" />
     <ClCompile Include="CameraMovement.cpp" />
@@ -143,6 +143,7 @@
     <ClCompile Include="DebugInfo.cpp" />
     <ClCompile Include="DebugInfoUi.cpp" />
     <ClCompile Include="DirectIntegrationScene.cpp" />
+    <ClCompile Include="ForceGeneratorBarnesHutBase.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
@@ -154,9 +155,9 @@
   <ItemGroup>
     <ClInclude Include="Asteroid.h" />
     <ClInclude Include="BarnesHutCS.h" />
-    <ClInclude Include="BarnesHutCSForceGenerator.h" />
+    <ClInclude Include="ForceGeneratorBarnesHutCS.h" />
     <ClInclude Include="BarnesHutCSScene.h" />
-    <ClInclude Include="BarnesHutForceGenerator.h" />
+    <ClInclude Include="ForceGeneratorBarnesHut.h" />
     <ClInclude Include="BarnesHutScene.h" />
     <ClInclude Include="BaseAsteroidScene.h" />
     <ClInclude Include="CameraMovement.h" />
@@ -164,6 +165,7 @@
     <ClInclude Include="DebugInfo.h" />
     <ClInclude Include="DebugInfoUi.h" />
     <ClInclude Include="DirectIntegrationScene.h" />
+    <ClInclude Include="ForceGeneratorBarnesHutBase.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="Planet.h" />
     <ClInclude Include="SpatialOctree.h" />

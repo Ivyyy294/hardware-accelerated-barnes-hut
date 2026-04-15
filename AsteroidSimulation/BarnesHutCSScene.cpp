@@ -4,7 +4,7 @@
 
 void BarnesHutCSScene::Init()
 {
-	m_forceGenerator = AddGameObject()->AddComponent<BarnesHutCSForceGenerator>().get();
+	m_forceGenerator = AddGameObject()->AddComponent<ForceGeneratorBarnesHutCS>().get();
 	BaseAsteroidScene::Init();
 
 	AdjustFixedUpdateLoop();
@@ -18,8 +18,8 @@ void BarnesHutCSScene::AdjustFixedUpdateLoop()
 	auto physicNode = mainLoopNodes->GetChildren()[1];
 
 	auto fixedUpdateNodes = physicNode->GetChildren();
-	fixedUpdateNodes.emplace(fixedUpdateNodes.begin() + 2,std::make_shared <MainLoopNode>("BarnesHutCSForceGenerator", Event().Bind<BarnesHutCSForceGenerator, &BarnesHutCSForceGenerator::Dispatch>(m_forceGenerator)));
-	fixedUpdateNodes.emplace(fixedUpdateNodes.begin() + 3,std::make_shared <MainLoopNode>("BarnesHutCSForceGenerator", Event().Bind<BarnesHutCSForceGenerator, &BarnesHutCSForceGenerator::ReadBack>(m_forceGenerator)));
+	fixedUpdateNodes.emplace(fixedUpdateNodes.begin() + 2,std::make_shared <MainLoopNode>("BarnesHutCSForceGenerator", Event().Bind<ForceGeneratorBarnesHutCS, &ForceGeneratorBarnesHutCS::Dispatch>(m_forceGenerator)));
+	fixedUpdateNodes.emplace(fixedUpdateNodes.begin() + 3,std::make_shared <MainLoopNode>("BarnesHutCSForceGenerator", Event().Bind<ForceGeneratorBarnesHutCS, &ForceGeneratorBarnesHutCS::ReadBack>(m_forceGenerator)));
 	physicNode->SetChildren(fixedUpdateNodes);
 }
 

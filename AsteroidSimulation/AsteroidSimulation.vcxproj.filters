@@ -45,7 +45,7 @@
     <ClCompile Include="SpatialOctree.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="BarnesHutForceGenerator.cpp">
+    <ClCompile Include="ForceGeneratorBarnesHut.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="CameraMovement.cpp">
@@ -60,10 +60,13 @@
     <ClCompile Include="BarnesHutCS.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="BarnesHutCSForceGenerator.cpp">
+    <ClCompile Include="ForceGeneratorBarnesHutCS.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="BarnesHutCSScene.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ForceGeneratorBarnesHutBase.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -92,7 +95,7 @@
     <ClInclude Include="SpatialOctree.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="BarnesHutForceGenerator.h">
+    <ClInclude Include="ForceGeneratorBarnesHut.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="CameraMovement.h">
@@ -107,10 +110,13 @@
     <ClInclude Include="BarnesHutCS.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="BarnesHutCSForceGenerator.h">
+    <ClInclude Include="ForceGeneratorBarnesHutCS.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="BarnesHutCSScene.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ForceGeneratorBarnesHutBase.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

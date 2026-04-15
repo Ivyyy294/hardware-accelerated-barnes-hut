@@ -1,13 +1,12 @@
 #include "pch.h"
+#include "ForceGeneratorBarnesHut.h"
 
-#include "BarnesHutForceGenerator.h"
-
-void BarnesHutForceGenerator::OnDrawGizmo()
+void ForceGeneratorBarnesHut::OnDrawGizmo()
 {
 	m_octTree.DrawGizmo();
 }
 
-void BarnesHutForceGenerator::ApplyForceForObject(PhysicObject* physicObj) const
+void ForceGeneratorBarnesHut::ApplyForceForObject(PhysicObject* physicObj) const
 {
 	std::queue<const SpatialOctree*> queue;
 
@@ -49,12 +48,30 @@ void BarnesHutForceGenerator::ApplyForceForObject(PhysicObject* physicObj) const
 	}
 }
 
-void BarnesHutForceGenerator::BuildTree()
+void ForceGeneratorBarnesHut::BuildTree()
 {
 	m_octTree.Clear();
+
+	float bounds = std::ceilf (GetMaxCoordinate());
+
+	m_octTree.SetHalfExtends({bounds, bounds, bounds});
 
 	for (size_t i = 0; i < m_objects.size(); ++i)
 		m_octTree.Insert(m_objects[i]);
 
 	m_octTree.CalculateMass();
+}
+
+float ForceGeneratorBarnesHut::GetMaxCoordinate()
+{
+	float coord;
+
+	for (size_t i = 0; i < m_objects.size(); ++i)
+	{
+		Vector3 pos = m_objects[i]->GetTransform()->GetPosition();
+		float val = std::max <float>(std::max <float>(std::abs(pos.x), std::abs(pos.y)), pos.z);
+		coord = std::max<float>(coord, val);
+	}
+
+	return coord;
 }
