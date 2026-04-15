@@ -6,18 +6,23 @@
 #include <IvyyyPhysicObjectGravityGenerator.h>
 
 #include "Asteroid.h"
-#include "ColorMaterial.h"
+
+std::shared_ptr<ColorMaterial> Asteroid::m_material = nullptr;
+Mesh Asteroid::m_mesh = Mesh::Sphere(16, 16);
 
 Asteroid::Asteroid()
 {
 	//Material
-	auto colorMaterial = std::make_shared<ColorMaterial> ();
-	colorMaterial->SetColor (Color (147, 146, 140));
+	if (m_material == nullptr)
+	{
+		m_material = std::make_shared<ColorMaterial> ();
+		m_material->SetColor (Color (147, 146, 140));
+	}
 
 	//MeshRenderer
 	auto meshRenderer = AddComponent<MeshRenderer>();
-	meshRenderer->SetMesh (Mesh::Sphere(16, 16));
-	meshRenderer->SetMaterial (colorMaterial);
+	meshRenderer->SetMesh (m_mesh);
+	meshRenderer->SetMaterial (m_material);
 
 	//Physics
 	auto physic = AddComponent<PhysicObject>();
