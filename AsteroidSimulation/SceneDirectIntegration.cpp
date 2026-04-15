@@ -4,14 +4,14 @@
 #include <IvyyyPhysic.h>
 #include <IvyyyPhysicObjectGravityGenerator.h>
 
-#include "DirectIntegrationScene.h"
+#include "SceneDirectIntegration.h"
 
-void DirectIntegrationScene::Init()
+void SceneDirectIntegration::Init()
 {
 	BaseAsteroidScene::Init();
 }
 
-void DirectIntegrationScene::OnOrbitalBodySpawned(GameObject* orbitalBody)
+void SceneDirectIntegration::OnOrbitalBodySpawned(GameObject* orbitalBody)
 {
 	orbitalBody->AddComponent <PhysicObjectGravityGenerator>();
 }

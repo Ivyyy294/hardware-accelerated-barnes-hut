@@ -3,7 +3,7 @@
 #include "BaseAsteroidScene.h"
 #include "ForceGeneratorBarnesHut.h"
 
-class BarnesHutScene
+class SceneBarnesHut
 : public BaseAsteroidScene
 {
 //Variables

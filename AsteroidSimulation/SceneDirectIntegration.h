@@ -4,7 +4,7 @@
 
 using namespace Ivyyy;
 
-class DirectIntegrationScene :
+class SceneDirectIntegration :
     public BaseAsteroidScene
 {
 //Methods

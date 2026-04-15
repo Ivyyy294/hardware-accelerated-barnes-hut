@@ -1,8 +1,8 @@
 #include "pch.h"
-#include "BarnesHutScene.h"
+#include "SceneBarnesHut.h"
 #include <IvyyyEngine.h>
 
-void BarnesHutScene::Init()
+void SceneBarnesHut::Init()
 {
 	m_forceGenerator = AddGameObject()->AddComponent<ForceGeneratorBarnesHut>().get();
 	BaseAsteroidScene::Init();
@@ -10,7 +10,7 @@ void BarnesHutScene::Init()
 	AdjustFixedUpdateLoop();
 }
 
-void BarnesHutScene::OnOrbitalBodySpawned(GameObject* orbitalBody)
+void SceneBarnesHut::OnOrbitalBodySpawned(GameObject* orbitalBody)
 {
 	PhysicObject* po = orbitalBody->GetComponent<PhysicObject>().get();
 	
@@ -20,7 +20,7 @@ void BarnesHutScene::OnOrbitalBodySpawned(GameObject* orbitalBody)
 	m_forceGenerator->AddForceSource (po);
 }
 
-void BarnesHutScene::AdjustFixedUpdateLoop()
+void SceneBarnesHut::AdjustFixedUpdateLoop()
 {
 	MainLoop& mainLoop = IvyyyEngine::Me()->GetMainLoop();
 	MainLoopNode node = mainLoop.GetNode();

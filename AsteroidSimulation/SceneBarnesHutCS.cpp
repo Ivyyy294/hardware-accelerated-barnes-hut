@@ -1,8 +1,8 @@
 #include "pch.h"
-#include "BarnesHutCSScene.h"
+#include "SceneBarnesHutCS.h"
 #include <IvyyyEngine.h>
 
-void BarnesHutCSScene::Init()
+void SceneBarnesHutCS::Init()
 {
 	m_forceGenerator = AddGameObject()->AddComponent<ForceGeneratorBarnesHutCS>().get();
 	BaseAsteroidScene::Init();
@@ -10,7 +10,7 @@ void BarnesHutCSScene::Init()
 	AdjustFixedUpdateLoop();
 }
 
-void BarnesHutCSScene::AdjustFixedUpdateLoop()
+void SceneBarnesHutCS::AdjustFixedUpdateLoop()
 {
 	MainLoop& mainLoop = IvyyyEngine::Me()->GetMainLoop();
 	MainLoopNode node = mainLoop.GetNode();
@@ -23,6 +23,6 @@ void BarnesHutCSScene::AdjustFixedUpdateLoop()
 	physicNode->SetChildren(fixedUpdateNodes);
 }
 
-void BarnesHutCSScene::OnOrbitalBodySpawned(GameObject* orbitalBody)
+void SceneBarnesHutCS::OnOrbitalBodySpawned(GameObject* orbitalBody)
 {
 }

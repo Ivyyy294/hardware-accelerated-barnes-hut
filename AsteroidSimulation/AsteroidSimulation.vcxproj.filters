@@ -21,7 +21,7 @@
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="DirectIntegrationScene.cpp">
+    <ClCompile Include="SceneDirectIntegration.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Asteroid.cpp">
@@ -54,7 +54,7 @@
     <ClCompile Include="BaseAsteroidScene.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="BarnesHutScene.cpp">
+    <ClCompile Include="SceneBarnesHut.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="BarnesHutCS.cpp">
@@ -63,7 +63,7 @@
     <ClCompile Include="ForceGeneratorBarnesHutCS.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="BarnesHutCSScene.cpp">
+    <ClCompile Include="SceneBarnesHutCS.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ForceGeneratorBarnesHutBase.cpp">
@@ -71,7 +71,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="DirectIntegrationScene.h">
+    <ClInclude Include="SceneDirectIntegration.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Asteroid.h">
@@ -104,7 +104,7 @@
     <ClInclude Include="BaseAsteroidScene.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="BarnesHutScene.h">
+    <ClInclude Include="SceneBarnesHut.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="BarnesHutCS.h">
@@ -113,7 +113,7 @@
     <ClInclude Include="ForceGeneratorBarnesHutCS.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="BarnesHutCSScene.h">
+    <ClInclude Include="SceneBarnesHutCS.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ForceGeneratorBarnesHutBase.h">
