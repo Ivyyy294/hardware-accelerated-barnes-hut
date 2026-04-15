@@ -67,31 +67,42 @@ void BarnesHutCS::SetShaderParameters(const std::vector<PhysicObject*>& objects)
 	if (deviceContext == nullptr)
 		return;
 
-	D3D11_MAPPED_SUBRESOURCE mappedResource;
+	D3D11_MAPPED_SUBRESOURCE mappedPosition;
+	D3D11_MAPPED_SUBRESOURCE mappedMass;
 
-	HRESULT result = deviceContext->Map(m_positionBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+	HRESULT result = deviceContext->Map(m_positionBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedPosition);
+
+	if (FAILED(result))
+		return;
+
+	result = deviceContext->Map(m_massBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedMass);
 
 	if (FAILED(result))
 		return;
 
 	// Get a pointer to the data in the constant buffer.
-	XMFLOAT3* dataPtr = (XMFLOAT3*)mappedResource.pData;
+	XMFLOAT3* positionPtr = (XMFLOAT3*)mappedPosition.pData;
+	float* massPtr = (float*)mappedMass.pData;
 
 	for (int i = 0; i < objects.size() && i < m_maxSize; ++i)
 	{
 		Vector3 pos = objects[i]->GetTransform()->GetPosition();
-		dataPtr[i].x = pos.x;
-		dataPtr[i].y = pos.y;
-		dataPtr[i].z = pos.z;
+		positionPtr[i].x = pos.x;
+		positionPtr[i].y = pos.y;
+		positionPtr[i].z = pos.z;
+
+		massPtr[i] = objects[i]->GetMass();
 	}
 
 	// Unlock the constant buffer.
 	deviceContext->Unmap(m_positionBuffer, 0);
+	deviceContext->Unmap(m_massBuffer, 0);
 }
 
 bool BarnesHutCS::BindShaderParameters (ID3D11DeviceContext* deviceContext)
 {
 	deviceContext->CSSetShaderResources (0, 1, &m_positionBufferSrv);
+	deviceContext->CSSetShaderResources (1, 1, &m_massBufferSrv);
 	deviceContext->CSSetUnorderedAccessViews (0, 1, &m_outputBufferUav, nullptr);
 	return true;
 }
@@ -99,17 +110,20 @@ bool BarnesHutCS::BindShaderParameters (ID3D11DeviceContext* deviceContext)
 void BarnesHutCS::UnbindShaderParameters(ID3D11DeviceContext* deviceContext)
 {
 	ID3D11ShaderResourceView* nullSRV = nullptr;
-	deviceContext->CSSetShaderResources(0, 1, &nullSRV);
-
 	ID3D11UnorderedAccessView* nullUAV = nullptr;
+
+	deviceContext->CSSetShaderResources(0, 1, &nullSRV);
 	deviceContext->CSSetUnorderedAccessViews(0, 1, &nullUAV, nullptr);
+
+	deviceContext->CSSetShaderResources(1, 1, &nullSRV);
+	deviceContext->CSSetUnorderedAccessViews(1, 1, &nullUAV, nullptr);
 
 	deviceContext->CopyResource(m_outputResultBuffer, m_outputBuffer);
 }
 
 bool BarnesHutCS::InitShaderParameters (ID3D11Device* device)
 {
-	//Input buffer
+	//position buffer
 	D3D11_BUFFER_DESC bufferDesc = {};
 	bufferDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
 	bufferDesc.ByteWidth = sizeof(XMFLOAT3) * m_maxSize;
@@ -129,6 +143,30 @@ bool BarnesHutCS::InitShaderParameters (ID3D11Device* device)
 	srvDesc.Buffer.NumElements = 1;
 
 	result = device->CreateShaderResourceView(m_positionBuffer, &srvDesc, &m_positionBufferSrv);
+
+	if (FAILED(result))
+		return false;
+
+	//mass buffer
+	bufferDesc = {};
+	bufferDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+	bufferDesc.ByteWidth = sizeof(float) * m_maxSize;
+	bufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+	bufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	bufferDesc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
+	bufferDesc.StructureByteStride = sizeof(float);
+
+	// Create the constant buffer pointer so we can access the vertex shader constant buffer from within this class.
+	result = device->CreateBuffer(&bufferDesc, NULL, &m_massBuffer);
+
+	if (FAILED(result))
+		return false;
+
+	srvDesc = {};
+	srvDesc.ViewDimension = D3D11_SRV_DIMENSION_BUFFER;
+	srvDesc.Buffer.NumElements = 1;
+
+	result = device->CreateShaderResourceView(m_massBuffer, &srvDesc, &m_massBufferSrv);
 
 	if (FAILED(result))
 		return false;

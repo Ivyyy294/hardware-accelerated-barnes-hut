@@ -23,5 +23,5 @@ void main( uint3 DTid : SV_DispatchThreadID )
     //int test = InputData[index];
     // bounds safety (important in real use)
     // assume you pass N via constant buffer if needed
-    OutputData[index] = position[index].x * 1024;
+    OutputData[index] = mass[index] * 1024;
 }

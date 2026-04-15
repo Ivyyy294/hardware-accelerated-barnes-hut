@@ -5,9 +5,13 @@
 class BarnesHutCS :
     public ComputeShader
 {
-	struct MyStruct
+private:
+//Definitions
+	struct Settings
 	{
-
+		Vector3 bounds;
+		size_t count;
+		float ugc;
 	};
 
 //Variables
@@ -16,6 +20,9 @@ class BarnesHutCS :
 
 	ID3D11Buffer* m_positionBuffer{ nullptr };
 	ID3D11ShaderResourceView* m_positionBufferSrv = nullptr;
+
+	ID3D11Buffer* m_massBuffer{ nullptr };
+	ID3D11ShaderResourceView* m_massBufferSrv = nullptr;
 
 	ID3D11Buffer* m_outputBuffer{ nullptr };
 	ID3D11Buffer* m_outputResultBuffer{ nullptr };
