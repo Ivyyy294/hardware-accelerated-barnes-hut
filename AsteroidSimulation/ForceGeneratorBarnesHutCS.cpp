@@ -12,10 +12,6 @@ void ForceGeneratorBarnesHutCS::Exit()
 	m_computeShader.ShutdownShader();
 }
 
-void ForceGeneratorBarnesHutCS::FixedUpdate()
-{
-}
-
 void ForceGeneratorBarnesHutCS::ApplyForceForObject(PhysicObject* physicObj) const
 {
 }

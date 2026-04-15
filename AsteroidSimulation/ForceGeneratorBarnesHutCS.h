@@ -1,26 +1,22 @@
 #pragma once
 
-#include <IvyyyForceGenerator.h>
+#include "ForceGeneratorBarnesHutBase.h"
 #include "BarnesHutCS.h"
 
 class ForceGeneratorBarnesHutCS :
-    public ForceGenerator
+    public ForceGeneratorBarnesHutBase
 {
 //Variables
 private:
-	float m_theta = 0.8f;
-	std::vector<PhysicObject*> m_objects;
 	BarnesHutCS m_computeShader;
 
 //Methods
 public:
+
 	void Start() override;
 	void Exit() override;
-	void FixedUpdate() override;
 	void ApplyForceForObject(PhysicObject* physicObj) const override;
 	void Dispatch();
 	void ReadBack();
-
-	inline void AddForceSource(PhysicObject* obj) { m_objects.push_back(obj); };
 };
 
