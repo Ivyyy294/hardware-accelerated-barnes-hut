@@ -4,6 +4,8 @@
 #include <algorithm>
 #include <cmath>
 
+#include <DirectXMath.h>
+
 #include <IvyyyGameObject.h>
 #include <IvyyyPhysicObject.h>
 #include <IvyyyPhysic.h>
@@ -18,3 +20,4 @@
 #include <queue>
 
 using namespace Ivyyy;
+using namespace DirectX;

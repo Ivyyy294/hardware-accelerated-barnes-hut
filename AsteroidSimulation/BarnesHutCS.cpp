@@ -23,6 +23,12 @@ void BarnesHutCS::ShutdownShader()
 		m_positionBufferSrv = nullptr;
 	}
 
+	if (m_unitCubeBuffer)
+	{
+		m_unitCubeBuffer->Release();
+		m_unitCubeBuffer = nullptr;
+	}
+
 	if (m_outputBuffer)
 	{
 		m_outputBuffer->Release();
@@ -69,6 +75,7 @@ void BarnesHutCS::SetShaderParameters(const std::vector<PhysicObject*>& objects)
 
 	D3D11_MAPPED_SUBRESOURCE mappedPosition;
 	D3D11_MAPPED_SUBRESOURCE mappedMass;
+	D3D11_MAPPED_SUBRESOURCE mappedUnitCube;
 
 	HRESULT result = deviceContext->Map(m_positionBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedPosition);
 
@@ -84,6 +91,9 @@ void BarnesHutCS::SetShaderParameters(const std::vector<PhysicObject*>& objects)
 	XMFLOAT3* positionPtr = (XMFLOAT3*)mappedPosition.pData;
 	float* massPtr = (float*)mappedMass.pData;
 
+	XMFLOAT3 boundingBoxMax {0.f, 0.f, 0.f};
+	XMFLOAT3 boundingBoxMin { 0.f, 0.f, 0.f };
+
 	for (int i = 0; i < objects.size() && i < m_maxSize; ++i)
 	{
 		Vector3 pos = objects[i]->GetTransform()->GetPosition();
@@ -92,15 +102,35 @@ void BarnesHutCS::SetShaderParameters(const std::vector<PhysicObject*>& objects)
 		positionPtr[i].z = pos.z;
 
 		massPtr[i] = objects[i]->GetMass();
+
+		boundingBoxMax.x = max(boundingBoxMax.x, pos.x);
+		boundingBoxMax.y = max(boundingBoxMax.y, pos.y);
+		boundingBoxMax.z = max(boundingBoxMax.z, pos.z);
+
+		boundingBoxMin.x = min(boundingBoxMin.x, pos.x);
+		boundingBoxMin.y = min(boundingBoxMin.y, pos.y);
+		boundingBoxMin.z = min(boundingBoxMin.z, pos.z);
 	}
 
 	// Unlock the constant buffer.
 	deviceContext->Unmap(m_positionBuffer, 0);
 	deviceContext->Unmap(m_massBuffer, 0);
+
+	result = deviceContext->Map(m_unitCubeBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedUnitCube);
+
+	if (FAILED(result))
+		return;
+
+	UnitCube* unitCube = (UnitCube*)mappedUnitCube.pData;
+	unitCube->boundsMax = boundingBoxMax;
+	unitCube->boundsMin = boundingBoxMin;
+
+	deviceContext->Unmap(m_unitCubeBuffer, 0);
 }
 
 bool BarnesHutCS::BindShaderParameters (ID3D11DeviceContext* deviceContext)
 {
+	deviceContext->CSSetConstantBuffers (0, 1, &m_unitCubeBuffer);
 	deviceContext->CSSetShaderResources (0, 1, &m_positionBufferSrv);
 	deviceContext->CSSetShaderResources (1, 1, &m_massBufferSrv);
 	deviceContext->CSSetUnorderedAccessViews (0, 1, &m_outputBufferUav, nullptr);
@@ -109,8 +139,11 @@ bool BarnesHutCS::BindShaderParameters (ID3D11DeviceContext* deviceContext)
 
 void BarnesHutCS::UnbindShaderParameters(ID3D11DeviceContext* deviceContext)
 {
+	ID3D11Buffer* nullBuffer = nullptr;
 	ID3D11ShaderResourceView* nullSRV = nullptr;
 	ID3D11UnorderedAccessView* nullUAV = nullptr;
+
+	deviceContext->CSSetConstantBuffers(0, 1, &nullBuffer);
 
 	deviceContext->CSSetShaderResources(0, 1, &nullSRV);
 	deviceContext->CSSetUnorderedAccessViews(0, 1, &nullUAV, nullptr);
@@ -167,6 +200,18 @@ bool BarnesHutCS::InitShaderParameters (ID3D11Device* device)
 	srvDesc.Buffer.NumElements = 1;
 
 	result = device->CreateShaderResourceView(m_massBuffer, &srvDesc, &m_massBufferSrv);
+
+	if (FAILED(result))
+		return false;
+
+	//UnitCube buffer
+	bufferDesc = {};
+	bufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+	bufferDesc.ByteWidth = sizeof(UnitCube);
+	bufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	bufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+
+	result = device->CreateBuffer(&bufferDesc, NULL, &m_unitCubeBuffer);
 
 	if (FAILED(result))
 		return false;

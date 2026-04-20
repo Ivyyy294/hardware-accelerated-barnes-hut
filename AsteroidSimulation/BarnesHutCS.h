@@ -7,16 +7,18 @@ class BarnesHutCS :
 {
 private:
 //Definitions
-	struct Settings
+	struct UnitCube
 	{
-		Vector3 bounds;
-		size_t count;
-		float ugc;
+		XMFLOAT3 boundsMax;
+		XMFLOAT3 boundsMin;
+		double padding;
 	};
 
 //Variables
 	int m_maxSize {1};
 	Vector3 m_boundingVolume {Vector3::Zero};
+
+	ID3D11Buffer* m_unitCubeBuffer {nullptr};
 
 	ID3D11Buffer* m_positionBuffer{ nullptr };
 	ID3D11ShaderResourceView* m_positionBufferSrv = nullptr;
