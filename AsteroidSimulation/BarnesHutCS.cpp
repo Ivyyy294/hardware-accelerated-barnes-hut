@@ -7,82 +7,41 @@ BarnesHutCS::BarnesHutCS()
 {
 }
 
-void BarnesHutCS::ShutdownShader()
-{
-	ComputeShader::ShutdownShader();
-
-	if (m_positionBuffer)
-	{
-		m_positionBuffer->Release();
-		m_positionBuffer = nullptr;
-	}
-
-	if (m_positionBufferSrv)
-	{
-		m_positionBufferSrv->Release();
-		m_positionBufferSrv = nullptr;
-	}
-
-	if (m_unitCubeBuffer)
-	{
-		m_unitCubeBuffer->Release();
-		m_unitCubeBuffer = nullptr;
-	}
-
-	if (m_outputBuffer)
-	{
-		m_outputBuffer->Release();
-		m_outputBuffer = nullptr;
-	}
-
-	if (m_outputResultBuffer)
-	{
-		m_outputResultBuffer->Release();
-		m_outputResultBuffer = nullptr;
-	}
-
-	if (m_outputBufferUav)
-	{
-		m_outputBufferUav->Release();
-		m_outputBufferUav = nullptr;
-	}
-}
-
 void BarnesHutCS::CopyData()
 {
 	if (IsDone())
 	{
-		ID3D11DeviceContext* deviceContext = D3D::Instance().GetDeviceContext();
+		ID3D11DeviceContext* m_deviceContext = D3D::Instance().GetDeviceContext();
 
 		D3D11_MAPPED_SUBRESOURCE mappedResource;
-		HRESULT hr = deviceContext->Map(m_outputResultBuffer, 0, D3D11_MAP_READ, 0, &mappedResource);
+		HRESULT hr = m_deviceContext->Map(m_outputResultBuffer, 0, D3D11_MAP_READ, 0, &mappedResource);
 
 		if (SUCCEEDED (hr))
 		{
 			int* data = reinterpret_cast <int*> (mappedResource.pData);
 			int test = data[0];
-			deviceContext->Unmap(m_outputResultBuffer, 0);
+			m_deviceContext->Unmap(m_outputResultBuffer, 0);
 		}
 	}
 }
 
 void BarnesHutCS::SetShaderParameters(const std::vector<PhysicObject*>& objects)
 {
-	ID3D11DeviceContext* deviceContext = D3D::Instance().GetDeviceContext();
+	ID3D11DeviceContext* m_deviceContext = D3D::Instance().GetDeviceContext();
 	
-	if (deviceContext == nullptr)
+	if (m_deviceContext == nullptr)
 		return;
 
 	D3D11_MAPPED_SUBRESOURCE mappedPosition;
 	D3D11_MAPPED_SUBRESOURCE mappedMass;
 	D3D11_MAPPED_SUBRESOURCE mappedUnitCube;
 
-	HRESULT result = deviceContext->Map(m_positionBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedPosition);
+	HRESULT result = m_deviceContext->Map(m_positionBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedPosition);
 
 	if (FAILED(result))
 		return;
 
-	result = deviceContext->Map(m_massBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedMass);
+	result = m_deviceContext->Map(m_massBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedMass);
 
 	if (FAILED(result))
 		return;
@@ -113,10 +72,10 @@ void BarnesHutCS::SetShaderParameters(const std::vector<PhysicObject*>& objects)
 	}
 
 	// Unlock the constant buffer.
-	deviceContext->Unmap(m_positionBuffer, 0);
-	deviceContext->Unmap(m_massBuffer, 0);
+	m_deviceContext->Unmap(m_positionBuffer, 0);
+	m_deviceContext->Unmap(m_massBuffer, 0);
 
-	result = deviceContext->Map(m_unitCubeBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedUnitCube);
+	result = m_deviceContext->Map(m_unitCubeBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedUnitCube);
 
 	if (FAILED(result))
 		return;
@@ -125,33 +84,31 @@ void BarnesHutCS::SetShaderParameters(const std::vector<PhysicObject*>& objects)
 	unitCube->boundsMax = boundingBoxMax;
 	unitCube->boundsMin = boundingBoxMin;
 
-	deviceContext->Unmap(m_unitCubeBuffer, 0);
+	m_deviceContext->Unmap(m_unitCubeBuffer, 0);
 }
 
-bool BarnesHutCS::BindShaderParameters (ID3D11DeviceContext* deviceContext)
+void BarnesHutCS::BindShaderParameters (ID3D11DeviceContext* m_deviceContext)
 {
-	deviceContext->CSSetConstantBuffers (0, 1, &m_unitCubeBuffer);
-	deviceContext->CSSetShaderResources (0, 1, &m_positionBufferSrv);
-	deviceContext->CSSetShaderResources (1, 1, &m_massBufferSrv);
-	deviceContext->CSSetUnorderedAccessViews (0, 1, &m_outputBufferUav, nullptr);
-	return true;
+	m_deviceContext->CSSetConstantBuffers (0, 1, &m_unitCubeBuffer);
+	m_deviceContext->CSSetShaderResources (0, 1, &m_positionBufferSrv);
+	m_deviceContext->CSSetShaderResources (1, 1, &m_massBufferSrv);
+	m_deviceContext->CSSetUnorderedAccessViews (0, 1, &m_outputBufferUav, nullptr);
 }
 
-void BarnesHutCS::UnbindShaderParameters(ID3D11DeviceContext* deviceContext)
+void BarnesHutCS::UnbindShaderParameters(ID3D11DeviceContext* m_deviceContext)
 {
 	ID3D11Buffer* nullBuffer = nullptr;
 	ID3D11ShaderResourceView* nullSRV = nullptr;
 	ID3D11UnorderedAccessView* nullUAV = nullptr;
 
-	deviceContext->CSSetConstantBuffers(0, 1, &nullBuffer);
+	m_deviceContext->CSSetConstantBuffers(0, 1, &nullBuffer);
 
-	deviceContext->CSSetShaderResources(0, 1, &nullSRV);
-	deviceContext->CSSetUnorderedAccessViews(0, 1, &nullUAV, nullptr);
+	m_deviceContext->CSSetShaderResources(0, 1, &nullSRV);
+	m_deviceContext->CSSetShaderResources(1, 1, &nullSRV);
 
-	deviceContext->CSSetShaderResources(1, 1, &nullSRV);
-	deviceContext->CSSetUnorderedAccessViews(1, 1, &nullUAV, nullptr);
+	m_deviceContext->CSSetUnorderedAccessViews(0, 1, &nullUAV, nullptr);
 
-	deviceContext->CopyResource(m_outputResultBuffer, m_outputBuffer);
+	m_deviceContext->CopyResource(m_outputResultBuffer, m_outputBuffer);
 }
 
 bool BarnesHutCS::InitShaderParameters (ID3D11Device* device)
@@ -252,4 +209,43 @@ bool BarnesHutCS::InitShaderParameters (ID3D11Device* device)
 		return false;
 
 	return true;
+}
+
+void BarnesHutCS::ReleaseShaderParameters()
+{
+	if (m_positionBuffer)
+	{
+		m_positionBuffer->Release();
+		m_positionBuffer = nullptr;
+	}
+
+	if (m_positionBufferSrv)
+	{
+		m_positionBufferSrv->Release();
+		m_positionBufferSrv = nullptr;
+	}
+
+	if (m_unitCubeBuffer)
+	{
+		m_unitCubeBuffer->Release();
+		m_unitCubeBuffer = nullptr;
+	}
+
+	if (m_outputBuffer)
+	{
+		m_outputBuffer->Release();
+		m_outputBuffer = nullptr;
+	}
+
+	if (m_outputResultBuffer)
+	{
+		m_outputResultBuffer->Release();
+		m_outputResultBuffer = nullptr;
+	}
+
+	if (m_outputBufferUav)
+	{
+		m_outputBufferUav->Release();
+		m_outputBufferUav = nullptr;
+	}
 }

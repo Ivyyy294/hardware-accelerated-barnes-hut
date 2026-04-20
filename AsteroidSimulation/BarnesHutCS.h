@@ -33,7 +33,6 @@ private:
 //Methods
 public:
 	BarnesHutCS();
-	void ShutdownShader() override;
 
 	void CopyData();
 	inline void SetMaxSize (int size) {m_maxSize = size;};
@@ -41,8 +40,9 @@ public:
 	void SetShaderParameters(const std::vector<PhysicObject*>& objects);
 
 private:
-	bool BindShaderParameters (ID3D11DeviceContext* deviceContext) override;
-	void UnbindShaderParameters(ID3D11DeviceContext* deviceContext) override;
+	void BindShaderParameters (ID3D11DeviceContext* m_deviceContext) override;
+	void UnbindShaderParameters(ID3D11DeviceContext* m_deviceContext) override;
 	bool InitShaderParameters (ID3D11Device* device) override;
+	void ReleaseShaderParameters() override;
 };
 

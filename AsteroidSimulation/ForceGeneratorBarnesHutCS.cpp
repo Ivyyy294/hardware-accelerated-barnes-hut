@@ -1,48 +1,27 @@
 #include "pch.h"
 #include "ForceGeneratorBarnesHutCS.h"
 
-void ForceGeneratorBarnesHutCS::Start()
+ForceGeneratorBarnesHutCS::ForceGeneratorBarnesHutCS()
+	: m_deviceContext (D3D::Instance().GetDeviceContext())
 {
-	m_computeShader.SetMaxSize (m_objects.size());
-	m_computeShader.Initialize ();
-
-	uint64_t x = GetMortonCode64(15);
 }
 
-void ForceGeneratorBarnesHutCS::FixedUpdate()
+void ForceGeneratorBarnesHutCS::Start()
 {
-	float maxValue = std::ceil (GetMaxCoordinate());
+	InitShaderParameters();
 
-	const size_t max = (1u << 10);
+	m_csMortonCodes.Initialize();
 
-	std::array <unsigned long, 2625> test;
+	m_csMortonCodes.m_mortonCodesBufferUav = m_mortonCodeBufferUav;
+	m_csMortonCodes.m_positionBufferUav = m_positionBufferUav;
 
-	for (size_t i = 0; i < m_objects.size(); ++i)
-	{
-		Vector3 pos = m_objects[i]->GetTransform()->GetPosition();
-		float x = Normalize(pos.x / maxValue, maxValue);
-		float y = Normalize(pos.y / maxValue, maxValue);
-		float z = Normalize(pos.z / maxValue, maxValue);
-
-		unsigned long ix = (unsigned long)(x * 512.f);
-		unsigned long iy = (unsigned long)(y * 512.f);
-		unsigned long iz = (unsigned long)(z * 512.f);
-
-		ix = GetMortonCode32(ix);
-		iy = GetMortonCode32(iy);
-		iz = GetMortonCode32(iz);
-
-		unsigned long final = ix | iy << 1 | iz << 2;
-		test[i] = final;
-	}
-
-	std::sort (test.begin(), test.end());
-
-	return;
+	m_computeShader.SetMaxSize (m_objects.size());
+	m_computeShader.Initialize ();
 }
 
 void ForceGeneratorBarnesHutCS::Exit()
 {
+	ReleaseShaderParameters();
 	m_computeShader.ShutdownShader();
 }
 
@@ -52,52 +31,152 @@ void ForceGeneratorBarnesHutCS::ApplyForceForObject(PhysicObject* physicObj) con
 
 void ForceGeneratorBarnesHutCS::Dispatch()
 {
-	m_computeShader.SetShaderParameters(m_objects);
-	m_computeShader.Dispatch(m_objects.size(), 1, 1);
+	SetShaderParameter();
+	m_csMortonCodes.Dispatch(m_objects.size(), 1, 1);
+
+	//m_computeShader.SetShaderParameters(m_objects);
+	//m_computeShader.Dispatch(m_objects.size(), 1, 1);
 }
 
 void ForceGeneratorBarnesHutCS::ReadBack()
 {
 	Debug::Log("Wait for compute shader...");
 	
-	while (!m_computeShader.IsDone())
+	while (!m_csMortonCodes.IsDone())
 		continue;
 
 	Debug::Log("´Compute shader done!");
-	m_computeShader.CopyData();
+	//m_csMortonCodes.CopyData();
 }
 
-float ForceGeneratorBarnesHutCS::Normalize(float val, float max)
+void ForceGeneratorBarnesHutCS::SetShaderParameter()
 {
-	return (val + max) / (max + max);
+	if (m_deviceContext == nullptr)
+		return;
+
+	D3D11_MAPPED_SUBRESOURCE mappedPosition;
+
+	HRESULT result = m_deviceContext->Map(m_positionBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedPosition);
+
+	if (FAILED(result))
+		return;
+
+	// Get a pointer to the data in the constant buffer.
+	XMFLOAT3* positionPtr = (XMFLOAT3*)mappedPosition.pData;
+
+	XMFLOAT3 boundingBoxMax{ 0.f, 0.f, 0.f };
+	XMFLOAT3 boundingBoxMin{ 0.f, 0.f, 0.f };
+
+	for (int i = 0; i < m_objects.size() && i < MaxCapacity; ++i)
+	{
+		Vector3 pos = m_objects[i]->GetTransform()->GetPosition();
+		positionPtr[i].x = pos.x;
+		positionPtr[i].y = pos.y;
+		positionPtr[i].z = pos.z;
+
+		boundingBoxMax.x = max(boundingBoxMax.x, pos.x);
+		boundingBoxMax.y = max(boundingBoxMax.y, pos.y);
+		boundingBoxMax.z = max(boundingBoxMax.z, pos.z);
+
+		boundingBoxMin.x = min(boundingBoxMin.x, pos.x);
+		boundingBoxMin.y = min(boundingBoxMin.y, pos.y);
+		boundingBoxMin.z = min(boundingBoxMin.z, pos.z);
+	}
+
+	// Unlock the constant buffer.
+	m_deviceContext->Unmap(m_positionBuffer, 0);
+
+	m_csMortonCodes.SetShaderParameter (m_boundsMin, m_boundsMax);
 }
 
-int ForceGeneratorBarnesHutCS::Quantize(float val, const int depth)
+
+bool ForceGeneratorBarnesHutCS::InitShaderParameters()
 {
-	int x = val * (1 << depth);
-	return x;
+	ID3D11Device* device = D3D::Instance().GetDevice();
+
+	if (device == nullptr)
+		return false;
+
+	//Position buffer
+	D3D11_BUFFER_DESC bufferDesc = {};
+	bufferDesc.BindFlags = D3D11_BIND_UNORDERED_ACCESS | D3D11_BIND_SHADER_RESOURCE;
+	bufferDesc.ByteWidth = sizeof(XMFLOAT3) * MaxCapacity;
+	bufferDesc.Usage = D3D11_USAGE_DEFAULT;
+	bufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	bufferDesc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
+	bufferDesc.StructureByteStride = sizeof(XMFLOAT3);
+
+	HRESULT result = device->CreateBuffer(&bufferDesc, NULL, &m_positionBuffer);
+
+	if (FAILED(result))
+		return false;
+
+	//Position buffer uav
+	D3D11_UNORDERED_ACCESS_VIEW_DESC uavDesc = {};
+	uavDesc.Format = DXGI_FORMAT_UNKNOWN;
+	uavDesc.ViewDimension = D3D11_UAV_DIMENSION_BUFFER;
+	uavDesc.Buffer.NumElements = MaxCapacity;
+
+	result = device->CreateUnorderedAccessView(m_positionBuffer, &uavDesc, &m_positionBufferUav);
+
+	if (FAILED(result))
+		return false;
+
+	//Morton Codes buffer
+	bufferDesc = {};
+	bufferDesc.BindFlags = D3D11_BIND_UNORDERED_ACCESS | D3D11_BIND_SHADER_RESOURCE;
+	bufferDesc.ByteWidth = sizeof(size_t) * MaxCapacity;
+	bufferDesc.Usage = D3D11_USAGE_DEFAULT;
+	//ToD0: set CPUAccessFlags to 0
+	bufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
+	bufferDesc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
+	bufferDesc.StructureByteStride = sizeof(size_t);
+
+	result = device->CreateBuffer(&bufferDesc, NULL, &m_positionBuffer);
+
+	if (FAILED(result))
+		return false;
+
+	//Morton Codes buffer uav
+	uavDesc = {};
+	uavDesc.Format = DXGI_FORMAT_UNKNOWN;
+	uavDesc.ViewDimension = D3D11_UAV_DIMENSION_BUFFER;
+	uavDesc.Buffer.NumElements = MaxCapacity;
+
+	result = device->CreateUnorderedAccessView(m_positionBuffer, &uavDesc, &m_positionBufferUav);
+
+	if (FAILED(result))
+		return false;
+
+	return true;
 }
 
-uint64_t ForceGeneratorBarnesHutCS::GetMortonCode64(uint64_t val)
+void ForceGeneratorBarnesHutCS::ReleaseShaderParameters()
 {
-	//Limit val to 21bits
-	uint64_t x = val & 0x1fffff;
+	if (m_positionBuffer)
+	{
+		m_positionBuffer->Release();
+		m_positionBuffer = nullptr;
+	}
 
-	x = (x | x << 32) & 0x1f00000000ffff; // shift left 32 bits, OR with self, and 00011111000000000000000000000000000000001111111111111111
-	x = (x | x << 16) & 0x1f0000ff0000ff; // shift left 32 bits, OR with self, and 00011111000000000000000011111111000000000000000011111111
-	x = (x | x << 8) & 0x100f00f00f00f00f; // shift left 32 bits, OR with self, and 0001000000001111000000001111000000001111000000001111000000000000
-	x = (x | x << 4) & 0x10c30c30c30c30c3; // shift left 32 bits, OR with self, and 0001000011000011000011000011000011000011000011000011000100000000
-	x = (x | x << 2) & 0x1249249249249249;
+	if (m_positionBufferUav)
+	{
+		m_positionBufferUav->Release();
+		m_positionBufferUav = nullptr;
+	}
 
-	return x;
+	if (m_mortonCodeBuffer)
+	{
+		m_mortonCodeBuffer->Release();
+		m_mortonCodeBuffer = nullptr;
+	}
+
+	if (m_mortonCodeBufferUav)
+	{
+		m_mortonCodeBufferUav->Release();
+		m_mortonCodeBufferUav = nullptr;
+	}
 }
 
-unsigned long ForceGeneratorBarnesHutCS::GetMortonCode32(unsigned long val)
-{
-	val &= 0x000003ff;
-	val = (val ^ (val << 16)) & 0xff0000ff;
-	val = (val ^ (val << 8)) & 0x0300f00f;
-	val = (val ^ (val << 4)) & 0x030c30c3;
-	val = (val ^ (val << 2)) & 0x09249249;
-	return val;
-}
+
+

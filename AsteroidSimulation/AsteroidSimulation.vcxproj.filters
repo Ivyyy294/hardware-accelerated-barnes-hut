@@ -69,6 +69,9 @@
     <ClCompile Include="ForceGeneratorBarnesHutBase.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="CSMortonCodes.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SceneDirectIntegration.h">
@@ -119,12 +122,18 @@
     <ClInclude Include="ForceGeneratorBarnesHutBase.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="CSMortonCodes.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="color.hlsl">
       <Filter>Shader</Filter>
     </FxCompile>
     <FxCompile Include="BarnesHutCS.hlsl">
+      <Filter>Shader</Filter>
+    </FxCompile>
+    <FxCompile Include="CSMortonCodes.hlsl">
       <Filter>Shader</Filter>
     </FxCompile>
   </ItemGroup>

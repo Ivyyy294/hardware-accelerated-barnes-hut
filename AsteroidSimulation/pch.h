@@ -15,6 +15,7 @@
 #include <IvyyyGizmo.h>
 #include <IvyyyInput.h>
 #include <IvyyyDebug.h>
+#include <IvyyyD3D.h>
 #include <array>
 #include <vector>
 #include <queue>
