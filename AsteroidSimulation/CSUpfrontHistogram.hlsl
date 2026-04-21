@@ -1,25 +1,83 @@
 #define NUM_BINS 256
 #define NUM_DIGITS 4
 
+#define ITEM_PER_THREAD 8
+#define NUM_THREADS 256
+
+#define NUM_GROUPS 40
+
 //Globals
 cbuffer Settings : register(b0)
 {
-    uint elementCount;
+    uint numObjects;
+    //uint numGroups;
+    //uint numPass;
     uint sPadding[3];
 }
 
 RWStructuredBuffer<uint> mortonCodes : register(u0);
 RWStructuredBuffer<uint> globalHistogram : register(u1);
 
-groupshared uint localHistogram[NUM_DIGITS][NUM_BINS];
+groupshared uint localHistogram[NUM_DIGITS * NUM_BINS];
 
-[numthreads(1, 1, 1)]
-void main( uint3 DTid : SV_DispatchThreadID )
+[numthreads(NUM_THREADS, 1, 1)]
+void main(uint3 DTid : SV_DispatchThreadID,
+          uint3 GTid : SV_GroupThreadID,
+          uint3 Gid : SV_GroupID)
 {
-    uint index = DTid.x;
+    const uint tileSize = ITEM_PER_THREAD * NUM_THREADS;
+    uint histSize = NUM_DIGITS * NUM_BINS;
+    const uint groupId = Gid.x;
+    const uint threadId = GTid.x;
     
-    if (index >= elementCount)
-        return;
+    //Clean local histogram
+    for (uint i = threadId; i < histSize; i += NUM_THREADS)
+        localHistogram[i] = 0;
     
-    globalHistogram[index] = mortonCodes[index];
+    //Blocks execution of all threads in a group until all group shared accesses have been completed
+    //and all threads in the group have reached this call.
+    GroupMemoryBarrierWithGroupSync();
+    
+    for (uint tileIndex = groupId; tileIndex * tileSize < numObjects; tileIndex += NUM_GROUPS)
+    {
+        const uint baseIndex = tileIndex * tileSize;
+
+        for (uint i = 0; i < ITEM_PER_THREAD; ++i)
+        {
+            uint index = baseIndex + threadId + i * NUM_THREADS;
+            
+            if (index < numObjects)
+            {
+                uint val = mortonCodes[index];
+                
+                //Get digit per position
+                uint digit0 = (val >> 0) & 0xFF;
+                uint digit1 = (val >> 8) & 0xFF;
+                uint digit2 = (val >> 16) & 0xFF;
+                uint digit3 = (val >> 24) & 0xFF;
+                
+                //Add digits to local histogram
+                InterlockedAdd(localHistogram[0 * NUM_BINS + digit0], 1);
+                InterlockedAdd(localHistogram[1 * NUM_BINS + digit1], 1);
+                InterlockedAdd(localHistogram[2 * NUM_BINS + digit2], 1);
+                InterlockedAdd(localHistogram[3 * NUM_BINS + digit3], 1);
+            }
+        }
+    }
+    
+
+    //Sync point
+    GroupMemoryBarrierWithGroupSync();
+    
+    //Add local histogram values to global histogram
+    for (uint i = threadId; i < histSize; i += NUM_THREADS)
+    {
+        uint value = localHistogram[i];
+        
+        if (value > 0)
+            InterlockedAdd(globalHistogram[i], value);
+    }
+    
+    //Sync point
+    GroupMemoryBarrierWithGroupSync();
 }

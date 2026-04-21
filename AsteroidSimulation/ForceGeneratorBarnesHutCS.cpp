@@ -36,7 +36,10 @@ void ForceGeneratorBarnesHutCS::Dispatch()
 {
 	SetShaderParameter();
 	m_csMortonCodes.Dispatch(m_objects.size(), 1, 1);
-	m_csUpfrontHistrogram.Dispatch(m_objects.size(), 1, 1);
+
+	//SM count for 3070 laptop is 40
+	//We dispatch the kernel per SM core
+	m_csUpfrontHistrogram.Dispatch(40, 1, 1);
 
 	m_deviceContext->CopyResource(m_outputBuffer, m_globalHistogramBuffer);
 	//m_computeShader.SetShaderParameters(m_objects);
@@ -105,6 +108,10 @@ void ForceGeneratorBarnesHutCS::SetShaderParameter()
 	settings->elementCount = m_objects.size();
 
 	m_deviceContext->Unmap (m_settingsBuffer, 0);
+
+	//Clear UAV
+	UINT clearValues[4] = { 0, 0, 0, 0 };
+	m_deviceContext->ClearUnorderedAccessViewUint (m_globalHistogramBufferUav, clearValues);
 }
 
 
@@ -293,11 +300,11 @@ void ForceGeneratorBarnesHutCS::CopyTestData()
 
 	if (SUCCEEDED(hr))
 	{
-		uint32_t* data = reinterpret_cast <uint32_t*> (mappedResource.pData);
-		uint32_t test = data [0];
+		uint32_t data [8];
+
+		memcpy (&data[0], mappedResource.pData, sizeof(uint32_t) * 8);
+
 		m_deviceContext->Unmap(m_outputBuffer, 0);
 	}
 }
-
-
 
