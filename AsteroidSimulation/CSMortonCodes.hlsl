@@ -1,9 +1,15 @@
 //Globals
-cbuffer UnitCube : register(b0)
+cbuffer Settings : register(b0)
+{
+    uint elementCount;
+    uint sPadding[3];
+}
+
+cbuffer UnitCube : register(b1)
 {
     float3 boundsMax;
     float3 boundsMin;
-    double padding;
+    double ucPadding;
 };
 
 RWStructuredBuffer<float3> positions : register(u0);
@@ -28,15 +34,17 @@ float3 MapToUnitCube(float3 value)
 
 uint GetMortonKey(float3 pos)
 {
-    pos = MapToUnitCube(pos);
-    pos.x = min(max(pos.x, 1024.f), 1023.f);
-    pos.y = min(max(pos.y, 1024.f), 1023.f);
-    pos.z = min(max(pos.z, 1024.f), 1023.f);
+    pos = MapToUnitCube(pos) * 1023;
+
+    //ToDo: check why used in paper
+    //pos.x = min(max(pos.x, 1024.f), 1023.f);
+    //pos.y = min(max(pos.y, 1024.f), 1023.f);
+    //pos.z = min(max(pos.z, 1024.f), 1023.f);
     
     uint xx = Part1By2((uint) pos.x);
     uint yy = Part1By2((uint) pos.y);
     uint zz = Part1By2((uint) pos.z);
-
+    
     return xx ^ (yy << 1) ^ (zz << 2);
 }
 
@@ -44,5 +52,9 @@ uint GetMortonKey(float3 pos)
 void main( uint3 DTid : SV_DispatchThreadID )
 {
     uint index = DTid.x;
+    
+    if (index >= elementCount)
+        return;
+
     mortonCodes[index] = GetMortonKey(positions[index]);
 }

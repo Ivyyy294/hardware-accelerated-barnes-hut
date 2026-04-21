@@ -2,7 +2,9 @@
 
 #include "ForceGeneratorBarnesHutBase.h"
 #include "BarnesHutCS.h"
+#include "CSSettings.h"
 #include "CSMortonCodes.h"
+#include "CSUpfrontHistogram.h"
 
 #define MaxCapacity 1024
 
@@ -13,19 +15,31 @@ class ForceGeneratorBarnesHutCS :
 private:
 	ID3D11DeviceContext* m_deviceContext {nullptr};
 
+	//Settings buffer
+	ID3D11Buffer* m_settingsBuffer{ nullptr };
+
+	//Particle info Buffer
+	ID3D11Buffer* m_positionUploadBuffer{ nullptr };
 	ID3D11Buffer* m_positionBuffer{ nullptr };
 	ID3D11UnorderedAccessView* m_positionBufferUav = nullptr;
 
+	//Additional Buffer
 	ID3D11Buffer* m_mortonCodeBuffer{ nullptr };
 	ID3D11UnorderedAccessView* m_mortonCodeBufferUav = nullptr;
 
+	ID3D11Buffer* m_globalHistogramBuffer{ nullptr };
+	ID3D11UnorderedAccessView* m_globalHistogramBufferUav = nullptr;
+
+	//Test staging buffer
+	ID3D11Buffer* m_outputBuffer{ nullptr };
+
+	//Compute shader kernel
 	BarnesHutCS m_computeShader;
 	CSMortonCodes m_csMortonCodes;
+	CSUpfrontHistogram m_csUpfrontHistrogram;
 
-	XMFLOAT3 m_boundsMin;
-	XMFLOAT3 m_boundsMax;
-
-	std::array<int, MaxCapacity> m_mortonKey;
+	XMFLOAT3 m_boundsMin {0.f, 0.f, 0.f};
+	XMFLOAT3 m_boundsMax { 0.f, 0.f, 0.f };
 
 //Methods
 public:
@@ -40,7 +54,10 @@ public:
 private:
 	void SetShaderParameter();
 
+	HRESULT InitPositionShaderParameters (ID3D11Device* device);
 	bool InitShaderParameters();
 	void ReleaseShaderParameters();
+
+	void CopyTestData();
 };
 

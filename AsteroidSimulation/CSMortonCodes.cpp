@@ -27,21 +27,23 @@ void CSMortonCodes::SetShaderParameter(XMFLOAT3 boundsMin, XMFLOAT3 boundsMax)
 	m_deviceContext->Unmap(m_unitCubeBuffer, 0);
 }
 
-void CSMortonCodes::BindShaderParameters(ID3D11DeviceContext* m_deviceContext)
+void CSMortonCodes::BindShaderParameters(ID3D11DeviceContext* deviceContext)
 {
-	m_deviceContext->CSSetConstantBuffers(0, 1, &m_unitCubeBuffer);
-	m_deviceContext->CSSetUnorderedAccessViews(0, 1, &m_positionBufferUav, nullptr);
-	m_deviceContext->CSSetUnorderedAccessViews(1, 1, &m_mortonCodesBufferUav, nullptr);
+	deviceContext->CSSetConstantBuffers(0, 1, &m_settingsBuffer);
+	deviceContext->CSSetConstantBuffers(1, 1, &m_unitCubeBuffer);
+	deviceContext->CSSetUnorderedAccessViews(0, 1, &m_positionBufferUav, nullptr);
+	deviceContext->CSSetUnorderedAccessViews(1, 1, &m_mortonCodesBufferUav, nullptr);
 }
 
-void CSMortonCodes::UnbindShaderParameters(ID3D11DeviceContext* m_deviceContext)
+void CSMortonCodes::UnbindShaderParameters(ID3D11DeviceContext* deviceContext)
 {
 	ID3D11Buffer* nullBuffer = nullptr;
 	ID3D11UnorderedAccessView* nullUAV = nullptr;
 
-	m_deviceContext->CSSetConstantBuffers(0, 1, &nullBuffer);
-	m_deviceContext->CSSetUnorderedAccessViews(0, 1, &nullUAV, nullptr);
-	m_deviceContext->CSSetUnorderedAccessViews(1, 1, &nullUAV, nullptr);
+	deviceContext->CSSetConstantBuffers(0, 1, &nullBuffer);
+	deviceContext->CSSetConstantBuffers(1, 1, &nullBuffer);
+	deviceContext->CSSetUnorderedAccessViews(0, 1, &nullUAV, nullptr);
+	deviceContext->CSSetUnorderedAccessViews(1, 1, &nullUAV, nullptr);
 }
 
 bool CSMortonCodes::InitShaderParameters(ID3D11Device* device)

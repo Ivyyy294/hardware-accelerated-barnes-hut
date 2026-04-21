@@ -3,6 +3,9 @@
 #include <string>
 #include <algorithm>
 #include <cmath>
+#include <array>
+#include <vector>
+#include <queue>
 
 #include <DirectXMath.h>
 
@@ -16,9 +19,6 @@
 #include <IvyyyInput.h>
 #include <IvyyyDebug.h>
 #include <IvyyyD3D.h>
-#include <array>
-#include <vector>
-#include <queue>
 
 using namespace Ivyyy;
 using namespace DirectX;

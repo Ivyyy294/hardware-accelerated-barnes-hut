@@ -72,6 +72,9 @@
     <ClCompile Include="CSMortonCodes.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="CSUpfrontHistogram.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SceneDirectIntegration.h">
@@ -125,6 +128,12 @@
     <ClInclude Include="CSMortonCodes.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="CSUpfrontHistogram.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CSSettings.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="color.hlsl">
@@ -134,6 +143,9 @@
       <Filter>Shader</Filter>
     </FxCompile>
     <FxCompile Include="CSMortonCodes.hlsl">
+      <Filter>Shader</Filter>
+    </FxCompile>
+    <FxCompile Include="CSUpfrontHistogram.hlsl">
       <Filter>Shader</Filter>
     </FxCompile>
   </ItemGroup>
