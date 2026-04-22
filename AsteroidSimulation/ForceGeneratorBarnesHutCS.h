@@ -5,6 +5,7 @@
 #include "CSSettings.h"
 #include "CSMortonCodes.h"
 #include "CSUpfrontHistogram.h"
+#include "CSExclusiveSum.h"
 
 #define MaxCapacity 1024
 
@@ -27,8 +28,12 @@ private:
 	ID3D11Buffer* m_mortonCodeBuffer{ nullptr };
 	ID3D11UnorderedAccessView* m_mortonCodeBufferUav = nullptr;
 
+	//Sorting Buffer
 	ID3D11Buffer* m_globalHistogramBuffer{ nullptr };
 	ID3D11UnorderedAccessView* m_globalHistogramBufferUav = nullptr;
+
+	ID3D11Buffer* m_exclusivePrefixSumBuffer{ nullptr };
+	ID3D11UnorderedAccessView* m_exclusivePrefixSumBufferUav = nullptr;
 
 	//Test staging buffer
 	ID3D11Buffer* m_outputBuffer{ nullptr };
@@ -37,6 +42,7 @@ private:
 	BarnesHutCS m_computeShader;
 	CSMortonCodes m_csMortonCodes;
 	CSUpfrontHistogram m_csUpfrontHistrogram;
+	CSExclusiveSum m_csExclusiveSum;
 
 	XMFLOAT3 m_boundsMin {0.f, 0.f, 0.f};
 	XMFLOAT3 m_boundsMax { 0.f, 0.f, 0.f };
@@ -55,6 +61,7 @@ private:
 	void SetShaderParameter();
 
 	HRESULT InitPositionShaderParameters (ID3D11Device* device);
+	HRESULT InitSortingShaderParameters (ID3D11Device* device);
 	bool InitShaderParameters();
 	void ReleaseShaderParameters();
 

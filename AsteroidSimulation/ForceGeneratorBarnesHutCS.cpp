@@ -19,6 +19,10 @@ void ForceGeneratorBarnesHutCS::Start()
 	m_csUpfrontHistrogram.m_mortonCodesBufferUav = m_mortonCodeBufferUav;
 	m_csUpfrontHistrogram.m_globalHistogramBufferUav = m_globalHistogramBufferUav;
 	m_csUpfrontHistrogram.m_settingsBuffer = m_settingsBuffer;
+
+	m_csExclusiveSum.Initialize();
+	m_csExclusiveSum.m_globalHistogramBufferUav = m_globalHistogramBufferUav;
+	m_csExclusiveSum.m_exclusivePrefixSumBufferUav = m_exclusivePrefixSumBufferUav;
 }
 
 void ForceGeneratorBarnesHutCS::Exit()
@@ -40,8 +44,9 @@ void ForceGeneratorBarnesHutCS::Dispatch()
 	//SM count for 3070 laptop is 40
 	//We dispatch the kernel per SM core
 	m_csUpfrontHistrogram.Dispatch(40, 1, 1);
+	m_csExclusiveSum.Dispatch(4,1,1);
 
-	m_deviceContext->CopyResource(m_outputBuffer, m_globalHistogramBuffer);
+	m_deviceContext->CopyResource(m_outputBuffer, m_exclusivePrefixSumBuffer);
 	//m_computeShader.SetShaderParameters(m_objects);
 	//m_computeShader.Dispatch(m_objects.size(), 1, 1);
 }
@@ -112,6 +117,7 @@ void ForceGeneratorBarnesHutCS::SetShaderParameter()
 	//Clear UAV
 	UINT clearValues[4] = { 0, 0, 0, 0 };
 	m_deviceContext->ClearUnorderedAccessViewUint (m_globalHistogramBufferUav, clearValues);
+	m_deviceContext->ClearUnorderedAccessViewUint (m_exclusivePrefixSumBufferUav, clearValues);
 }
 
 
@@ -154,6 +160,70 @@ HRESULT ForceGeneratorBarnesHutCS::InitPositionShaderParameters(ID3D11Device* de
 	return device->CreateUnorderedAccessView(m_positionBuffer, &uavDesc, &m_positionBufferUav);
 }
 
+HRESULT ForceGeneratorBarnesHutCS::InitSortingShaderParameters(ID3D11Device* device)
+{
+	//Global histogram buffer
+	D3D11_BUFFER_DESC bufferDesc = {};
+	bufferDesc.BindFlags = D3D11_BIND_UNORDERED_ACCESS | D3D11_BIND_SHADER_RESOURCE;
+	bufferDesc.ByteWidth = sizeof(uint32_t) * MaxCapacity;
+	bufferDesc.Usage = D3D11_USAGE_DEFAULT;
+	bufferDesc.CPUAccessFlags = 0;
+	bufferDesc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
+	bufferDesc.StructureByteStride = sizeof(uint32_t);
+
+	HRESULT result = device->CreateBuffer(&bufferDesc, NULL, &m_globalHistogramBuffer);
+
+	if (FAILED(result))
+		return result;
+
+	//Global histogram buffer uav
+	D3D11_UNORDERED_ACCESS_VIEW_DESC uavDesc = {};
+	uavDesc.Format = DXGI_FORMAT_UNKNOWN;
+	uavDesc.ViewDimension = D3D11_UAV_DIMENSION_BUFFER;
+	uavDesc.Buffer.NumElements = MaxCapacity;
+
+	result = device->CreateUnorderedAccessView(m_globalHistogramBuffer, &uavDesc, &m_globalHistogramBufferUav);
+
+	if (FAILED(result))
+		return result;
+
+	//Exclusive prefix sum buffer
+	bufferDesc = {};
+	bufferDesc.BindFlags = D3D11_BIND_UNORDERED_ACCESS | D3D11_BIND_SHADER_RESOURCE;
+	bufferDesc.ByteWidth = sizeof(uint32_t) * MaxCapacity;
+	bufferDesc.Usage = D3D11_USAGE_DEFAULT;
+	bufferDesc.CPUAccessFlags = 0;
+	bufferDesc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
+	bufferDesc.StructureByteStride = sizeof(uint32_t);
+
+	result = device->CreateBuffer(&bufferDesc, NULL, &m_exclusivePrefixSumBuffer);
+
+	if (FAILED(result))
+		return result;
+
+	//##########Test buffer#############
+	bufferDesc.BindFlags = 0;
+	bufferDesc.Usage = D3D11_USAGE_STAGING;
+	bufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
+
+	result = device->CreateBuffer(&bufferDesc, NULL, &m_outputBuffer);
+
+	if (FAILED(result))
+		return result;
+	//##################################
+
+	//Exclusive prefix sum buffer uav
+	uavDesc = {};
+	uavDesc.Format = DXGI_FORMAT_UNKNOWN;
+	uavDesc.ViewDimension = D3D11_UAV_DIMENSION_BUFFER;
+	uavDesc.Buffer.NumElements = MaxCapacity;
+
+	result = device->CreateUnorderedAccessView(m_exclusivePrefixSumBuffer, &uavDesc, &m_exclusivePrefixSumBufferUav);
+
+	if (FAILED(result))
+		return result;
+}
+
 bool ForceGeneratorBarnesHutCS::InitShaderParameters()
 {
 	ID3D11Device* device = D3D::Instance().GetDevice();
@@ -191,38 +261,8 @@ bool ForceGeneratorBarnesHutCS::InitShaderParameters()
 	if (FAILED(result))
 		return false;
 
-	//Global histogram buffer
-	bufferDesc = {};
-	bufferDesc.BindFlags = D3D11_BIND_UNORDERED_ACCESS | D3D11_BIND_SHADER_RESOURCE;
-	bufferDesc.ByteWidth = sizeof(uint32_t) * MaxCapacity;
-	bufferDesc.Usage = D3D11_USAGE_DEFAULT;
-	bufferDesc.CPUAccessFlags = 0;
-	bufferDesc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
-	bufferDesc.StructureByteStride = sizeof(uint32_t);
-
-	result = device->CreateBuffer(&bufferDesc, NULL, &m_globalHistogramBuffer);
-
-	if (FAILED(result))
-		return false;
-
-	//##########Test buffer#############
-	bufferDesc.BindFlags = 0;
-	bufferDesc.Usage = D3D11_USAGE_STAGING;
-	bufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
-
-	result = device->CreateBuffer(&bufferDesc, NULL, &m_outputBuffer);
-
-	if (FAILED(result))
-		return false;
-	//##################################
-
-	//Global histogram buffer uav
-	uavDesc = {};
-	uavDesc.Format = DXGI_FORMAT_UNKNOWN;
-	uavDesc.ViewDimension = D3D11_UAV_DIMENSION_BUFFER;
-	uavDesc.Buffer.NumElements = MaxCapacity;
-
-	result = device->CreateUnorderedAccessView(m_globalHistogramBuffer, &uavDesc, &m_globalHistogramBufferUav);
+	//Sorting buffers
+	result = InitSortingShaderParameters (device);
 
 	if (FAILED(result))
 		return false;
@@ -291,6 +331,18 @@ void ForceGeneratorBarnesHutCS::ReleaseShaderParameters()
 		m_globalHistogramBufferUav->Release();
 		m_globalHistogramBufferUav = nullptr;
 	}
+
+	if (m_exclusivePrefixSumBuffer)
+	{
+		m_exclusivePrefixSumBuffer->Release();
+		m_exclusivePrefixSumBuffer = nullptr;
+	}
+
+	if (m_exclusivePrefixSumBufferUav)
+	{
+		m_exclusivePrefixSumBufferUav->Release();
+		m_exclusivePrefixSumBufferUav = nullptr;
+	}
 }
 
 void ForceGeneratorBarnesHutCS::CopyTestData()
@@ -300,9 +352,9 @@ void ForceGeneratorBarnesHutCS::CopyTestData()
 
 	if (SUCCEEDED(hr))
 	{
-		uint32_t data [8];
+		uint32_t data [1024];
 
-		memcpy (&data[0], mappedResource.pData, sizeof(uint32_t) * 8);
+		memcpy (&data[0], mappedResource.pData, sizeof(uint32_t) * 1024);
 
 		m_deviceContext->Unmap(m_outputBuffer, 0);
 	}
