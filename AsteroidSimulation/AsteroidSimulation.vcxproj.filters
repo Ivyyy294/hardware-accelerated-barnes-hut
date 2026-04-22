@@ -78,6 +78,9 @@
     <ClCompile Include="CSExclusiveSum.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="CSDigitBinning.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SceneDirectIntegration.h">
@@ -140,6 +143,9 @@
     <ClInclude Include="CSExclusiveSum.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="CSDigitBinning.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="color.hlsl">
@@ -155,6 +161,9 @@
       <Filter>Shader</Filter>
     </FxCompile>
     <FxCompile Include="CSExclusiveSum.hlsl">
+      <Filter>Shader</Filter>
+    </FxCompile>
+    <FxCompile Include="CSDigitBinning.hlsl">
       <Filter>Shader</Filter>
     </FxCompile>
   </ItemGroup>

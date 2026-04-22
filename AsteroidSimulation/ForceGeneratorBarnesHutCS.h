@@ -6,6 +6,7 @@
 #include "CSMortonCodes.h"
 #include "CSUpfrontHistogram.h"
 #include "CSExclusiveSum.h"
+#include "CSDigitBinning.h"
 
 #define MaxCapacity 1024
 
@@ -23,6 +24,10 @@ private:
 	ID3D11Buffer* m_positionUploadBuffer{ nullptr };
 	ID3D11Buffer* m_positionBuffer{ nullptr };
 	ID3D11UnorderedAccessView* m_positionBufferUav = nullptr;
+
+	ID3D11Buffer* m_massUploadBuffer{ nullptr };
+	ID3D11Buffer* m_massBuffer{ nullptr };
+	ID3D11UnorderedAccessView* m_massBufferUav = nullptr;
 
 	//Additional Buffer
 	ID3D11Buffer* m_mortonCodeBuffer{ nullptr };
@@ -43,6 +48,7 @@ private:
 	CSMortonCodes m_csMortonCodes;
 	CSUpfrontHistogram m_csUpfrontHistrogram;
 	CSExclusiveSum m_csExclusiveSum;
+	CSDigitBinning m_csDigitBinning;
 
 	XMFLOAT3 m_boundsMin {0.f, 0.f, 0.f};
 	XMFLOAT3 m_boundsMax { 0.f, 0.f, 0.f };
@@ -61,6 +67,7 @@ private:
 	void SetShaderParameter();
 
 	HRESULT InitPositionShaderParameters (ID3D11Device* device);
+	HRESULT InitMassShaderParameters (ID3D11Device* device);
 	HRESULT InitSortingShaderParameters (ID3D11Device* device);
 	bool InitShaderParameters();
 	void ReleaseShaderParameters();

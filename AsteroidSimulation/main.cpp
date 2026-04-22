@@ -22,5 +22,5 @@ int WINAPI WinMain (_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance,
 	//SceneHandler::AddScene <SceneDirectIntegration>();
 	//SceneHandler::AddScene <SceneBarnesHut>();
 	SceneHandler::AddScene <SceneBarnesHutCS>();
-	return Ivyyy::IvyyyEngine::Start (hInstance, nShowCmd);
+	return IvyyyEngine::Start (hInstance, nShowCmd);
 }
