@@ -45,6 +45,7 @@ void ForceGeneratorBarnesHutCS::ApplyForceForObject(PhysicObject* physicObj) con
 void ForceGeneratorBarnesHutCS::Dispatch()
 {
 	SetShaderParameter();
+	//ToDo optimize dispatch count
 	m_csMortonCodes.Dispatch(m_objects.size(), 1, 1);
 
 	//SM count for 3070 laptop is 40
@@ -52,7 +53,10 @@ void ForceGeneratorBarnesHutCS::Dispatch()
 	m_csUpfrontHistrogram.Dispatch(40, 1, 1);
 	m_csExclusiveSum.Dispatch(4,1,1);
 
-	m_deviceContext->CopyResource(m_outputBuffer, m_exclusivePrefixSumBuffer);
+	int count = std::ceilf (m_objects.size() / 1024.f);
+	m_csDigitBinning.Dispatch(count,1,1);
+
+	m_deviceContext->CopyResource(m_outputBuffer, m_mortonCodeBuffer);
 	//m_computeShader.SetShaderParameters(m_objects);
 	//m_computeShader.Dispatch(m_objects.size(), 1, 1);
 }
@@ -256,17 +260,6 @@ HRESULT ForceGeneratorBarnesHutCS::InitSortingShaderParameters(ID3D11Device* dev
 	if (FAILED(result))
 		return result;
 
-	//##########Test buffer#############
-	bufferDesc.BindFlags = 0;
-	bufferDesc.Usage = D3D11_USAGE_STAGING;
-	bufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
-
-	result = device->CreateBuffer(&bufferDesc, NULL, &m_outputBuffer);
-
-	if (FAILED(result))
-		return result;
-	//##################################
-
 	//Exclusive prefix sum buffer uav
 	uavDesc = {};
 	uavDesc.Format = DXGI_FORMAT_UNKNOWN;
@@ -310,6 +303,17 @@ bool ForceGeneratorBarnesHutCS::InitShaderParameters()
 
 	if (FAILED(result))
 		return false;
+
+	//##########Test buffer#############
+	bufferDesc.BindFlags = 0;
+	bufferDesc.Usage = D3D11_USAGE_STAGING;
+	bufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
+
+	result = device->CreateBuffer(&bufferDesc, NULL, &m_outputBuffer);
+
+	if (FAILED(result))
+		return result;
+	//##################################
 
 	//Morton Codes buffer uav
 	D3D11_UNORDERED_ACCESS_VIEW_DESC uavDesc = {};
