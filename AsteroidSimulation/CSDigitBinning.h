@@ -15,6 +15,9 @@ private:
 	ID3D11Buffer* m_tileCounterBuffer{ nullptr };
 	ID3D11UnorderedAccessView* m_tileCounterBufferUav = nullptr;
 
+	ID3D11Buffer* m_scanStateBuffer{ nullptr };
+	ID3D11UnorderedAccessView* m_scanStateBufferUav = nullptr;
+
 //Methods
 public:
 	CSDigitBinning();
