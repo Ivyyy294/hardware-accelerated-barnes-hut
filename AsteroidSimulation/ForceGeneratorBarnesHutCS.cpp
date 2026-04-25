@@ -13,7 +13,7 @@ void ForceGeneratorBarnesHutCS::Start()
 
 	m_csMortonCodes.Initialize();
 	m_csMortonCodes.m_mortonCodesBufferUav = m_uavMortonCodeBuffer;
-	m_csMortonCodes.m_uavPositionBuffer = m_uavPositionBuffer;
+	m_csMortonCodes.m_srvPositionBuffer = m_srvPositionBuffer;
 	m_csMortonCodes.m_settingsBuffer = m_settingsBuffer;
 
 	m_csUpfrontHistrogram.Initialize();

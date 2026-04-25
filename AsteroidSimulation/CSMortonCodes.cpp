@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "CSMortonCodes.h"
+#include "ShaderUtils.h"
 
 CSMortonCodes::CSMortonCodes()
 	: ComputeShader(L"CSMortonCodes.hlsl")
@@ -31,43 +32,29 @@ void CSMortonCodes::BindShaderParameters(ID3D11DeviceContext* deviceContext)
 {
 	deviceContext->CSSetConstantBuffers(0, 1, &m_settingsBuffer);
 	deviceContext->CSSetConstantBuffers(1, 1, &m_unitCubeBuffer);
-	deviceContext->CSSetUnorderedAccessViews(0, 1, &m_uavPositionBuffer, nullptr);
-	deviceContext->CSSetUnorderedAccessViews(1, 1, &m_mortonCodesBufferUav, nullptr);
+	deviceContext->CSSetShaderResources(0, 1, &m_srvPositionBuffer);
+	deviceContext->CSSetUnorderedAccessViews(0, 1, &m_mortonCodesBufferUav, nullptr);
 }
 
 void CSMortonCodes::UnbindShaderParameters(ID3D11DeviceContext* deviceContext)
 {
 	ID3D11Buffer* nullBuffer = nullptr;
 	ID3D11UnorderedAccessView* nullUAV = nullptr;
+	ID3D11ShaderResourceView* nullSRV = nullptr;
 
 	deviceContext->CSSetConstantBuffers(0, 1, &nullBuffer);
 	deviceContext->CSSetConstantBuffers(1, 1, &nullBuffer);
-	deviceContext->CSSetUnorderedAccessViews(0, 1, &nullUAV, nullptr);
+	deviceContext->CSSetShaderResources(0, 1, &nullSRV);
 	deviceContext->CSSetUnorderedAccessViews(1, 1, &nullUAV, nullptr);
 }
 
 bool CSMortonCodes::InitShaderParameters(ID3D11Device* device)
 {
-	//UnitCube buffer
-	D3D11_BUFFER_DESC bufferDesc = {};
-	bufferDesc.Usage = D3D11_USAGE_DYNAMIC;
-	bufferDesc.ByteWidth = sizeof(UnitCube);
-	bufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-	bufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-
-	HRESULT result = device->CreateBuffer(&bufferDesc, NULL, &m_unitCubeBuffer);
-
-	if (FAILED(result))
-		return false;
-
-	return true;
+	HRESULT result;
+	return ShaderUtils::CreateConstBuffer (device, result, &m_unitCubeBuffer, sizeof(UnitCube));
 }
 
 void CSMortonCodes::ReleaseShaderParameters()
 {
-	if (m_unitCubeBuffer)
-	{
-		m_unitCubeBuffer->Release();
-		m_unitCubeBuffer = nullptr;
-	}
+	ShaderUtils::SafeRelease(&m_unitCubeBuffer);
 }

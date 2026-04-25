@@ -12,8 +12,8 @@ cbuffer UnitCube : register(b1)
     double ucPadding;
 };
 
-RWStructuredBuffer<float3> positions : register(u0);
-RWStructuredBuffer<uint> mortonCodes : register(u1);
+StructuredBuffer<float3> positions : register(t0);
+RWStructuredBuffer<uint> mortonCodes : register(u0);
 
 uint Part1By2(uint val)
 {
