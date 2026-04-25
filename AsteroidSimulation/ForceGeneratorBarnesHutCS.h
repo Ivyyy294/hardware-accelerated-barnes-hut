@@ -21,9 +21,10 @@ private:
 	ID3D11Buffer* m_settingsBuffer{ nullptr };
 
 	//Morton Code Buffer
+	ID3D11Buffer* m_upMortonCodeBuffer{ nullptr };
 	ID3D11Buffer* m_inMortonCodeBuffer{ nullptr };
-	ID3D11ShaderResourceView* m_srvMortonCodeBuffer = nullptr;
 	ID3D11Buffer* m_outMortonCodeBuffer{ nullptr };
+	ID3D11ShaderResourceView* m_srvMortonCodeBuffer = nullptr;
 	ID3D11UnorderedAccessView* m_uavMortonCodeBuffer = nullptr;
 
 	//Position Buffer
@@ -74,6 +75,8 @@ public:
 
 private:
 	void SetShaderParameter();
+	void SetTestShaderParameter();
+	void SetSettingParameter (uint32_t elementCount, uint32_t dispatchGroupCount);
 
 	HRESULT InitMortonCodeShaderParameters (ID3D11Device* device);
 	HRESULT InitPositionShaderParameters (ID3D11Device* device);

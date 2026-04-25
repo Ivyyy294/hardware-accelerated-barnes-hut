@@ -8,8 +8,8 @@ class CSUpfrontHistogram :
 //Variables
 public:
 	ID3D11Buffer* m_settingsBuffer = nullptr;
-	ID3D11UnorderedAccessView* m_mortonCodesBufferUav = nullptr;
-	ID3D11UnorderedAccessView* m_globalHistogramBufferUav = nullptr;
+	ID3D11ShaderResourceView* m_srvMortonCodesBuffer = nullptr;
+	ID3D11UnorderedAccessView* m_uavGlobalHistogramBuffer = nullptr;
 //Methods
 public:
 	CSUpfrontHistogram();

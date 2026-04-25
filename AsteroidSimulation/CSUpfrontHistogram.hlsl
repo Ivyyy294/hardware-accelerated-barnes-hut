@@ -4,19 +4,16 @@
 #define ITEM_PER_THREAD 8
 #define NUM_THREADS 256
 
-#define NUM_GROUPS 40
-
 //Globals
-cbuffer Settings : register(b0)
+cbuffer SettingsBuffer : register(b0)
 {
-    uint numObjects;
-    //uint numGroups;
-    //uint numPass;
-    uint sPadding[3];
+    uint elementCount;
+    uint dispatchGroupCount;
+    uint sPadding[2];
 }
 
-RWStructuredBuffer<uint> mortonCodes : register(u0);
-RWStructuredBuffer<uint> globalHistogram : register(u1);
+StructuredBuffer<uint> mortonCodes : register(t0);
+RWStructuredBuffer<uint> globalHistogram : register(u0);
 
 groupshared uint localHistogram[NUM_DIGITS * NUM_BINS];
 
@@ -25,6 +22,7 @@ void main(uint3 DTid : SV_DispatchThreadID,
           uint3 GTid : SV_GroupThreadID,
           uint3 Gid : SV_GroupID)
 {
+   
     const uint tileSize = ITEM_PER_THREAD * NUM_THREADS;
     uint histSize = NUM_DIGITS * NUM_BINS;
     const uint groupId = Gid.x;
@@ -38,7 +36,7 @@ void main(uint3 DTid : SV_DispatchThreadID,
     //and all threads in the group have reached this call.
     GroupMemoryBarrierWithGroupSync();
     
-    for (uint tileIndex = groupId; tileIndex * tileSize < numObjects; tileIndex += NUM_GROUPS)
+    for (uint tileIndex = groupId; tileIndex * tileSize < elementCount; tileIndex += dispatchGroupCount)
     {
         const uint baseIndex = tileIndex * tileSize;
 
@@ -46,7 +44,7 @@ void main(uint3 DTid : SV_DispatchThreadID,
         {
             uint index = baseIndex + threadId + i * NUM_THREADS;
             
-            if (index < numObjects)
+            if (index < elementCount)
             {
                 uint val = mortonCodes[index];
                 
@@ -66,7 +64,7 @@ void main(uint3 DTid : SV_DispatchThreadID,
     }
 
     //Sync point
-    GroupMemoryBarrierWithGroupSync();
+    GroupMemoryBarrierWithGroupSync ();
     
     //Add local histogram values to global histogram
     for (uint i = threadId; i < histSize; i += NUM_THREADS)

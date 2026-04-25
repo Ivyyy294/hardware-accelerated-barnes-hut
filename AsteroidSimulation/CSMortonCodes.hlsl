@@ -1,8 +1,9 @@
 //Globals
-cbuffer Settings : register(b0)
+cbuffer SettingsBuffer : register(b0)
 {
     uint elementCount;
-    uint sPadding[3];
+    uint dispatchGroupCount;
+    uint sPadding[2];
 }
 
 cbuffer UnitCube : register(b1)
