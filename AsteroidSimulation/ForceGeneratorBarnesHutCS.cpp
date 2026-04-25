@@ -12,7 +12,7 @@ void ForceGeneratorBarnesHutCS::Start()
 	InitShaderParameters();
 
 	m_csMortonCodes.Initialize();
-	m_csMortonCodes.m_mortonCodesBufferUav = m_uavMortonCodeBuffer;
+	m_csMortonCodes.m_uavMortonCodesBuffer = m_uavMortonCodeBuffer;
 	m_csMortonCodes.m_srvPositionBuffer = m_srvPositionBuffer;
 	m_csMortonCodes.m_settingsBuffer = m_settingsBuffer;
 
@@ -27,9 +27,15 @@ void ForceGeneratorBarnesHutCS::Start()
 
 	m_csDigitBinning.Initialize();
 	m_csDigitBinning.m_settingsBuffer = m_settingsBuffer;
-	m_csDigitBinning.m_mortonCodesBufferUav = m_uavMortonCodeBuffer;
-	m_csDigitBinning.m_mortonCodesBufferSrv = m_srvMortonCodeBuffer;
 	m_csDigitBinning.m_exclusivePrefixSumBufferSrv = m_srvEclusivePrefixSumBuffer;
+
+	m_csDigitBinning.m_uavMortonCodesBuffer = m_uavMortonCodeBuffer;
+	m_csDigitBinning.m_uavPositionBuffer = m_uavPositionBuffer;
+	m_csDigitBinning.m_uavMassBuffer = m_uavMassBuffer;
+
+	m_csDigitBinning.m_srvMortonCodesBuffer = m_srvMortonCodeBuffer;
+	m_csDigitBinning.m_srvPositionBuffer = m_srvPositionBuffer;
+	m_csDigitBinning.m_srvMassBuffer = m_srvMassBuffer;
 	//m_csDigitBinning.m_uavMassBuffer = m_uavMassBuffer;
 	//m_csDigitBinning.m_uavPositionBuffer = m_uavPositionBuffer;
 }

@@ -33,7 +33,7 @@ void CSMortonCodes::BindShaderParameters(ID3D11DeviceContext* deviceContext)
 	deviceContext->CSSetConstantBuffers(0, 1, &m_settingsBuffer);
 	deviceContext->CSSetConstantBuffers(1, 1, &m_unitCubeBuffer);
 	deviceContext->CSSetShaderResources(0, 1, &m_srvPositionBuffer);
-	deviceContext->CSSetUnorderedAccessViews(0, 1, &m_mortonCodesBufferUav, nullptr);
+	deviceContext->CSSetUnorderedAccessViews(0, 1, &m_uavMortonCodesBuffer, nullptr);
 }
 
 void CSMortonCodes::UnbindShaderParameters(ID3D11DeviceContext* deviceContext)

@@ -15,10 +15,14 @@ void CSDigitBinning::BindShaderParameters(ID3D11DeviceContext* deviceContext)
 	deviceContext->CSSetConstantBuffers (0, 1, &m_settingsBuffer);
 
 	deviceContext->CSSetShaderResources (0, 1, &m_exclusivePrefixSumBufferSrv);
-	deviceContext->CSSetShaderResources (1, 1, &m_mortonCodesBufferSrv);
+	deviceContext->CSSetShaderResources (1, 1, &m_srvMortonCodesBuffer);
+	deviceContext->CSSetShaderResources (2, 1, &m_srvPositionBuffer);
+	deviceContext->CSSetShaderResources (3, 1, &m_srvMassBuffer);
 
 	deviceContext->CSSetUnorderedAccessViews(0, 1, &m_uavScatterCountersBuffer, nullptr);
-	deviceContext->CSSetUnorderedAccessViews(1, 1, &m_mortonCodesBufferUav, nullptr);
+	deviceContext->CSSetUnorderedAccessViews(1, 1, &m_uavMortonCodesBuffer, nullptr);
+	deviceContext->CSSetUnorderedAccessViews(2, 1, &m_uavPositionBuffer, nullptr);
+	deviceContext->CSSetUnorderedAccessViews(3, 1, &m_uavMassBuffer, nullptr);
 }
 
 void CSDigitBinning::UnbindShaderParameters(ID3D11DeviceContext* deviceContext)
@@ -31,9 +35,13 @@ void CSDigitBinning::UnbindShaderParameters(ID3D11DeviceContext* deviceContext)
 
 	deviceContext->CSGetShaderResources(0, 1, &nullSRV);
 	deviceContext->CSGetShaderResources(1, 1, &nullSRV);
+	deviceContext->CSGetShaderResources(2, 1, &nullSRV);
+	deviceContext->CSGetShaderResources(3, 1, &nullSRV);
 
 	deviceContext->CSSetUnorderedAccessViews(0, 1, &nullUAV, nullptr);
 	deviceContext->CSSetUnorderedAccessViews(1, 1, &nullUAV, nullptr);
+	deviceContext->CSSetUnorderedAccessViews(2, 1, &nullUAV, nullptr);
+	deviceContext->CSSetUnorderedAccessViews(3, 1, &nullUAV, nullptr);
 }
 
 bool CSDigitBinning::InitShaderParameters(ID3D11Device* device)

@@ -9,10 +9,16 @@ class CSDigitBinning :
 public:
 
 	ID3D11Buffer* m_settingsBuffer = nullptr;
-	ID3D11UnorderedAccessView* m_mortonCodesBufferUav = nullptr;
-	ID3D11ShaderResourceView* m_mortonCodesBufferSrv = nullptr;
 	ID3D11ShaderResourceView* m_exclusivePrefixSumBufferSrv = nullptr;
 
+	ID3D11UnorderedAccessView* m_uavMortonCodesBuffer = nullptr;
+	ID3D11ShaderResourceView* m_srvMortonCodesBuffer = nullptr;
+
+	ID3D11UnorderedAccessView* m_uavPositionBuffer = nullptr;
+	ID3D11ShaderResourceView* m_srvPositionBuffer = nullptr;
+
+	ID3D11UnorderedAccessView* m_uavMassBuffer = nullptr;
+	ID3D11ShaderResourceView* m_srvMassBuffer = nullptr;
 
 	//ID3D11UnorderedAccessView* m_uavPositionBuffer = nullptr;
 	//ID3D11UnorderedAccessView* m_uavMassBuffer = nullptr;

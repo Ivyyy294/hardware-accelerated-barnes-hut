@@ -209,9 +209,13 @@ cbuffer SettingsBuffer : register(b0)
 
 StructuredBuffer<uint> exclusivePrefixSum : register(t0);
 StructuredBuffer<uint> mortonCodeIn : register(t1);
+StructuredBuffer<uint> positionIn : register(t2);
+StructuredBuffer<uint> massIn : register(t3);
 
 RWStructuredBuffer<uint> scatterCounters : register(u0);
 RWStructuredBuffer<uint> mortonCodeOut : register(u1);
+RWStructuredBuffer<uint> positionOut : register(u2);
+RWStructuredBuffer<uint> massOut : register(u3);
 
 [numthreads(NUM_THREADS, 1, 1)]
 void main(uint3 DTid : SV_DispatchThreadID)
@@ -222,11 +226,13 @@ void main(uint3 DTid : SV_DispatchThreadID)
         return;
     
     //Get value
-    uint value = mortonCodeIn[index];
+    uint key = mortonCodeIn[index];
+    float3 position = positionIn[index];
+    float mass = massIn[index];
     
     //Get radix
     uint shift = digitPlace * 8;
-    uint digit = (value >> shift) & 0xFF;
+    uint digit = (key >> shift) & 0xFF;
     
     //Count prior matching digits
     uint rank = 0;
@@ -247,5 +253,7 @@ void main(uint3 DTid : SV_DispatchThreadID)
     int dstIndex = exclusivePrefixSum[histIndex] + rank;
     
     //Scatter
-    mortonCodeOut[dstIndex] = value;
+    mortonCodeOut[dstIndex] = key;
+    positionOut[dstIndex] = position;
+    massOut[dstIndex] = mass;
 }
