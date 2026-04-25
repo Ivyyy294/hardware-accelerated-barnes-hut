@@ -22,8 +22,8 @@ void ForceGeneratorBarnesHutCS::Start()
 	m_csUpfrontHistrogram.m_settingsBuffer = m_settingsBuffer;
 
 	m_csExclusiveSum.Initialize();
-	m_csExclusiveSum.m_globalHistogramBufferUav = m_uavGlobalHistogramBuffer;
-	m_csExclusiveSum.m_exclusivePrefixSumBufferUav = m_uavExclusivePrefixSumBuffer;
+	m_csExclusiveSum.m_srvGlobalHistogramBuffer = m_srvGlobalHistogramBuffer;
+	m_csExclusiveSum.m_uavExclusivePrefixSumBuffer = m_uavExclusivePrefixSumBuffer;
 
 	m_csDigitBinning.Initialize();
 	m_csDigitBinning.m_mortonCodesBufferUav = m_uavMortonCodeBuffer;
@@ -54,13 +54,15 @@ void ForceGeneratorBarnesHutCS::Dispatch()
 	//We dispatch the kernel per SM core
 	SetSettingParameter (MAX_CAPACITY, 40);
 	m_csUpfrontHistrogram.Dispatch(40, 1, 1);
-	//m_csExclusiveSum.Dispatch(4,1,1);
+
+	SetSettingParameter(MAX_CAPACITY, 4);
+	m_csExclusiveSum.Dispatch(4,1,1);
 
 	//m_deviceContext->CopyResource(m_inMortonCodeBuffer, m_outMortonCodeBuffer);
 
 	m_csDigitBinning.Dispatch(1,1,1);
 
-	m_deviceContext->CopyResource(m_outputBuffer, m_globalHistogramBuffer);
+	m_deviceContext->CopyResource(m_outputBuffer, m_exclusivePrefixSumBuffer);
 	//m_computeShader.SetShaderParameters(m_objects);
 	//m_computeShader.Dispatch(m_objects.size(), 1, 1);
 }

@@ -7,8 +7,8 @@ class CSExclusiveSum :
 {
 //Variables
 public:
-	ID3D11UnorderedAccessView* m_globalHistogramBufferUav = nullptr;
-	ID3D11UnorderedAccessView* m_exclusivePrefixSumBufferUav = nullptr;
+	ID3D11ShaderResourceView* m_srvGlobalHistogramBuffer = nullptr;
+	ID3D11UnorderedAccessView* m_uavExclusivePrefixSumBuffer = nullptr;
 
 //Methods
 public:

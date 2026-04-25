@@ -1,8 +1,8 @@
 #define NUM_BINS 256
 #define NUM_DIGITS 4
 
-RWStructuredBuffer<uint> globalHistogram : register(u0);
-RWStructuredBuffer<uint> exclusivePrefixSum : register(u1);
+StructuredBuffer<uint> globalHistogram : register(t0);
+RWStructuredBuffer<uint> exclusivePrefixSum : register(u0);
 
 [numthreads(256, 1, 1)]
 void main(uint3 GTid : SV_GroupThreadID,
