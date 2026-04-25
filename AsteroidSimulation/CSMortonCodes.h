@@ -18,7 +18,7 @@ private:
 public:
 	ID3D11Buffer* m_settingsBuffer = nullptr;
 	ID3D11UnorderedAccessView* m_mortonCodesBufferUav = nullptr;
-	ID3D11UnorderedAccessView* m_positionBufferUav = nullptr;
+	ID3D11UnorderedAccessView* m_uavPositionBuffer = nullptr;
 
 private:
 	ID3D11Buffer* m_unitCubeBuffer{ nullptr };

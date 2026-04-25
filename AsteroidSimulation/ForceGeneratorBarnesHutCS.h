@@ -20,25 +20,34 @@ private:
 	//Settings buffer
 	ID3D11Buffer* m_settingsBuffer{ nullptr };
 
-	//Particle info Buffer
-	ID3D11Buffer* m_positionUploadBuffer{ nullptr };
-	ID3D11Buffer* m_positionBuffer{ nullptr };
-	ID3D11UnorderedAccessView* m_positionBufferUav = nullptr;
+	//Morton Code Buffer
+	ID3D11Buffer* m_inMortonCodeBuffer{ nullptr };
+	ID3D11ShaderResourceView* m_srvMortonCodeBuffer = nullptr;
+	ID3D11Buffer* m_outMortonCodeBuffer{ nullptr };
+	ID3D11UnorderedAccessView* m_uavMortonCodeBuffer = nullptr;
 
-	ID3D11Buffer* m_massUploadBuffer{ nullptr };
-	ID3D11Buffer* m_massBuffer{ nullptr };
-	ID3D11UnorderedAccessView* m_massBufferUav = nullptr;
+	//Position Buffer
+	ID3D11Buffer* m_upPositionBuffer{ nullptr };
+	ID3D11Buffer* m_inPositionBuffer{ nullptr };
+	ID3D11Buffer* m_outPositionBuffer{ nullptr };
+	ID3D11UnorderedAccessView* m_uavPositionBuffer = nullptr;
+	ID3D11ShaderResourceView* m_srvPositionBuffer = nullptr;
 
-	//Additional Buffer
-	ID3D11Buffer* m_mortonCodeBuffer{ nullptr };
-	ID3D11UnorderedAccessView* m_mortonCodeBufferUav = nullptr;
+	//Mass Buffer
+	ID3D11Buffer* m_upMassBuffer{ nullptr };
+	ID3D11Buffer* m_inMassBuffer{ nullptr };
+	ID3D11Buffer* m_outMassBuffer{ nullptr };
+	ID3D11UnorderedAccessView* m_uavMassBuffer = nullptr;
+	ID3D11ShaderResourceView* m_srvMassBuffer = nullptr;
 
 	//Sorting Buffer
 	ID3D11Buffer* m_globalHistogramBuffer{ nullptr };
-	ID3D11UnorderedAccessView* m_globalHistogramBufferUav = nullptr;
+	ID3D11UnorderedAccessView* m_uavGlobalHistogramBuffer = nullptr;
+	ID3D11ShaderResourceView* m_srvGlobalHistogramBuffer = nullptr;
 
 	ID3D11Buffer* m_exclusivePrefixSumBuffer{ nullptr };
-	ID3D11UnorderedAccessView* m_exclusivePrefixSumBufferUav = nullptr;
+	ID3D11UnorderedAccessView* m_uavExclusivePrefixSumBuffer = nullptr;
+	ID3D11ShaderResourceView* m_srvEclusivePrefixSumBuffer = nullptr;
 
 	//Test staging buffer
 	ID3D11Buffer* m_outputBuffer{ nullptr };
@@ -66,6 +75,7 @@ public:
 private:
 	void SetShaderParameter();
 
+	HRESULT InitMortonCodeShaderParameters (ID3D11Device* device);
 	HRESULT InitPositionShaderParameters (ID3D11Device* device);
 	HRESULT InitMassShaderParameters (ID3D11Device* device);
 	HRESULT InitSortingShaderParameters (ID3D11Device* device);

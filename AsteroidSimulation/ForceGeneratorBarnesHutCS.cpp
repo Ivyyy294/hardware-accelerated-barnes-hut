@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "ForceGeneratorBarnesHutCS.h"
+#include "ShaderUtils.h"
 
 ForceGeneratorBarnesHutCS::ForceGeneratorBarnesHutCS()
 	: m_deviceContext (D3D::Instance().GetDeviceContext())
@@ -11,24 +12,25 @@ void ForceGeneratorBarnesHutCS::Start()
 	InitShaderParameters();
 
 	m_csMortonCodes.Initialize();
-	m_csMortonCodes.m_mortonCodesBufferUav = m_mortonCodeBufferUav;
-	m_csMortonCodes.m_positionBufferUav = m_positionBufferUav;
+	m_csMortonCodes.m_mortonCodesBufferUav = m_uavMortonCodeBuffer;
+	m_csMortonCodes.m_uavPositionBuffer = m_uavPositionBuffer;
 	m_csMortonCodes.m_settingsBuffer = m_settingsBuffer;
 
 	m_csUpfrontHistrogram.Initialize();
-	m_csUpfrontHistrogram.m_mortonCodesBufferUav = m_mortonCodeBufferUav;
-	m_csUpfrontHistrogram.m_globalHistogramBufferUav = m_globalHistogramBufferUav;
+	m_csUpfrontHistrogram.m_mortonCodesBufferUav = m_uavMortonCodeBuffer;
+	m_csUpfrontHistrogram.m_globalHistogramBufferUav = m_uavGlobalHistogramBuffer;
 	m_csUpfrontHistrogram.m_settingsBuffer = m_settingsBuffer;
 
 	m_csExclusiveSum.Initialize();
-	m_csExclusiveSum.m_globalHistogramBufferUav = m_globalHistogramBufferUav;
-	m_csExclusiveSum.m_exclusivePrefixSumBufferUav = m_exclusivePrefixSumBufferUav;
+	m_csExclusiveSum.m_globalHistogramBufferUav = m_uavGlobalHistogramBuffer;
+	m_csExclusiveSum.m_exclusivePrefixSumBufferUav = m_uavExclusivePrefixSumBuffer;
 
 	m_csDigitBinning.Initialize();
-	m_csDigitBinning.m_mortonCodesBufferUav = m_mortonCodeBufferUav;
-	m_csDigitBinning.m_exclusivePrefixSumBufferUav = m_exclusivePrefixSumBufferUav;
-	m_csDigitBinning.m_massBufferUav = m_massBufferUav;
-	m_csDigitBinning.m_positionBufferUav = m_positionBufferUav;
+	m_csDigitBinning.m_mortonCodesBufferUav = m_uavMortonCodeBuffer;
+	m_csDigitBinning.m_mortonCodesBufferSrv = m_srvMortonCodeBuffer;
+	m_csDigitBinning.m_exclusivePrefixSumBufferSrv = m_srvEclusivePrefixSumBuffer;
+	//m_csDigitBinning.m_uavMassBuffer = m_uavMassBuffer;
+	//m_csDigitBinning.m_uavPositionBuffer = m_uavPositionBuffer;
 }
 
 void ForceGeneratorBarnesHutCS::Exit()
@@ -53,10 +55,11 @@ void ForceGeneratorBarnesHutCS::Dispatch()
 	m_csUpfrontHistrogram.Dispatch(40, 1, 1);
 	m_csExclusiveSum.Dispatch(4,1,1);
 
-	int count = std::ceilf (m_objects.size() / 1024.f);
-	m_csDigitBinning.Dispatch(count,1,1);
+	m_deviceContext->CopyResource(m_inMortonCodeBuffer, m_outMortonCodeBuffer);
 
-	m_deviceContext->CopyResource(m_outputBuffer, m_mortonCodeBuffer);
+	m_csDigitBinning.Dispatch(1,1,1);
+
+	m_deviceContext->CopyResource(m_outputBuffer, m_outMortonCodeBuffer);
 	//m_computeShader.SetShaderParameters(m_objects);
 	//m_computeShader.Dispatch(m_objects.size(), 1, 1);
 }
@@ -65,7 +68,7 @@ void ForceGeneratorBarnesHutCS::ReadBack()
 {
 	Debug::Log("Wait for compute shader...");
 	
-	while (!m_csUpfrontHistrogram.IsDone())
+	while (!m_csDigitBinning.IsDone())
 		continue;
 
 	Debug::Log("´Compute shader done!");
@@ -81,12 +84,12 @@ void ForceGeneratorBarnesHutCS::SetShaderParameter()
 	D3D11_MAPPED_SUBRESOURCE mappedPosition;
 	D3D11_MAPPED_SUBRESOURCE mappedMass;
 
-	HRESULT result = m_deviceContext->Map(m_positionUploadBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedPosition);
+	HRESULT result = m_deviceContext->Map(m_upPositionBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedPosition);
 
 	if (FAILED(result))
 		return;
 
-	result = m_deviceContext->Map(m_massUploadBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedMass);
+	result = m_deviceContext->Map(m_upMassBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedMass);
 
 	if (FAILED(result))
 		return;
@@ -113,11 +116,11 @@ void ForceGeneratorBarnesHutCS::SetShaderParameter()
 	}
 
 	// Unlock the constant buffer.
-	m_deviceContext->Unmap(m_positionUploadBuffer, 0);
-	m_deviceContext->Unmap(m_massUploadBuffer, 0);
+	m_deviceContext->Unmap(m_upPositionBuffer, 0);
+	m_deviceContext->Unmap(m_upMassBuffer, 0);
 
-	m_deviceContext->CopyResource(m_positionBuffer, m_positionUploadBuffer);
-	m_deviceContext->CopyResource(m_massBuffer, m_massUploadBuffer);
+	m_deviceContext->CopyResource(m_inPositionBuffer, m_upPositionBuffer);
+	m_deviceContext->CopyResource(m_inMassBuffer, m_upMassBuffer);
 
 	m_csMortonCodes.SetShaderParameter (m_boundsMin, m_boundsMax);
 
@@ -136,140 +139,64 @@ void ForceGeneratorBarnesHutCS::SetShaderParameter()
 
 	//Clear UAV
 	UINT clearValues[4] = { 0, 0, 0, 0 };
-	m_deviceContext->ClearUnorderedAccessViewUint (m_globalHistogramBufferUav, clearValues);
-	m_deviceContext->ClearUnorderedAccessViewUint (m_exclusivePrefixSumBufferUav, clearValues);
+	m_deviceContext->ClearUnorderedAccessViewUint (m_uavMortonCodeBuffer, clearValues);
+	m_deviceContext->ClearUnorderedAccessViewUint (m_uavPositionBuffer, clearValues);
+	m_deviceContext->ClearUnorderedAccessViewUint (m_uavMassBuffer, clearValues);
+	m_deviceContext->ClearUnorderedAccessViewUint (m_uavGlobalHistogramBuffer, clearValues);
+	m_deviceContext->ClearUnorderedAccessViewUint (m_uavExclusivePrefixSumBuffer, clearValues);
 }
 
 
+HRESULT ForceGeneratorBarnesHutCS::InitMortonCodeShaderParameters(ID3D11Device* device)
+{
+	HRESULT result;
+
+	bool ok = ShaderUtils::CreateResourceBuffer (device, result, &m_inMortonCodeBuffer, sizeof(uint32_t), MAX_CAPACITY)
+	&& ShaderUtils::CreateResourceBuffer(device, result, &m_outMortonCodeBuffer, sizeof(uint32_t), MAX_CAPACITY)
+	&& ShaderUtils::CreateUAVBuffer(device, result, m_outMortonCodeBuffer, &m_uavMortonCodeBuffer, MAX_CAPACITY)
+	&& ShaderUtils::CreateResourceViewBuffer(device, result, m_inMortonCodeBuffer, &m_srvMortonCodeBuffer, MAX_CAPACITY);
+
+	return result;
+}
+
 HRESULT ForceGeneratorBarnesHutCS::InitPositionShaderParameters(ID3D11Device* device)
 {
-	//Position upload buffer
-	D3D11_BUFFER_DESC bufferDesc = {};
-	bufferDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
-	bufferDesc.ByteWidth = sizeof(XMFLOAT3) * MaxCapacity;
-	bufferDesc.Usage = D3D11_USAGE_DYNAMIC;
-	bufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-	bufferDesc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
-	bufferDesc.StructureByteStride = sizeof(XMFLOAT3);
+	HRESULT result;
 
-	HRESULT result = device->CreateBuffer(&bufferDesc, NULL, &m_positionUploadBuffer);
+	bool ok = ShaderUtils::CreateDynamicBuffer(device, result, &m_upPositionBuffer, sizeof(XMFLOAT3), MAX_CAPACITY)
+		&& ShaderUtils::CreateResourceBuffer(device, result, &m_outPositionBuffer, sizeof(XMFLOAT3), MAX_CAPACITY)
+		&& ShaderUtils::CreateResourceBuffer(device, result, &m_inPositionBuffer, sizeof(XMFLOAT3), MAX_CAPACITY)
+		&& ShaderUtils::CreateUAVBuffer(device, result, m_outPositionBuffer, &m_uavPositionBuffer, MAX_CAPACITY)
+		&& ShaderUtils::CreateResourceViewBuffer(device, result, m_inPositionBuffer, &m_srvPositionBuffer, MAX_CAPACITY);
 
-	if (FAILED(result))
-		return result;
-
-	//Position buffer
-	bufferDesc = {};
-	bufferDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_UNORDERED_ACCESS;
-	bufferDesc.ByteWidth = sizeof(XMFLOAT3) * MaxCapacity;
-	bufferDesc.Usage = D3D11_USAGE_DEFAULT;
-	bufferDesc.CPUAccessFlags = 0;
-	bufferDesc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
-	bufferDesc.StructureByteStride = sizeof(XMFLOAT3);
-
-	result = device->CreateBuffer(&bufferDesc, NULL, &m_positionBuffer);
-
-	if (FAILED(result))
-		return result;
-
-	//Position buffer uav
-	D3D11_UNORDERED_ACCESS_VIEW_DESC uavDesc = {};
-	uavDesc.Format = DXGI_FORMAT_UNKNOWN;
-	uavDesc.ViewDimension = D3D11_UAV_DIMENSION_BUFFER;
-	uavDesc.Buffer.NumElements = MaxCapacity;
-
-	return device->CreateUnorderedAccessView(m_positionBuffer, &uavDesc, &m_positionBufferUav);
+	return result;
 }
 
 HRESULT ForceGeneratorBarnesHutCS::InitMassShaderParameters(ID3D11Device* device)
 {
-	//Position upload buffer
-	D3D11_BUFFER_DESC bufferDesc = {};
-	bufferDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
-	bufferDesc.ByteWidth = sizeof(float) * MaxCapacity;
-	bufferDesc.Usage = D3D11_USAGE_DYNAMIC;
-	bufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-	bufferDesc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
-	bufferDesc.StructureByteStride = sizeof(float);
+	HRESULT result;
 
-	HRESULT result = device->CreateBuffer(&bufferDesc, NULL, &m_massUploadBuffer);
+	bool ok = ShaderUtils::CreateDynamicBuffer(device, result, &m_upMassBuffer, sizeof(float), MAX_CAPACITY)
+		&& ShaderUtils::CreateResourceBuffer(device, result, &m_outMassBuffer, sizeof(float), MAX_CAPACITY)
+		&& ShaderUtils::CreateResourceBuffer(device, result, &m_inMassBuffer, sizeof(float), MAX_CAPACITY)
+		&& ShaderUtils::CreateUAVBuffer(device, result, m_outMassBuffer, &m_uavMassBuffer, MAX_CAPACITY)
+		&& ShaderUtils::CreateResourceViewBuffer(device, result, m_inMassBuffer, &m_srvMassBuffer, MAX_CAPACITY);
 
-	if (FAILED(result))
-		return result;
-
-	//Position buffer
-	bufferDesc = {};
-	bufferDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_UNORDERED_ACCESS;
-	bufferDesc.ByteWidth = sizeof(float) * MaxCapacity;
-	bufferDesc.Usage = D3D11_USAGE_DEFAULT;
-	bufferDesc.CPUAccessFlags = 0;
-	bufferDesc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
-	bufferDesc.StructureByteStride = sizeof(float);
-
-	result = device->CreateBuffer(&bufferDesc, NULL, &m_massBuffer);
-
-	if (FAILED(result))
-		return result;
-
-	//Position buffer uav
-	D3D11_UNORDERED_ACCESS_VIEW_DESC uavDesc = {};
-	uavDesc.Format = DXGI_FORMAT_UNKNOWN;
-	uavDesc.ViewDimension = D3D11_UAV_DIMENSION_BUFFER;
-	uavDesc.Buffer.NumElements = MaxCapacity;
-
-	return device->CreateUnorderedAccessView(m_massBuffer, &uavDesc, &m_massBufferUav);
+	return result;
 }
 
 HRESULT ForceGeneratorBarnesHutCS::InitSortingShaderParameters(ID3D11Device* device)
 {
-	//Global histogram buffer
-	D3D11_BUFFER_DESC bufferDesc = {};
-	bufferDesc.BindFlags = D3D11_BIND_UNORDERED_ACCESS | D3D11_BIND_SHADER_RESOURCE;
-	bufferDesc.ByteWidth = sizeof(uint32_t) * MaxCapacity;
-	bufferDesc.Usage = D3D11_USAGE_DEFAULT;
-	bufferDesc.CPUAccessFlags = 0;
-	bufferDesc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
-	bufferDesc.StructureByteStride = sizeof(uint32_t);
+	HRESULT result;
 
-	HRESULT result = device->CreateBuffer(&bufferDesc, NULL, &m_globalHistogramBuffer);
+	bool ok = ShaderUtils::CreateResourceBuffer(device, result, &m_globalHistogramBuffer, sizeof(uint32_t), MAX_CAPACITY)
+		&& ShaderUtils::CreateUAVBuffer(device, result, m_globalHistogramBuffer, &m_uavGlobalHistogramBuffer, MAX_CAPACITY)
+		&& ShaderUtils::CreateResourceViewBuffer(device, result, m_globalHistogramBuffer, &m_srvGlobalHistogramBuffer, MAX_CAPACITY)
+		&&ShaderUtils::CreateResourceBuffer(device, result, &m_exclusivePrefixSumBuffer, sizeof(uint32_t), MAX_CAPACITY)
+		&& ShaderUtils::CreateUAVBuffer(device, result, m_exclusivePrefixSumBuffer, &m_uavExclusivePrefixSumBuffer, MAX_CAPACITY)
+		&& ShaderUtils::CreateResourceViewBuffer(device, result, m_exclusivePrefixSumBuffer, &m_srvEclusivePrefixSumBuffer, MAX_CAPACITY);
 
-	if (FAILED(result))
-		return result;
-
-	//Global histogram buffer uav
-	D3D11_UNORDERED_ACCESS_VIEW_DESC uavDesc = {};
-	uavDesc.Format = DXGI_FORMAT_UNKNOWN;
-	uavDesc.ViewDimension = D3D11_UAV_DIMENSION_BUFFER;
-	uavDesc.Buffer.NumElements = MaxCapacity;
-
-	result = device->CreateUnorderedAccessView(m_globalHistogramBuffer, &uavDesc, &m_globalHistogramBufferUav);
-
-	if (FAILED(result))
-		return result;
-
-	//Exclusive prefix sum buffer
-	bufferDesc = {};
-	bufferDesc.BindFlags = D3D11_BIND_UNORDERED_ACCESS | D3D11_BIND_SHADER_RESOURCE;
-	bufferDesc.ByteWidth = sizeof(uint32_t) * MaxCapacity;
-	bufferDesc.Usage = D3D11_USAGE_DEFAULT;
-	bufferDesc.CPUAccessFlags = 0;
-	bufferDesc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
-	bufferDesc.StructureByteStride = sizeof(uint32_t);
-
-	result = device->CreateBuffer(&bufferDesc, NULL, &m_exclusivePrefixSumBuffer);
-
-	if (FAILED(result))
-		return result;
-
-	//Exclusive prefix sum buffer uav
-	uavDesc = {};
-	uavDesc.Format = DXGI_FORMAT_UNKNOWN;
-	uavDesc.ViewDimension = D3D11_UAV_DIMENSION_BUFFER;
-	uavDesc.Buffer.NumElements = MaxCapacity;
-
-	result = device->CreateUnorderedAccessView(m_exclusivePrefixSumBuffer, &uavDesc, &m_exclusivePrefixSumBufferUav);
-
-	if (FAILED(result))
-		return result;
+	return result;
 }
 
 bool ForceGeneratorBarnesHutCS::InitShaderParameters()
@@ -279,49 +206,26 @@ bool ForceGeneratorBarnesHutCS::InitShaderParameters()
 	if (device == nullptr)
 		return false;
 
+	HRESULT result;
+
+	//Debug buffer
+	ShaderUtils::CreateStagingBuffer (device, result, &m_outputBuffer, sizeof(uint32_t), MAX_CAPACITY);
+
+	if (FAILED(result))
+		return false;
+
 	//Particle buffer
-	HRESULT result = InitPositionShaderParameters(device);
+	result = InitMortonCodeShaderParameters(device);
+
+	if (FAILED(result))
+		return false;
+
+	result = InitPositionShaderParameters(device);
 
 	if (FAILED(result))
 		return false;
 
 	result = InitMassShaderParameters(device);
-
-	if (FAILED(result))
-		return false;
-
-	//Morton Codes buffer
-	D3D11_BUFFER_DESC bufferDesc = {};
-	bufferDesc.BindFlags = D3D11_BIND_UNORDERED_ACCESS | D3D11_BIND_SHADER_RESOURCE;
-	bufferDesc.ByteWidth = sizeof(uint32_t) * MaxCapacity;
-	bufferDesc.Usage = D3D11_USAGE_DEFAULT;
-	bufferDesc.CPUAccessFlags = 0;
-	bufferDesc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
-	bufferDesc.StructureByteStride = sizeof(uint32_t);
-
-	result = device->CreateBuffer(&bufferDesc, NULL, &m_mortonCodeBuffer);
-
-	if (FAILED(result))
-		return false;
-
-	//##########Test buffer#############
-	bufferDesc.BindFlags = 0;
-	bufferDesc.Usage = D3D11_USAGE_STAGING;
-	bufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
-
-	result = device->CreateBuffer(&bufferDesc, NULL, &m_outputBuffer);
-
-	if (FAILED(result))
-		return result;
-	//##################################
-
-	//Morton Codes buffer uav
-	D3D11_UNORDERED_ACCESS_VIEW_DESC uavDesc = {};
-	uavDesc.Format = DXGI_FORMAT_UNKNOWN;
-	uavDesc.ViewDimension = D3D11_UAV_DIMENSION_BUFFER;
-	uavDesc.Buffer.NumElements = MaxCapacity;
-
-	result = device->CreateUnorderedAccessView(m_mortonCodeBuffer, &uavDesc, &m_mortonCodeBufferUav);
 
 	if (FAILED(result))
 		return false;
@@ -333,13 +237,7 @@ bool ForceGeneratorBarnesHutCS::InitShaderParameters()
 		return false;
 
 	//Settings buffer
-	bufferDesc = {};
-	bufferDesc.Usage = D3D11_USAGE_DYNAMIC;
-	bufferDesc.ByteWidth = sizeof(CSSettings);
-	bufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-	bufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-
-	result = device->CreateBuffer(&bufferDesc, NULL, &m_settingsBuffer);
+	ShaderUtils::CreateConstBuffer (device, result, &m_settingsBuffer, sizeof(CSSettings));
 
 	if (FAILED(result))
 		return false;
@@ -349,89 +247,33 @@ bool ForceGeneratorBarnesHutCS::InitShaderParameters()
 
 void ForceGeneratorBarnesHutCS::ReleaseShaderParameters()
 {
-	if (m_outputBuffer)
-	{
-		m_outputBuffer->Release();
-		m_outputBuffer = nullptr;
-	}
+	ShaderUtils::SafeRelease (&m_outputBuffer);
+	ShaderUtils::SafeRelease (&m_settingsBuffer);
 
-	if (m_settingsBuffer)
-	{
-		m_settingsBuffer->Release();
-		m_settingsBuffer = nullptr;
-	}
+	ShaderUtils::SafeRelease (&m_upPositionBuffer);
+	ShaderUtils::SafeRelease (&m_inPositionBuffer);
+	ShaderUtils::SafeRelease (&m_outPositionBuffer);
+	ShaderUtils::SafeRelease (&m_srvPositionBuffer);
+	ShaderUtils::SafeRelease (&m_uavPositionBuffer);
 
-	if (m_positionBuffer)
-	{
-		m_positionBuffer->Release();
-		m_positionBuffer = nullptr;
-	}
+	ShaderUtils::SafeRelease(&m_upMassBuffer);
+	ShaderUtils::SafeRelease(&m_inMassBuffer);
+	ShaderUtils::SafeRelease(&m_outMassBuffer);
+	ShaderUtils::SafeRelease(&m_srvMassBuffer);
+	ShaderUtils::SafeRelease(&m_uavMassBuffer);
 
-	if (m_positionUploadBuffer)
-	{
-		m_positionUploadBuffer->Release();
-		m_positionUploadBuffer = nullptr;
-	}
+	ShaderUtils::SafeRelease (&m_inMortonCodeBuffer);
+	ShaderUtils::SafeRelease(&m_outMortonCodeBuffer);
+	ShaderUtils::SafeRelease (&m_srvMortonCodeBuffer);
+	ShaderUtils::SafeRelease (&m_uavMortonCodeBuffer);
 
-	if (m_positionBufferUav)
-	{
-		m_positionBufferUav->Release();
-		m_positionBufferUav = nullptr;
-	}
+	ShaderUtils::SafeRelease(&m_globalHistogramBuffer);
+	ShaderUtils::SafeRelease (&m_uavGlobalHistogramBuffer);
+	ShaderUtils::SafeRelease (&m_srvGlobalHistogramBuffer);
 
-	if (m_massBuffer)
-	{
-		m_massBuffer->Release();
-		m_massBuffer = nullptr;
-	}
-
-	if (m_massUploadBuffer)
-	{
-		m_massUploadBuffer->Release();
-		m_massUploadBuffer = nullptr;
-	}
-
-	if (m_massBufferUav)
-	{
-		m_massBufferUav->Release();
-		m_massBufferUav = nullptr;
-	}
-
-	if (m_mortonCodeBuffer)
-	{
-		m_mortonCodeBuffer->Release();
-		m_mortonCodeBuffer = nullptr;
-	}
-
-	if (m_mortonCodeBufferUav)
-	{
-		m_mortonCodeBufferUav->Release();
-		m_mortonCodeBufferUav = nullptr;
-	}
-
-	if (m_globalHistogramBuffer)
-	{
-		m_globalHistogramBuffer->Release();
-		m_globalHistogramBuffer = nullptr;
-	}
-
-	if (m_globalHistogramBufferUav)
-	{
-		m_globalHistogramBufferUav->Release();
-		m_globalHistogramBufferUav = nullptr;
-	}
-
-	if (m_exclusivePrefixSumBuffer)
-	{
-		m_exclusivePrefixSumBuffer->Release();
-		m_exclusivePrefixSumBuffer = nullptr;
-	}
-
-	if (m_exclusivePrefixSumBufferUav)
-	{
-		m_exclusivePrefixSumBufferUav->Release();
-		m_exclusivePrefixSumBufferUav = nullptr;
-	}
+	ShaderUtils::SafeRelease(&m_exclusivePrefixSumBuffer);
+	ShaderUtils::SafeRelease(&m_uavExclusivePrefixSumBuffer);
+	ShaderUtils::SafeRelease (&m_srvEclusivePrefixSumBuffer);
 }
 
 void ForceGeneratorBarnesHutCS::CopyTestData()
@@ -441,9 +283,9 @@ void ForceGeneratorBarnesHutCS::CopyTestData()
 
 	if (SUCCEEDED(hr))
 	{
-		uint32_t data [1024];
+		uint32_t data [MaxCapacity];
 
-		memcpy (&data[0], mappedResource.pData, sizeof(uint32_t) * 1024);
+		memcpy (&data[0], mappedResource.pData, sizeof(uint32_t) * MaxCapacity);
 
 		m_deviceContext->Unmap(m_outputBuffer, 0);
 	}

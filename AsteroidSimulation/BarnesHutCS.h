@@ -23,7 +23,7 @@ private:
 	ID3D11Buffer* m_positionBuffer{ nullptr };
 	ID3D11ShaderResourceView* m_positionBufferSrv = nullptr;
 
-	ID3D11Buffer* m_massBuffer{ nullptr };
+	ID3D11Buffer* m_inMassBuffer{ nullptr };
 	ID3D11ShaderResourceView* m_massBufferSrv = nullptr;
 
 	ID3D11Buffer* m_outputBuffer{ nullptr };

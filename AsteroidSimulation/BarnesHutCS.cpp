@@ -41,7 +41,7 @@ void BarnesHutCS::SetShaderParameters(const std::vector<PhysicObject*>& objects)
 	if (FAILED(result))
 		return;
 
-	result = m_deviceContext->Map(m_massBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedMass);
+	result = m_deviceContext->Map(m_inMassBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedMass);
 
 	if (FAILED(result))
 		return;
@@ -73,7 +73,7 @@ void BarnesHutCS::SetShaderParameters(const std::vector<PhysicObject*>& objects)
 
 	// Unlock the constant buffer.
 	m_deviceContext->Unmap(m_positionBuffer, 0);
-	m_deviceContext->Unmap(m_massBuffer, 0);
+	m_deviceContext->Unmap(m_inMassBuffer, 0);
 
 	result = m_deviceContext->Map(m_unitCubeBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedUnitCube);
 
@@ -147,7 +147,7 @@ bool BarnesHutCS::InitShaderParameters (ID3D11Device* device)
 	bufferDesc.StructureByteStride = sizeof(float);
 
 	// Create the constant buffer pointer so we can access the vertex shader constant buffer from within this class.
-	result = device->CreateBuffer(&bufferDesc, NULL, &m_massBuffer);
+	result = device->CreateBuffer(&bufferDesc, NULL, &m_inMassBuffer);
 
 	if (FAILED(result))
 		return false;
@@ -156,7 +156,7 @@ bool BarnesHutCS::InitShaderParameters (ID3D11Device* device)
 	srvDesc.ViewDimension = D3D11_SRV_DIMENSION_BUFFER;
 	srvDesc.Buffer.NumElements = 1;
 
-	result = device->CreateShaderResourceView(m_massBuffer, &srvDesc, &m_massBufferSrv);
+	result = device->CreateShaderResourceView(m_inMassBuffer, &srvDesc, &m_massBufferSrv);
 
 	if (FAILED(result))
 		return false;
