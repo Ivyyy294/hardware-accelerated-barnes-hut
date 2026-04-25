@@ -76,7 +76,7 @@ public:
 private:
 	void SetShaderParameter();
 	void SetTestShaderParameter();
-	void SetSettingParameter (uint32_t elementCount, uint32_t dispatchGroupCount);
+	void SetSettingParameter (uint32_t elementCount, uint32_t dispatchGroupCount, uint32_t digitPlace = 0);
 
 	HRESULT InitMortonCodeShaderParameters (ID3D11Device* device);
 	HRESULT InitPositionShaderParameters (ID3D11Device* device);

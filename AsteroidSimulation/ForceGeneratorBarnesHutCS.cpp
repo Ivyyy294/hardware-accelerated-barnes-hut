@@ -26,6 +26,7 @@ void ForceGeneratorBarnesHutCS::Start()
 	m_csExclusiveSum.m_uavExclusivePrefixSumBuffer = m_uavExclusivePrefixSumBuffer;
 
 	m_csDigitBinning.Initialize();
+	m_csDigitBinning.m_settingsBuffer = m_settingsBuffer;
 	m_csDigitBinning.m_mortonCodesBufferUav = m_uavMortonCodeBuffer;
 	m_csDigitBinning.m_mortonCodesBufferSrv = m_srvMortonCodeBuffer;
 	m_csDigitBinning.m_exclusivePrefixSumBufferSrv = m_srvEclusivePrefixSumBuffer;
@@ -59,10 +60,20 @@ void ForceGeneratorBarnesHutCS::Dispatch()
 	m_csExclusiveSum.Dispatch(4,1,1);
 
 	//m_deviceContext->CopyResource(m_inMortonCodeBuffer, m_outMortonCodeBuffer);
+	uint32_t groupCount = (MAX_CAPACITY + 255) / 256;
+	SetSettingParameter(MAX_CAPACITY, groupCount, 0);
+	m_csDigitBinning.Dispatch(groupCount,1,1);
 
-	m_csDigitBinning.Dispatch(1,1,1);
+	SetSettingParameter(MAX_CAPACITY, groupCount, 1);
+	m_csDigitBinning.Dispatch(groupCount, 1, 1);
 
-	m_deviceContext->CopyResource(m_outputBuffer, m_exclusivePrefixSumBuffer);
+	SetSettingParameter(MAX_CAPACITY, groupCount, 2);
+	m_csDigitBinning.Dispatch(groupCount, 1, 1);
+
+	SetSettingParameter(MAX_CAPACITY, groupCount, 3);
+	m_csDigitBinning.Dispatch(groupCount, 1, 1);
+
+	m_deviceContext->CopyResource(m_outputBuffer, m_outMortonCodeBuffer);
 	//m_computeShader.SetShaderParameters(m_objects);
 	//m_computeShader.Dispatch(m_objects.size(), 1, 1);
 }
@@ -203,7 +214,7 @@ void ForceGeneratorBarnesHutCS::SetTestShaderParameter()
 	m_deviceContext->ClearUnorderedAccessViewUint(m_uavExclusivePrefixSumBuffer, clearValues);
 }
 
-void ForceGeneratorBarnesHutCS::SetSettingParameter(uint32_t elementCount, uint32_t dispatchGroupCount)
+void ForceGeneratorBarnesHutCS::SetSettingParameter(uint32_t elementCount, uint32_t dispatchGroupCount, uint32_t digitPlace)
 {
 	//Settings buffer
 	D3D11_MAPPED_SUBRESOURCE mappedSettings;
@@ -216,6 +227,7 @@ void ForceGeneratorBarnesHutCS::SetSettingParameter(uint32_t elementCount, uint3
 	CSSettings* settings = (CSSettings*)mappedSettings.pData;
 	settings->elementCount = elementCount;
 	settings->dispatchGroupCount = dispatchGroupCount;
+	settings->digitPlace = digitPlace;
 
 	m_deviceContext->Unmap(m_settingsBuffer, 0);
 }
