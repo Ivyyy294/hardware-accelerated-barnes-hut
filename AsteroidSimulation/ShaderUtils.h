@@ -1,6 +1,6 @@
 #pragma once
 
-#define MAX_CAPACITY NUM_ASTEROIDS
+#define MAX_CAPACITY NUM_ASTEROIDS + 1
 
 class ShaderUtils
 {

@@ -85,7 +85,6 @@ public:
 
 private:
 	void SetShaderParameter();
-	void SetTestShaderParameter();
 	void SetSettingParameter (uint32_t elementCount, uint32_t dispatchGroupCount, uint32_t digitPlace = 0);
 
 	void CallculateMortonKeys (uint32_t elementCount);

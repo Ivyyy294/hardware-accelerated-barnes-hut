@@ -60,16 +60,16 @@ void ForceGeneratorBarnesHutCS::ApplyForceForObject(PhysicObject* physicObj) con
 void ForceGeneratorBarnesHutCS::Dispatch()
 {
 	SetShaderParameter();
+	//SetTestShaderParameter();
 	uint32_t capacity = m_objects.size();
 
 	CallculateMortonKeys(capacity);
 	DispatchRadixSort (capacity);
-	//BuildOctree (capacity);
-	//CallculateForces (capacity);
+	BuildOctree (capacity);
 
-	m_deviceContext->CopyResource(m_outputBuffer, m_outMortonCodeBuffer);
-	//m_computeShader.SetShaderParameters(m_objects);
-	//m_computeShader.Dispatch(m_objects.size(), 1, 1);
+	m_deviceContext->Flush();
+	m_deviceContext->CopyResource(m_outputBuffer, m_nBuffer);
+	CallculateForces (capacity);
 }
 
 void ForceGeneratorBarnesHutCS::CallculateMortonKeys(uint32_t elementCount)
@@ -128,6 +128,8 @@ void ForceGeneratorBarnesHutCS::DispatchRadixSort(uint32_t elementCount)
 
 void ForceGeneratorBarnesHutCS::BuildOctree(uint32_t elementCount)
 {
+	SetSettingParameter (elementCount, 2);
+	m_csCornerStone_F.Dispatch(1,1,1);
 }
 
 void ForceGeneratorBarnesHutCS::CallculateForces(uint32_t elementCount)
@@ -203,72 +205,6 @@ void ForceGeneratorBarnesHutCS::SetShaderParameter()
 	m_deviceContext->ClearUnorderedAccessViewUint (m_uavExclusivePrefixSumBuffer, clearValues);
 }
 
-void ForceGeneratorBarnesHutCS::SetTestShaderParameter()
-{
-	if (m_deviceContext == nullptr)
-		return;
-
-	D3D11_MAPPED_SUBRESOURCE mappedMortonCode;
-	D3D11_MAPPED_SUBRESOURCE mappedPosition;
-	D3D11_MAPPED_SUBRESOURCE mappedMass;
-
-	HRESULT result = m_deviceContext->Map(m_upMortonCodeBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedMortonCode);
-
-	if (FAILED(result))
-		return;
-
-	result = m_deviceContext->Map(m_upPositionBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedPosition);
-
-	if (FAILED(result))
-		return;
-
-	result = m_deviceContext->Map(m_upMassBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedMass);
-
-	if (FAILED(result))
-		return;
-
-	// Get a pointer to the data in the constant buffer.
-	uint32_t* mortonPtr = (uint32_t*)mappedMortonCode.pData;
-	XMFLOAT3* positionPtr = (XMFLOAT3*)mappedPosition.pData;
-	float* massPtr = (float*)mappedMass.pData;
-
-	for (int i = 0; i < MAX_CAPACITY; ++i)
-	{
-		Vector3 pos = Vector3::Zero;
-		positionPtr[i].x = pos.x;
-		positionPtr[i].y = pos.y;
-		positionPtr[i].z = pos.z;
-		massPtr[i] = 1.f;
-		mortonPtr[i] = i;
-
-		m_boundsMax.x = max(m_boundsMax.x, pos.x);
-		m_boundsMax.y = max(m_boundsMax.y, pos.y);
-		m_boundsMax.z = max(m_boundsMax.z, pos.z);
-
-		m_boundsMin.x = min(m_boundsMin.x, pos.x);
-		m_boundsMin.y = min(m_boundsMin.y, pos.y);
-		m_boundsMin.z = min(m_boundsMin.z, pos.z);
-	}
-
-	// Unlock the constant buffer.
-	m_deviceContext->Unmap(m_upMortonCodeBuffer, 0);
-	m_deviceContext->Unmap(m_upPositionBuffer, 0);
-	m_deviceContext->Unmap(m_upMassBuffer, 0);
-
-	m_deviceContext->CopyResource(m_inMortonCodeBuffer, m_upMortonCodeBuffer);
-	m_deviceContext->CopyResource(m_inPositionBuffer, m_upPositionBuffer);
-	m_deviceContext->CopyResource(m_inMassBuffer, m_upMassBuffer);
-
-	m_csMortonCodes.SetShaderParameter(m_boundsMin, m_boundsMax);
-
-	//Clear UAV
-	UINT clearValues[4] = { 0, 0, 0, 0 };
-	m_deviceContext->ClearUnorderedAccessViewUint(m_uavMortonCodeBuffer, clearValues);
-	m_deviceContext->ClearUnorderedAccessViewUint(m_uavPositionBuffer, clearValues);
-	m_deviceContext->ClearUnorderedAccessViewUint(m_uavMassBuffer, clearValues);
-	m_deviceContext->ClearUnorderedAccessViewUint(m_uavGlobalHistogramBuffer, clearValues);
-	m_deviceContext->ClearUnorderedAccessViewUint(m_uavExclusivePrefixSumBuffer, clearValues);
-}
 
 void ForceGeneratorBarnesHutCS::SetSettingParameter(uint32_t elementCount, uint32_t dispatchGroupCount, uint32_t digitPlace)
 {
@@ -453,9 +389,9 @@ void ForceGeneratorBarnesHutCS::CopyTestData()
 
 	if (SUCCEEDED(hr))
 	{
-		uint32_t data [MAX_CAPACITY];
+		uint32_t data [1024];
 
-		memcpy (&data[0], mappedResource.pData, sizeof(uint32_t) * MAX_CAPACITY);
+		memcpy (&data[0], mappedResource.pData, sizeof(uint32_t) * 1024);
 
 		m_deviceContext->Unmap(m_outputBuffer, 0);
 	}

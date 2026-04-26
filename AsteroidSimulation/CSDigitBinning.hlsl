@@ -209,13 +209,13 @@ cbuffer SettingsBuffer : register(b0)
 
 StructuredBuffer<uint> exclusivePrefixSum : register(t0);
 StructuredBuffer<uint> mortonCodeIn : register(t1);
-StructuredBuffer<uint> positionIn : register(t2);
-StructuredBuffer<uint> massIn : register(t3);
+StructuredBuffer<float3> positionIn : register(t2);
+StructuredBuffer<float> massIn : register(t3);
 
 RWStructuredBuffer<uint> scatterCounters : register(u0);
 RWStructuredBuffer<uint> mortonCodeOut : register(u1);
-RWStructuredBuffer<uint> positionOut : register(u2);
-RWStructuredBuffer<uint> massOut : register(u3);
+RWStructuredBuffer<float3> positionOut : register(u2);
+RWStructuredBuffer<float> massOut : register(u3);
 
 [numthreads(NUM_THREADS, 1, 1)]
 void main(uint3 DTid : SV_DispatchThreadID)
@@ -246,14 +246,19 @@ void main(uint3 DTid : SV_DispatchThreadID)
             rank++;
     }
     
+    GroupMemoryBarrierWithGroupSync();
+    
     //Get histogram index
     uint histIndex = digitPlace * NUM_BINS + digit;
     
     //Final destination
-    int dstIndex = exclusivePrefixSum[histIndex] + rank;
-    
+    uint dstIndex = exclusivePrefixSum[histIndex] + rank;
+
     //Scatter
-    mortonCodeOut[dstIndex] = key;
-    positionOut[dstIndex] = position;
-    massOut[dstIndex] = mass;
+    if (dstIndex < elementCount)
+    {
+        mortonCodeOut[dstIndex] = key;
+        positionOut[dstIndex] = position;
+        massOut[dstIndex] = mass;
+    }
 }
