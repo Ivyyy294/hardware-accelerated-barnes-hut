@@ -133,11 +133,11 @@
   <ItemGroup>
     <ClCompile Include="Asteroid.cpp" />
     <ClCompile Include="BarnesHutCS.cpp" />
-    <ClCompile Include="CSBuildOctree.cpp" />
     <ClCompile Include="CSDigitBinning.cpp" />
     <ClCompile Include="CSExclusiveSum.cpp" />
     <ClCompile Include="CSMortonCodes.cpp" />
     <ClCompile Include="CSUpfrontHistogram.cpp" />
+    <ClCompile Include="CS_CornerStone_F.cpp" />
     <ClCompile Include="ForceGeneratorBarnesHutCS.cpp" />
     <ClCompile Include="KeplerOrbit.cpp" />
     <ClCompile Include="OrbitalElement.cpp" />
@@ -163,12 +163,12 @@
   <ItemGroup>
     <ClInclude Include="Asteroid.h" />
     <ClInclude Include="BarnesHutCS.h" />
-    <ClInclude Include="CSBuildOctree.h" />
     <ClInclude Include="CSDigitBinning.h" />
     <ClInclude Include="CSExclusiveSum.h" />
     <ClInclude Include="CSMortonCodes.h" />
     <ClInclude Include="CSSettings.h" />
     <ClInclude Include="CSUpfrontHistogram.h" />
+    <ClInclude Include="CS_CornerStone_F.h" />
     <ClInclude Include="ForceGeneratorBarnesHutCS.h" />
     <ClInclude Include="KeplerOrbit.h" />
     <ClInclude Include="OrbitalElement.h" />
@@ -204,7 +204,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </FxCompile>
-    <FxCompile Include="CSBuildOctree.hlsl">
+    <FxCompile Include="CSCornerStone_F.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Compute</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Compute</ShaderType>

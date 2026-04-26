@@ -84,13 +84,13 @@
     <ClCompile Include="ShaderUtils.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="CSBuildOctree.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="OrbitalElement.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="KeplerOrbit.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CS_CornerStone_F.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -161,13 +161,13 @@
     <ClInclude Include="ShaderUtils.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="CSBuildOctree.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="OrbitalElement.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="KeplerOrbit.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CS_CornerStone_F.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -190,7 +190,7 @@
     <FxCompile Include="CSDigitBinning.hlsl">
       <Filter>Shader</Filter>
     </FxCompile>
-    <FxCompile Include="CSBuildOctree.hlsl">
+    <FxCompile Include="CSCornerStone_F.hlsl">
       <Filter>Shader</Filter>
     </FxCompile>
   </ItemGroup>
