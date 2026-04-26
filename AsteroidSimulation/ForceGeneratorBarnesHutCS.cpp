@@ -162,7 +162,7 @@ void ForceGeneratorBarnesHutCS::SetShaderParameter()
 	XMFLOAT3* positionPtr = (XMFLOAT3*)mappedPosition.pData;
 	float * massPtr = (float*)mappedMass.pData;
 
-	for (int i = 0; i < m_objects.size() && i < MaxCapacity; ++i)
+	for (int i = 0; i < m_objects.size() && i < MAX_CAPACITY; ++i)
 	{
 		Vector3 pos = m_objects[i]->GetTransform()->GetPosition();
 		positionPtr[i].x = pos.x;
@@ -420,9 +420,9 @@ void ForceGeneratorBarnesHutCS::CopyTestData()
 
 	if (SUCCEEDED(hr))
 	{
-		uint32_t data [MaxCapacity];
+		uint32_t data [MAX_CAPACITY];
 
-		memcpy (&data[0], mappedResource.pData, sizeof(uint32_t) * MaxCapacity);
+		memcpy (&data[0], mappedResource.pData, sizeof(uint32_t) * MAX_CAPACITY);
 
 		m_deviceContext->Unmap(m_outputBuffer, 0);
 	}

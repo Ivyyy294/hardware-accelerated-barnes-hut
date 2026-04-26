@@ -8,8 +8,6 @@
 #include "CSExclusiveSum.h"
 #include "CSDigitBinning.h"
 
-#define MaxCapacity 1024
-
 class ForceGeneratorBarnesHutCS :
     public ForceGeneratorBarnesHutBase
 {

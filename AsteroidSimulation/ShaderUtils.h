@@ -1,6 +1,6 @@
 #pragma once
 
-#define MAX_CAPACITY 1024
+#define MAX_CAPACITY 4096
 
 class ShaderUtils
 {
