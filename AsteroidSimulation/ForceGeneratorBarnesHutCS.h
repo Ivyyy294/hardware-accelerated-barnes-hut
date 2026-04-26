@@ -7,6 +7,7 @@
 #include "CSUpfrontHistogram.h"
 #include "CSExclusiveSum.h"
 #include "CSDigitBinning.h"
+#include "CS_CornerStone_F.h"
 
 class ForceGeneratorBarnesHutCS :
     public ForceGeneratorBarnesHutBase
@@ -51,12 +52,23 @@ private:
 	//Test staging buffer
 	ID3D11Buffer* m_outputBuffer{ nullptr };
 
+	//Corner stone buffer
+	ID3D11Buffer* m_inKBuffer{ nullptr };
+	ID3D11ShaderResourceView* m_srvKBuffer = nullptr;
+	ID3D11Buffer* m_outKBuffer{ nullptr };
+	ID3D11UnorderedAccessView* m_uavKBuffer = nullptr;
+
+	//Leaf node particle count
+	ID3D11Buffer* m_nBuffer{ nullptr };
+	ID3D11UnorderedAccessView* m_uavNBuffer = nullptr;
+
 	//Compute shader kernel
 	BarnesHutCS m_computeShader;
 	CSMortonCodes m_csMortonCodes;
 	CSUpfrontHistogram m_csUpfrontHistrogram;
 	CSExclusiveSum m_csExclusiveSum;
 	CSDigitBinning m_csDigitBinning;
+	CS_CornerStone_F m_csCornerStone_F;
 
 	XMFLOAT3 m_boundsMin {0.f, 0.f, 0.f};
 	XMFLOAT3 m_boundsMax { 0.f, 0.f, 0.f };
@@ -85,6 +97,8 @@ private:
 	HRESULT InitPositionShaderParameters (ID3D11Device* device);
 	HRESULT InitMassShaderParameters (ID3D11Device* device);
 	HRESULT InitSortingShaderParameters (ID3D11Device* device);
+	HRESULT InitCornerStoneShaderParameters (ID3D11Device* device);
+
 	bool InitShaderParameters();
 	void ReleaseShaderParameters();
 

@@ -36,6 +36,12 @@ void ForceGeneratorBarnesHutCS::Start()
 	m_csDigitBinning.m_srvMortonCodesBuffer = m_srvMortonCodeBuffer;
 	m_csDigitBinning.m_srvPositionBuffer = m_srvPositionBuffer;
 	m_csDigitBinning.m_srvMassBuffer = m_srvMassBuffer;
+
+	m_csCornerStone_F.Initialize();
+	m_csCornerStone_F.m_settingsBuffer = m_settingsBuffer;
+	m_csCornerStone_F.m_mortonKeyBuffer = m_srvMortonCodeBuffer;
+	m_csCornerStone_F.m_srvKBuffer = m_srvKBuffer;
+	m_csCornerStone_F.m_uavNBuffer = m_uavNBuffer;
 	//m_csDigitBinning.m_uavMassBuffer = m_uavMassBuffer;
 	//m_csDigitBinning.m_uavPositionBuffer = m_uavPositionBuffer;
 }
@@ -58,8 +64,8 @@ void ForceGeneratorBarnesHutCS::Dispatch()
 
 	CallculateMortonKeys(capacity);
 	DispatchRadixSort (capacity);
-	BuildOctree (capacity);
-	CallculateForces (capacity);
+	//BuildOctree (capacity);
+	//CallculateForces (capacity);
 
 	m_deviceContext->CopyResource(m_outputBuffer, m_outMortonCodeBuffer);
 	//m_computeShader.SetShaderParameters(m_objects);
@@ -335,6 +341,31 @@ HRESULT ForceGeneratorBarnesHutCS::InitSortingShaderParameters(ID3D11Device* dev
 	return result;
 }
 
+HRESULT ForceGeneratorBarnesHutCS::InitCornerStoneShaderParameters(ID3D11Device* device)
+{
+	//L = 10
+	uint32_t maxK = MAX_CAPACITY + 1;
+
+	HRESULT result;
+
+	bool ok = ShaderUtils::CreateResourceBuffer(device, result, &m_inKBuffer, sizeof(uint32_t), maxK)
+		&& ShaderUtils::CreateResourceViewBuffer(device, result, m_inKBuffer, &m_srvKBuffer, maxK)
+		&& ShaderUtils::CreateResourceBuffer(device, result, &m_outKBuffer, sizeof(uint32_t), maxK)
+		&& ShaderUtils::CreateUAVBuffer(device, result, m_outKBuffer, &m_uavKBuffer, maxK)
+		&& ShaderUtils::CreateResourceBuffer(device, result, &m_nBuffer, sizeof(uint32_t), MAX_CAPACITY)
+		&& ShaderUtils::CreateUAVBuffer(device, result, m_nBuffer, &m_uavNBuffer, MAX_CAPACITY);
+
+	if (ok)
+	{
+		ID3D11DeviceContext* deviceContext = D3D::Instance().GetDeviceContext();
+		uint32_t init[2] = { 0, MAX_CAPACITY };
+		D3D11_BOX box = { 0,0,0, 2 * sizeof(uint32_t),1,1 };
+		deviceContext->UpdateSubresource (m_inKBuffer, 0, &box, init, 0, 0);
+	}
+
+	return result;
+}
+
 bool ForceGeneratorBarnesHutCS::InitShaderParameters()
 {
 	ID3D11Device* device = D3D::Instance().GetDevice();
@@ -377,6 +408,8 @@ bool ForceGeneratorBarnesHutCS::InitShaderParameters()
 
 	if (FAILED(result))
 		return false;
+
+	InitCornerStoneShaderParameters(device);
 
 	return true;
 }
