@@ -18,6 +18,7 @@ RWStructuredBuffer<uint> mortonCodes : register(u0);
 
 uint Part1By2(uint val)
 {
+    val &= 0x000003ff;
     val = (val * 0x00010001u) & 0xFF0000FFu;
     val = (val * 0x00000101u) & 0x0F00F00Fu;
     val = (val * 0x00000011u) & 0xC30C30C3u;
