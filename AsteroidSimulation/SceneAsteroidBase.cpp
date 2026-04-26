@@ -60,8 +60,9 @@ void SceneAsteroidBase::SpawnAsteroids(int num, Vector2 dist, Vector2 e, Vector2
 		dist = dist * 10.f;
 		e = e * 10.f;
 
-		std::random_device rd; // obtain a random number from hardware
-		std::mt19937 gen(rd()); // seed the generator
+		std::string str ("85245679");
+		std::seed_seq seed1(str.begin(), str.end());
+		std::mt19937 gen(seed1); // seed the generator
 		std::uniform_int_distribution<> smaRnd(dist.x, dist.y); // define the range
 		std::uniform_int_distribution<> eRnd(e.x, e.y); // define the range
 		std::uniform_int_distribution<> iRnd(i.x, i.y); // define the range
