@@ -84,6 +84,9 @@
     <ClCompile Include="ShaderUtils.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="CSBuildOctree.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SceneDirectIntegration.h">
@@ -152,6 +155,9 @@
     <ClInclude Include="ShaderUtils.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="CSBuildOctree.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="color.hlsl">
@@ -170,6 +176,9 @@
       <Filter>Shader</Filter>
     </FxCompile>
     <FxCompile Include="CSDigitBinning.hlsl">
+      <Filter>Shader</Filter>
+    </FxCompile>
+    <FxCompile Include="CSBuildOctree.hlsl">
       <Filter>Shader</Filter>
     </FxCompile>
   </ItemGroup>
