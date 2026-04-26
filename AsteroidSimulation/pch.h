@@ -1,5 +1,7 @@
 #pragma once
 
+#define NUM_ASTEROIDS 10240
+
 #include <string>
 #include <algorithm>
 #include <cmath>

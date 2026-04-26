@@ -11,7 +11,7 @@
 
 void SceneAsteroidBase::Init()
 {
-	IvyyyPhysic::SetGravitationalConstant(0.0005f);
+	IvyyyPhysic::SetGravitationalConstant(0.00005f);
 
 	//Add Light
 	auto light = AddGameObject<GameObject>()->AddComponent<DirectionalLight>();
@@ -29,7 +29,7 @@ void SceneAsteroidBase::Init()
 	OnOrbitalBodySpawned (planet);
 
 	//Add Asteroids
-	SpawnAsteroids (4096, {10.f, 10.5f}, {0.f, 0.25f}, {-10.f, 10.f}, planet);
+	SpawnAsteroids (NUM_ASTEROIDS, {10.f, 15.f}, {0.f, 0.25f}, {-10.f, 10.f}, planet);
 }
 
 void SceneAsteroidBase::SpawnAsteroids(int num, float dist, float speed)

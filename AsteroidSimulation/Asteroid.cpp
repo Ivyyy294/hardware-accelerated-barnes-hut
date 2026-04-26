@@ -30,8 +30,8 @@ Asteroid::Asteroid()
 	//physic->SetMass(0.1f);
 
 	//Collider
-	auto collider = AddComponent<CircleCollider>();
-	collider->SetRadius (0.5f);
+	//auto collider = AddComponent<CircleCollider>();
+	//collider->SetRadius (0.5f);
 
 	transform.SetLocalScale ({0.05f, 0.05f, 0.05f});
 }
