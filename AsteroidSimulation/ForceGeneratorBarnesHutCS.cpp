@@ -56,49 +56,76 @@ void ForceGeneratorBarnesHutCS::Dispatch()
 	SetShaderParameter();
 	uint32_t capacity = m_objects.size();
 
-	//ToDo: reduce dispatch count!!!
-	SetSettingParameter(capacity, capacity);
-	m_csMortonCodes.Dispatch(capacity, 1, 1);
-
-	m_deviceContext->CopyResource(m_inMortonCodeBuffer, m_outMortonCodeBuffer);
-
-	//SM count for 3070 laptop is 40
-	//We dispatch the kernel per SM core
-	SetSettingParameter(capacity, 40);
-	m_csUpfrontHistrogram.Dispatch(40, 1, 1);
-
-	SetSettingParameter(capacity, 4);
-	m_csExclusiveSum.Dispatch(4,1,1);
-
-	//m_deviceContext->CopyResource(m_inMortonCodeBuffer, m_outMortonCodeBuffer);
-	uint32_t groupCount = (capacity + 255) / 256;
-	SetSettingParameter(capacity, groupCount, 0);
-	m_csDigitBinning.Dispatch(groupCount,1,1);
-
-	m_deviceContext->CopyResource(m_inMortonCodeBuffer, m_outMortonCodeBuffer);
-	m_deviceContext->CopyResource(m_inPositionBuffer, m_outPositionBuffer);
-	m_deviceContext->CopyResource(m_inMassBuffer, m_outMassBuffer);
-
-	SetSettingParameter(capacity, groupCount, 1);
-	m_csDigitBinning.Dispatch(groupCount, 1, 1);
-
-	m_deviceContext->CopyResource(m_inMortonCodeBuffer, m_outMortonCodeBuffer);
-	m_deviceContext->CopyResource(m_inPositionBuffer, m_outPositionBuffer);
-	m_deviceContext->CopyResource(m_inMassBuffer, m_outMassBuffer);
-
-	SetSettingParameter(capacity, groupCount, 2);
-	m_csDigitBinning.Dispatch(groupCount, 1, 1);
-
-	m_deviceContext->CopyResource(m_inMortonCodeBuffer, m_outMortonCodeBuffer);
-	m_deviceContext->CopyResource(m_inPositionBuffer, m_outPositionBuffer);
-	m_deviceContext->CopyResource(m_inMassBuffer, m_outMassBuffer);
-
-	SetSettingParameter(capacity, groupCount, 3);
-	m_csDigitBinning.Dispatch(groupCount, 1, 1);
+	CallculateMortonKeys(capacity);
+	DispatchRadixSort (capacity);
+	BuildOctree (capacity);
+	CallculateForces (capacity);
 
 	m_deviceContext->CopyResource(m_outputBuffer, m_outMortonCodeBuffer);
 	//m_computeShader.SetShaderParameters(m_objects);
 	//m_computeShader.Dispatch(m_objects.size(), 1, 1);
+}
+
+void ForceGeneratorBarnesHutCS::CallculateMortonKeys(uint32_t elementCount)
+{
+	//ToDo: reduce dispatch count!!!
+	SetSettingParameter(elementCount, elementCount);
+	m_csMortonCodes.Dispatch(elementCount, 1, 1);
+
+	m_deviceContext->CopyResource(m_inMortonCodeBuffer, m_outMortonCodeBuffer);
+}
+
+void ForceGeneratorBarnesHutCS::DispatchRadixSort(uint32_t elementCount)
+{
+	//SM count for 3070 laptop is 40
+	//We dispatch the kernel per SM core
+	SetSettingParameter(elementCount, 40);
+	m_csUpfrontHistrogram.Dispatch(40, 1, 1);
+
+	SetSettingParameter(elementCount, 4);
+	m_csExclusiveSum.Dispatch(4, 1, 1);
+
+	uint32_t groupCount = (elementCount + 255) / 256;
+
+	//Digit place 0
+	SetSettingParameter(elementCount, groupCount, 0);
+	m_csDigitBinning.Dispatch(groupCount, 1, 1);
+
+	m_deviceContext->CopyResource(m_inMortonCodeBuffer, m_outMortonCodeBuffer);
+	m_deviceContext->CopyResource(m_inPositionBuffer, m_outPositionBuffer);
+	m_deviceContext->CopyResource(m_inMassBuffer, m_outMassBuffer);
+
+	//Digit place 1
+	SetSettingParameter(elementCount, groupCount, 1);
+	m_csDigitBinning.Dispatch(groupCount, 1, 1);
+
+	m_deviceContext->CopyResource(m_inMortonCodeBuffer, m_outMortonCodeBuffer);
+	m_deviceContext->CopyResource(m_inPositionBuffer, m_outPositionBuffer);
+	m_deviceContext->CopyResource(m_inMassBuffer, m_outMassBuffer);
+
+	//Digit place 2
+	SetSettingParameter(elementCount, groupCount, 2);
+	m_csDigitBinning.Dispatch(groupCount, 1, 1);
+
+	m_deviceContext->CopyResource(m_inMortonCodeBuffer, m_outMortonCodeBuffer);
+	m_deviceContext->CopyResource(m_inPositionBuffer, m_outPositionBuffer);
+	m_deviceContext->CopyResource(m_inMassBuffer, m_outMassBuffer);
+
+	//Digit place 3
+	SetSettingParameter(elementCount, groupCount, 3);
+	m_csDigitBinning.Dispatch(groupCount, 1, 1);
+
+	m_deviceContext->CopyResource(m_inMortonCodeBuffer, m_outMortonCodeBuffer);
+	m_deviceContext->CopyResource(m_inPositionBuffer, m_outPositionBuffer);
+	m_deviceContext->CopyResource(m_inMassBuffer, m_outMassBuffer);
+}
+
+void ForceGeneratorBarnesHutCS::BuildOctree(uint32_t elementCount)
+{
+}
+
+void ForceGeneratorBarnesHutCS::CallculateForces(uint32_t elementCount)
+{
 }
 
 void ForceGeneratorBarnesHutCS::ReadBack()
@@ -254,7 +281,6 @@ void ForceGeneratorBarnesHutCS::SetSettingParameter(uint32_t elementCount, uint3
 
 	m_deviceContext->Unmap(m_settingsBuffer, 0);
 }
-
 
 HRESULT ForceGeneratorBarnesHutCS::InitMortonCodeShaderParameters(ID3D11Device* device)
 {

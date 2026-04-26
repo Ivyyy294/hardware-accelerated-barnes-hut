@@ -78,6 +78,11 @@ private:
 	void SetTestShaderParameter();
 	void SetSettingParameter (uint32_t elementCount, uint32_t dispatchGroupCount, uint32_t digitPlace = 0);
 
+	void CallculateMortonKeys (uint32_t elementCount);
+	void DispatchRadixSort (uint32_t elementCount);
+	void BuildOctree (uint32_t elementCount);
+	void CallculateForces (uint32_t elementCount);
+
 	HRESULT InitMortonCodeShaderParameters (ID3D11Device* device);
 	HRESULT InitPositionShaderParameters (ID3D11Device* device);
 	HRESULT InitMassShaderParameters (ID3D11Device* device);
