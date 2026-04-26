@@ -6,6 +6,7 @@
 #include <IvyyyPhysicObjectGravityGenerator.h>
 
 #include "Asteroid.h"
+#include "KeplerOrbit.h"
 
 std::shared_ptr<ColorMaterial> Asteroid::m_material = nullptr;
 Mesh Asteroid::m_mesh = Mesh::Sphere(16, 16);
@@ -25,7 +26,7 @@ Asteroid::Asteroid()
 	meshRenderer->SetMaterial (m_material);
 
 	//Physics
-	auto physic = AddComponent<PhysicObject>();
+	m_physicObject = AddComponent<PhysicObject>().get();
 	//physic->SetMass(0.1f);
 
 	//Collider
@@ -33,4 +34,13 @@ Asteroid::Asteroid()
 	collider->SetRadius (0.5f);
 
 	transform.SetLocalScale ({0.05f, 0.05f, 0.05f});
+}
+
+void Asteroid::SetOrbit(OrbitalElement oe, const PhysicObject* soi)
+{
+	OrbitalData orbitalData = KeplerOrbit::CallculateOrbitalData (oe, soi->GetMass());
+	Vector3 pos = KeplerOrbit::CalculateOrbitalPositionAtTime (oe, orbitalData, 0.f);
+	Vector3 vel = KeplerOrbit::CalculateOrbitalVelocityAtPosition (oe, orbitalData, pos) * -1.f;
+	transform.SetPosition (pos);
+	m_physicObject->SetVelocity(vel);
 }

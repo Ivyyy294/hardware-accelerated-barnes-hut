@@ -139,6 +139,8 @@
     <ClCompile Include="CSMortonCodes.cpp" />
     <ClCompile Include="CSUpfrontHistogram.cpp" />
     <ClCompile Include="ForceGeneratorBarnesHutCS.cpp" />
+    <ClCompile Include="KeplerOrbit.cpp" />
+    <ClCompile Include="OrbitalElement.cpp" />
     <ClCompile Include="SceneBarnesHutCS.cpp" />
     <ClCompile Include="ForceGeneratorBarnesHut.cpp" />
     <ClCompile Include="SceneBarnesHut.cpp" />
@@ -168,6 +170,8 @@
     <ClInclude Include="CSSettings.h" />
     <ClInclude Include="CSUpfrontHistogram.h" />
     <ClInclude Include="ForceGeneratorBarnesHutCS.h" />
+    <ClInclude Include="KeplerOrbit.h" />
+    <ClInclude Include="OrbitalElement.h" />
     <ClInclude Include="SceneBarnesHutCS.h" />
     <ClInclude Include="ForceGeneratorBarnesHut.h" />
     <ClInclude Include="SceneBarnesHut.h" />

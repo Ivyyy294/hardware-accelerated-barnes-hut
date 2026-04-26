@@ -19,6 +19,7 @@
 #include <IvyyyInput.h>
 #include <IvyyyDebug.h>
 #include <IvyyyD3D.h>
+#include <IvyyyMathF.h>
 
 using namespace Ivyyy;
 using namespace DirectX;

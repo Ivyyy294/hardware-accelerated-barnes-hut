@@ -7,9 +7,12 @@
 #include "DebugInfoUi.h"
 #include "CameraMovement.h"
 #include "Planet.h"
+#include <random>
 
 void SceneAsteroidBase::Init()
 {
+	IvyyyPhysic::SetGravitationalConstant(0.0005f);
+
 	//Add Light
 	auto light = AddGameObject<GameObject>()->AddComponent<DirectionalLight>();
 	light->GetTransform()->SetParent(Camera::MainCamera()->GetTransform());
@@ -21,21 +24,12 @@ void SceneAsteroidBase::Init()
 	//Add Debug UI
 	AddGameObject<DebugInfoUi>();
 
-	//Add Asteroids
-	SpawnAsteroids(64, 10.f, 0.5f);
-	SpawnAsteroids(128, 10.25f, 0.5f);
-	//SpawnAsteroids(128, 10.5f, 0.5f);
-	//SpawnAsteroids(256, 10.75f, 0.48f);
-	//SpawnAsteroids(512, 16.f, 0.45f);
-	//SpawnAsteroids(512, 16.25f, 0.45f);
-	//SpawnAsteroids(512, 16.5f, 0.45f);
-	//SpawnAsteroids(512, 16.75f, 0.45f);
-
 	//Add Planet
 	Planet* planet = AddGameObject <Planet>();
 	OnOrbitalBodySpawned (planet);
 
-	IvyyyPhysic::SetGravitationalConstant(0.005f);
+	//Add Asteroids
+	SpawnAsteroids (4096, {10.f, 10.5f}, {0.f, 0.25f}, {-10.f, 10.f}, planet);
 }
 
 void SceneAsteroidBase::SpawnAsteroids(int num, float dist, float speed)
@@ -57,4 +51,37 @@ void SceneAsteroidBase::SpawnAsteroids(int num, float dist, float speed)
 
 		OnOrbitalBodySpawned (asteroid);
 	}
+}
+
+void SceneAsteroidBase::SpawnAsteroids(int num, Vector2 dist, Vector2 e, Vector2 i, GameObject* planet)
+{
+		PhysicObject* soi = planet->GetComponent<PhysicObject>().get();
+
+		dist = dist * 10.f;
+		e = e * 10.f;
+
+		std::random_device rd; // obtain a random number from hardware
+		std::mt19937 gen(rd()); // seed the generator
+		std::uniform_int_distribution<> smaRnd(dist.x, dist.y); // define the range
+		std::uniform_int_distribution<> eRnd(e.x, e.y); // define the range
+		std::uniform_int_distribution<> iRnd(i.x, i.y); // define the range
+		std::uniform_int_distribution<> oRnd(0, 360); // define the range
+		std::uniform_int_distribution<> wRnd(0, 360); // define the range
+		std::uniform_int_distribution<> m0Rnd(0, 360); // define the range
+
+		for (int j = 0; j < num; ++j)
+		{
+			OrbitalElement oe;
+			oe.a = smaRnd(gen) * 0.1f;
+			oe.e = eRnd(gen) * 0.1f;
+			oe.i = float (iRnd(gen));
+			oe.o = float (oRnd(gen));
+			oe.w = float (wRnd(gen));
+			oe.m0 = float (m0Rnd(gen));
+
+			Asteroid* asteroid = AddGameObject <Asteroid>();
+			asteroid->SetOrbit (oe, soi);
+
+			OnOrbitalBodySpawned(asteroid);
+		}
 }
