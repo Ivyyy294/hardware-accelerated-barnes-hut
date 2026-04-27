@@ -78,9 +78,12 @@ HRESULT CsSharedBuffer::InitCornerStoneShaderParameters(ID3D11Device* device)
 	if (ok)
 	{
 		ID3D11DeviceContext* deviceContext = D3D::Instance().GetDeviceContext();
-		uint32_t init[2] = { 0, MAX_CAPACITY };
+
+		//8^L  L = 10   8 = 1 << 3
+		uint32_t k [2] = {0, 1 << 3 * 10};
+
 		D3D11_BOX box = { 0,0,0, 2 * sizeof(uint32_t),1,1 };
-		deviceContext->UpdateSubresource(m_inKBuffer, 0, &box, init, 0, 0);
+		deviceContext->UpdateSubresource(m_inKBuffer, 0, nullptr, k, 0, 0);
 	}
 
 	return result;
