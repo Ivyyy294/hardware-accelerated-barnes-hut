@@ -136,6 +136,7 @@
     <ClCompile Include="CSDigitBinning.cpp" />
     <ClCompile Include="CSExclusiveSum.cpp" />
     <ClCompile Include="CSMortonCodes.cpp" />
+    <ClCompile Include="CsSharedBuffer.cpp" />
     <ClCompile Include="CSUpfrontHistogram.cpp" />
     <ClCompile Include="CS_CornerStone_F.cpp" />
     <ClCompile Include="ForceGeneratorBarnesHutCS.cpp" />
@@ -167,8 +168,10 @@
     <ClInclude Include="CSExclusiveSum.h" />
     <ClInclude Include="CSMortonCodes.h" />
     <ClInclude Include="CSSettings.h" />
+    <ClInclude Include="CsSharedBuffer.h" />
     <ClInclude Include="CSUpfrontHistogram.h" />
     <ClInclude Include="CS_CornerStone_F.h" />
+    <ClInclude Include="FgbhSharedBuffer.h" />
     <ClInclude Include="ForceGeneratorBarnesHutCS.h" />
     <ClInclude Include="KeplerOrbit.h" />
     <ClInclude Include="OrbitalElement.h" />

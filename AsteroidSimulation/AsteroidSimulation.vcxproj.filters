@@ -93,6 +93,9 @@
     <ClCompile Include="CS_CornerStone_F.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="CsSharedBuffer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SceneDirectIntegration.h">
@@ -168,6 +171,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="CS_CornerStone_F.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="FgbhSharedBuffer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CsSharedBuffer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
