@@ -13,9 +13,6 @@ void CsCornerStone_F::BindShaderParameters(ID3D11DeviceContext* deviceContext)
 	deviceContext->CSSetShaderResources (0, 1, &m_mortonKeyBuffer);
 	deviceContext->CSSetShaderResources (1, 1, &m_srvKBuffer);
 
-	UINT clearValues[4] = { 0, 0, 0, 0 };
-	deviceContext->ClearUnorderedAccessViewUint(m_uavNBuffer, clearValues);
-
 	deviceContext->CSSetUnorderedAccessViews (0, 1, &m_uavNBuffer, nullptr);
 }
 
@@ -26,8 +23,11 @@ void CsCornerStone_F::UnbindShaderParameters(ID3D11DeviceContext* deviceContext)
 	ID3D11UnorderedAccessView* nullUAV = nullptr;
 
 	deviceContext->CSSetConstantBuffers (0, 1, &nullBuffer);
+
 	deviceContext->CSSetShaderResources(0, 1, &nullSRV);
 	deviceContext->CSSetShaderResources(1, 1, &nullSRV);
+
+	deviceContext->CSSetUnorderedAccessViews(0, 1, &nullUAV, nullptr);
 }
 
 bool CsCornerStone_F::InitShaderParameters(ID3D11Device* device)

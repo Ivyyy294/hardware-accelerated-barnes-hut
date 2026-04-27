@@ -54,6 +54,13 @@ public:
 	//Leaf node particle count
 	ID3D11Buffer* m_nBuffer{ nullptr };
 	ID3D11UnorderedAccessView* m_uavNBuffer = nullptr;
+	ID3D11ShaderResourceView* m_srvNBuffer = nullptr;
+
+	//Auxiliary array for node transformations
+	ID3D11Buffer* m_inOBuffer{ nullptr };
+	ID3D11ShaderResourceView* m_srvOBuffer = nullptr;
+	ID3D11Buffer* m_outOBuffer{ nullptr };
+	ID3D11UnorderedAccessView* m_uavOBuffer = nullptr;
 
 //Methods
 public:

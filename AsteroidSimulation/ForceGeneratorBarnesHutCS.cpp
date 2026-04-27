@@ -42,6 +42,12 @@ void ForceGeneratorBarnesHutCS::Start()
 	m_csCornerStone_F.m_mortonKeyBuffer = m_buffer.m_srvMortonCodeBuffer;
 	m_csCornerStone_F.m_srvKBuffer = m_buffer.m_srvKBuffer;
 	m_csCornerStone_F.m_uavNBuffer = m_buffer.m_uavNBuffer;
+
+	m_csCornerStone_G1.Initialize();
+	m_csCornerStone_G1.m_settingsBuffer = m_buffer.m_settingsBuffer;
+	m_csCornerStone_G1.m_srvKBuffer = m_buffer.m_srvKBuffer;
+	m_csCornerStone_G1.m_srvNBuffer = m_buffer.m_srvNBuffer;
+	m_csCornerStone_G1.m_uavOBuffer = m_buffer.m_uavOBuffer;
 	//m_csDigitBinning.m_uavMassBuffer = m_uavMassBuffer;
 	//m_csDigitBinning.m_uavPositionBuffer = m_uavPositionBuffer;
 }
@@ -124,7 +130,7 @@ void ForceGeneratorBarnesHutCS::Dispatch()
 	BuildOctree (capacity);
 
 	m_deviceContext->Flush();
-	m_deviceContext->CopyResource(m_buffer.m_outputBuffer, m_buffer.m_outMortonCodeBuffer);
+	m_deviceContext->CopyResource(m_buffer.m_outputBuffer, m_buffer.m_outOBuffer);
 	CallculateForces (capacity);
 }
 
@@ -159,8 +165,13 @@ void ForceGeneratorBarnesHutCS::DispatchRadixSort(uint32_t elementCount)
 
 void ForceGeneratorBarnesHutCS::BuildOctree(uint32_t elementCount)
 {
-	m_buffer.SetSettingParameter (elementCount, 2);
-	m_csCornerStone_F.Dispatch(1,1,1);
+	uint32_t kSize = 2;
+	uint32_t groupCount = (elementCount + 255) / 256;
+	m_buffer.SetSettingParameter (elementCount, kSize);
+	m_csCornerStone_F.Dispatch(groupCount,1,1);
+
+	m_buffer.SetSettingParameter(kSize, m_nCrit);
+	m_csCornerStone_G1.Dispatch(groupCount, 1, 1);
 }
 
 void ForceGeneratorBarnesHutCS::CallculateForces(uint32_t elementCount)

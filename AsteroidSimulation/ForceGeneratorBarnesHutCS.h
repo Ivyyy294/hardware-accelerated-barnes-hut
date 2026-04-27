@@ -1,20 +1,23 @@
 #pragma once
 
 #include "ForceGeneratorBarnesHutBase.h"
+
+#include "CsSharedBuffer.h"
 #include "CsSettings.h"
 #include "CsMortonCodes.h"
 #include "CsUpfrontHistogram.h"
 #include "CsExclusiveSum.h"
 #include "CsDigitBinning.h"
 #include "CsCornerStone_F.h"
-
-#include "CsSharedBuffer.h"
+#include "CsCornerStone_G1.h"
 
 class ForceGeneratorBarnesHutCS :
     public ForceGeneratorBarnesHutBase
 {
 //Variables
 private:
+	const uint32_t m_nCrit {16};
+
 	ID3D11DeviceContext* m_deviceContext {nullptr};
 	
 	//Test staging buffer
@@ -26,6 +29,7 @@ private:
 	CsExclusiveSum m_csExclusiveSum;
 	CsDigitBinning m_csDigitBinning;
 	CsCornerStone_F m_csCornerStone_F;
+	CsCornerStone_G1 m_csCornerStone_G1;
 
 	XMFLOAT3 m_boundsMin {0.f, 0.f, 0.f};
 	XMFLOAT3 m_boundsMax { 0.f, 0.f, 0.f };
