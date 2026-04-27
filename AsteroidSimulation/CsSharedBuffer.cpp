@@ -68,8 +68,16 @@ HRESULT CsSharedBuffer::InitCornerStoneShaderParameters(ID3D11Device* device)
 
 	HRESULT result;
 
+	uint32_t k [MAX_CAPACITY + 1] = {0, 1 << 3 * 10};
+	D3D11_SUBRESOURCE_DATA initalK = {};
+	initalK.pSysMem = k;
+
+	uint32_t counter[1] = { 2 };
+	D3D11_SUBRESOURCE_DATA initalCount = {};
+	initalCount.pSysMem = counter;
+
 		// K Buffer
-	bool ok = ShaderUtils::CreateResourceBuffer(device, result, &m_inKBuffer, sizeof(uint32_t), maxK)
+	bool ok = ShaderUtils::CreateResourceBuffer(device, result, &m_inKBuffer, sizeof(uint32_t), maxK, &initalK)
 		&& ShaderUtils::CreateResourceViewBuffer(device, result, m_inKBuffer, &m_srvKBuffer, maxK)
 		&& ShaderUtils::CreateResourceBuffer(device, result, &m_outKBuffer, sizeof(uint32_t), maxK)
 		&& ShaderUtils::CreateUAVBuffer(device, result, m_outKBuffer, &m_uavKBuffer, maxK)
@@ -85,23 +93,9 @@ HRESULT CsSharedBuffer::InitCornerStoneShaderParameters(ID3D11Device* device)
 		&& ShaderUtils::CreateResourceViewBuffer(device, result, m_o2Buffer, &m_srvO2OBuffer, maxK)
 		&& ShaderUtils::CreateUAVBuffer(device, result, m_o2Buffer, &m_uavO2Buffer, maxK)
 		//Counter Buffer
-		&& ShaderUtils::CreateResourceBuffer(device, result, &m_counterBuffer, sizeof(uint32_t), 1)
+		&& ShaderUtils::CreateResourceBuffer(device, result, &m_counterBuffer, sizeof(uint32_t), 1, &initalCount)
 		&& ShaderUtils::CreateResourceViewBuffer(device, result, m_counterBuffer, &m_srvCounterBuffer, 1)
 		&& ShaderUtils::CreateUAVBuffer(device, result, m_counterBuffer, &m_uavCounterBuffer, 1);
-
-	if (ok)
-	{
-		ID3D11DeviceContext* deviceContext = D3D::Instance().GetDeviceContext();
-
-		//8^L  L = 10   8 = 1 << 3
-		uint32_t k [2] = {0, 1 << 3 * 10};
-
-		deviceContext->UpdateSubresource(m_inKBuffer, 0, nullptr, k, 0, 0);
-
-		uint32_t counter[1] = {2};
-
-		deviceContext->UpdateSubresource(m_counterBuffer, 0, nullptr, counter, 0, 0);
-	}
 
 	return result;
 }

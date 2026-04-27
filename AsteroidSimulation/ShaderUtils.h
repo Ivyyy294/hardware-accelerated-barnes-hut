@@ -15,7 +15,7 @@ public:
 
 
 	static bool CreateResourceBuffer (ID3D11Device* device, HRESULT& result, ID3D11Buffer** buffer
-		, UINT byteStride, UINT elementCount);
+		, UINT byteStride, UINT elementCount, D3D11_SUBRESOURCE_DATA* initalData = NULL);
 
 
 	static bool CreateUAVBuffer(ID3D11Device* device, HRESULT& result, ID3D11Resource* resource, ID3D11UnorderedAccessView** buffer
