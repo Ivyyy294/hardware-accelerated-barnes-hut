@@ -8,8 +8,8 @@ class CsCornerStone_G2 :
 //Variables
 public:
 	ID3D11Buffer* m_settingsBuffer = nullptr;
-	ID3D11ShaderResourceView* m_srvOBuffer = nullptr;
-	ID3D11UnorderedAccessView* m_uavOBuffer = nullptr;
+	ID3D11ShaderResourceView* m_srvO1Buffer = nullptr;
+	ID3D11UnorderedAccessView* m_uavO2Buffer = nullptr;
 
 //Methods
 public:

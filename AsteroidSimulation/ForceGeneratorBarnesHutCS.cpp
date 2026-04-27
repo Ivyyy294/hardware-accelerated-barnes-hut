@@ -47,12 +47,19 @@ void ForceGeneratorBarnesHutCS::Start()
 	m_csCornerStone_G1.m_settingsBuffer = m_buffer.m_settingsBuffer;
 	m_csCornerStone_G1.m_srvKBuffer = m_buffer.m_srvKBuffer;
 	m_csCornerStone_G1.m_srvNBuffer = m_buffer.m_srvNBuffer;
-	m_csCornerStone_G1.m_uavOBuffer = m_buffer.m_uavOBuffer;
+	m_csCornerStone_G1.m_uavO1Buffer = m_buffer.m_uavO1Buffer;
 
 	m_csCornerStone_G2.Initialize();
 	m_csCornerStone_G2.m_settingsBuffer = m_buffer.m_settingsBuffer;
-	m_csCornerStone_G2.m_srvOBuffer = m_buffer.m_srvOBuffer;
-	m_csCornerStone_G2.m_uavOBuffer = m_buffer.m_uavOBuffer;
+	m_csCornerStone_G2.m_srvO1Buffer = m_buffer.m_srvO1Buffer;
+	m_csCornerStone_G2.m_uavO2Buffer = m_buffer.m_uavO2Buffer;
+
+	m_csCornerStone_G3.Initialize();
+	m_csCornerStone_G3.m_settingsBuffer = m_buffer.m_settingsBuffer;
+	m_csCornerStone_G3.m_srvKBuffer = m_buffer.m_srvKBuffer;
+	m_csCornerStone_G3.m_srvO1Buffer = m_buffer.m_srvO1Buffer;
+	m_csCornerStone_G3.m_srvO2Buffer = m_buffer.m_srvO2OBuffer;
+	m_csCornerStone_G3.m_uavKBuffer = m_buffer.m_uavKBuffer;
 	//m_csDigitBinning.m_uavMassBuffer = m_uavMassBuffer;
 	//m_csDigitBinning.m_uavPositionBuffer = m_uavPositionBuffer;
 }
@@ -135,7 +142,7 @@ void ForceGeneratorBarnesHutCS::Dispatch()
 	BuildOctree (capacity);
 
 	m_deviceContext->Flush();
-	m_deviceContext->CopyResource(m_buffer.m_outputBuffer, m_buffer.m_outOBuffer);
+	m_deviceContext->CopyResource(m_buffer.m_outputBuffer, m_buffer.m_outKBuffer);
 	CallculateForces (capacity);
 }
 
@@ -170,18 +177,27 @@ void ForceGeneratorBarnesHutCS::DispatchRadixSort(uint32_t elementCount)
 
 void ForceGeneratorBarnesHutCS::BuildOctree(uint32_t elementCount)
 {
-	uint32_t kSize = 2;
-	uint32_t groupCount = (elementCount + 255) / 256;
-	m_buffer.SetSettingParameter (elementCount, kSize);
-	m_csCornerStone_F.Dispatch(groupCount,1,1);
+	//Repeat max L times, L = 10
 
-	m_buffer.SetSettingParameter(kSize, m_nCrit);
-	m_csCornerStone_G1.Dispatch(groupCount, 1, 1);
+	uint32_t kSize = MAX_CAPACITY + 1;
+	uint32_t groupCount = (kSize + 255) / 256;
 
-	m_deviceContext->CopyResource(m_buffer.m_inOBuffer, m_buffer.m_outOBuffer);
+	for (uint32_t i = 0; i < 10; ++i)
+	{
+		m_buffer.SetSettingParameter (elementCount, kSize);
+		m_csCornerStone_F.Dispatch(groupCount,1,1);
 
-	m_buffer.SetSettingParameter(kSize, 0);
-	m_csCornerStone_G2.Dispatch(groupCount, 1, 1);
+		m_buffer.SetSettingParameter(kSize, m_nCrit);
+		m_csCornerStone_G1.Dispatch(groupCount, 1, 1);
+
+		m_buffer.SetSettingParameter(kSize, 0);
+		m_csCornerStone_G2.Dispatch(groupCount, 1, 1);
+
+		m_buffer.SetSettingParameter(kSize, 0);
+		m_csCornerStone_G3.Dispatch(groupCount, 1, 1);
+
+		m_deviceContext->CopyResource(m_buffer.m_inKBuffer, m_buffer.m_outKBuffer);
+	}
 }
 
 void ForceGeneratorBarnesHutCS::CallculateForces(uint32_t elementCount)
@@ -192,7 +208,7 @@ void ForceGeneratorBarnesHutCS::ReadBack()
 {
 	Debug::Log("Wait for compute shader...");
 	
-	while (!m_csDigitBinning.IsDone())
+	while (!m_csCornerStone_G3.IsDone())
 		continue;
 
 	Debug::Log("´Compute shader done!");

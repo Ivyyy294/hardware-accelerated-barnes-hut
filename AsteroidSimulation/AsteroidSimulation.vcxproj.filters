@@ -102,6 +102,9 @@
     <ClCompile Include="CsCornerStone_G2.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="CsCornerStone_G3.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SceneDirectIntegration.h">
@@ -179,9 +182,6 @@
     <ClInclude Include="CsCornerStone_F.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="FgbhSharedBuffer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="CsSharedBuffer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -189,6 +189,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="CsCornerStone_G2.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CsCornerStone_G3.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -218,6 +221,9 @@
       <Filter>Shader</Filter>
     </FxCompile>
     <FxCompile Include="CSCornerStone_G2.hlsl">
+      <Filter>Shader</Filter>
+    </FxCompile>
+    <FxCompile Include="CSCornerStone_G3.hlsl">
       <Filter>Shader</Filter>
     </FxCompile>
   </ItemGroup>

@@ -57,10 +57,13 @@ public:
 	ID3D11ShaderResourceView* m_srvNBuffer = nullptr;
 
 	//Auxiliary array for node transformations
-	ID3D11Buffer* m_inOBuffer{ nullptr };
-	ID3D11ShaderResourceView* m_srvOBuffer = nullptr;
-	ID3D11Buffer* m_outOBuffer{ nullptr };
-	ID3D11UnorderedAccessView* m_uavOBuffer = nullptr;
+	ID3D11Buffer* m_o1Buffer{ nullptr };
+	ID3D11ShaderResourceView* m_srvO1Buffer = nullptr;
+	ID3D11UnorderedAccessView* m_uavO1Buffer = nullptr;
+
+	ID3D11Buffer* m_o2Buffer{ nullptr };
+	ID3D11UnorderedAccessView* m_uavO2Buffer = nullptr;
+	ID3D11ShaderResourceView* m_srvO2OBuffer = nullptr;
 
 //Methods
 public:

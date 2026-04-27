@@ -12,7 +12,7 @@ void main( uint3 DTid : SV_DispatchThreadID )
 {
     uint index = DTid.x;
     
-    if (index > kSize)
+    if (index >= kSize)
         return;
     
     int localCounter = 0;
@@ -21,4 +21,5 @@ void main( uint3 DTid : SV_DispatchThreadID )
         localCounter += inOBuffer[i];
     
     outOBuffer[index] = localCounter;
+
 }

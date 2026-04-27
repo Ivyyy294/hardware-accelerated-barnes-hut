@@ -11,7 +11,7 @@ public:
 	ID3D11Buffer* m_settingsBuffer = nullptr;
 	ID3D11ShaderResourceView* m_srvNBuffer = nullptr;
 	ID3D11ShaderResourceView* m_srvKBuffer = nullptr;
-	ID3D11UnorderedAccessView* m_uavOBuffer = nullptr;
+	ID3D11UnorderedAccessView* m_uavO1Buffer = nullptr;
 
 //Methods
 public:
