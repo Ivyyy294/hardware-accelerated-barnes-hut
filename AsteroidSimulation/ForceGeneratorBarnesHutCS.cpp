@@ -48,6 +48,11 @@ void ForceGeneratorBarnesHutCS::Start()
 	m_csCornerStone_G1.m_srvKBuffer = m_buffer.m_srvKBuffer;
 	m_csCornerStone_G1.m_srvNBuffer = m_buffer.m_srvNBuffer;
 	m_csCornerStone_G1.m_uavOBuffer = m_buffer.m_uavOBuffer;
+
+	m_csCornerStone_G2.Initialize();
+	m_csCornerStone_G2.m_settingsBuffer = m_buffer.m_settingsBuffer;
+	m_csCornerStone_G2.m_srvOBuffer = m_buffer.m_srvOBuffer;
+	m_csCornerStone_G2.m_uavOBuffer = m_buffer.m_uavOBuffer;
 	//m_csDigitBinning.m_uavMassBuffer = m_uavMassBuffer;
 	//m_csDigitBinning.m_uavPositionBuffer = m_uavPositionBuffer;
 }
@@ -172,6 +177,11 @@ void ForceGeneratorBarnesHutCS::BuildOctree(uint32_t elementCount)
 
 	m_buffer.SetSettingParameter(kSize, m_nCrit);
 	m_csCornerStone_G1.Dispatch(groupCount, 1, 1);
+
+	m_deviceContext->CopyResource(m_buffer.m_inOBuffer, m_buffer.m_outOBuffer);
+
+	m_buffer.SetSettingParameter(kSize, 0);
+	m_csCornerStone_G2.Dispatch(groupCount, 1, 1);
 }
 
 void ForceGeneratorBarnesHutCS::CallculateForces(uint32_t elementCount)
