@@ -14,23 +14,22 @@ void main( uint3 DTid : SV_DispatchThreadID )
 {
     uint index = DTid.x;
     
-    if (index > kSize - 1)
+    if (index >= kSize)
         return;
     
     uint kVal = inKBuffer[index];
     uint oVal = inOBuffer[index];
+
+    uint outKIndex = inO2Buffer[index];
     
     if (oVal == 1)
-    {
-        uint outKIndex = inO2Buffer[index];
         outKBuffer[outKIndex] = kVal;
-    }
     else if (oVal == 8)
     {
         uint kDelta = inKBuffer[index + 1] - kVal;
         uint iDelta = kDelta / 8;
         
         for (int j = 0; j < 8; ++j)
-            outKBuffer[index + j] = kVal + j * iDelta;
+            outKBuffer[outKIndex + j] = kVal + j * iDelta;
     }
 }

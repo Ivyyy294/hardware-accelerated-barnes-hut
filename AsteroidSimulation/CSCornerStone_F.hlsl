@@ -33,9 +33,8 @@ uint BinarySearch(uint key)
 void main( uint3 DTid : SV_DispatchThreadID )
 {
     uint intervalIndex = DTid.x;
-    uint intervals = (kSize > 0) ? (kSize - 1) : 0;
     
-    if (intervalIndex >= intervals)
+    if (intervalIndex >= kSize)
         return;
  
     uint k0 = kBuffer[intervalIndex];

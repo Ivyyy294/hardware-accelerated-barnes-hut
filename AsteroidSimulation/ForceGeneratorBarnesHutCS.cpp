@@ -179,7 +179,7 @@ void ForceGeneratorBarnesHutCS::BuildOctree(uint32_t elementCount)
 {
 	//Repeat max L times, L = 10
 
-	uint32_t kSize = MAX_CAPACITY + 1;
+	uint32_t kSize = MAX_CAPACITY;
 	uint32_t groupCount = (kSize + 255) / 256;
 
 	for (uint32_t i = 0; i < 10; ++i)
