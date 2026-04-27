@@ -2,12 +2,12 @@
 #include "CSMortonCodes.h"
 #include "ShaderUtils.h"
 
-CSMortonCodes::CSMortonCodes()
+CsMortonCodes::CsMortonCodes()
 	: ComputeShader(L"CSMortonCodes.hlsl")
 {
 }
 
-void CSMortonCodes::SetShaderParameter(XMFLOAT3 boundsMin, XMFLOAT3 boundsMax)
+void CsMortonCodes::SetShaderParameter(XMFLOAT3 boundsMin, XMFLOAT3 boundsMax)
 {
 	ID3D11DeviceContext* m_deviceContext = D3D::Instance().GetDeviceContext();
 
@@ -28,7 +28,7 @@ void CSMortonCodes::SetShaderParameter(XMFLOAT3 boundsMin, XMFLOAT3 boundsMax)
 	m_deviceContext->Unmap(m_unitCubeBuffer, 0);
 }
 
-void CSMortonCodes::BindShaderParameters(ID3D11DeviceContext* deviceContext)
+void CsMortonCodes::BindShaderParameters(ID3D11DeviceContext* deviceContext)
 {
 	deviceContext->CSSetConstantBuffers(0, 1, &m_settingsBuffer);
 	deviceContext->CSSetConstantBuffers(1, 1, &m_unitCubeBuffer);
@@ -36,7 +36,7 @@ void CSMortonCodes::BindShaderParameters(ID3D11DeviceContext* deviceContext)
 	deviceContext->CSSetUnorderedAccessViews(0, 1, &m_uavMortonCodesBuffer, nullptr);
 }
 
-void CSMortonCodes::UnbindShaderParameters(ID3D11DeviceContext* deviceContext)
+void CsMortonCodes::UnbindShaderParameters(ID3D11DeviceContext* deviceContext)
 {
 	ID3D11Buffer* nullBuffer = nullptr;
 	ID3D11UnorderedAccessView* nullUAV = nullptr;
@@ -48,13 +48,13 @@ void CSMortonCodes::UnbindShaderParameters(ID3D11DeviceContext* deviceContext)
 	deviceContext->CSSetUnorderedAccessViews(1, 1, &nullUAV, nullptr);
 }
 
-bool CSMortonCodes::InitShaderParameters(ID3D11Device* device)
+bool CsMortonCodes::InitShaderParameters(ID3D11Device* device)
 {
 	HRESULT result;
 	return ShaderUtils::CreateConstBuffer (device, result, &m_unitCubeBuffer, sizeof(UnitCube));
 }
 
-void CSMortonCodes::ReleaseShaderParameters()
+void CsMortonCodes::ReleaseShaderParameters()
 {
 	ShaderUtils::SafeRelease(&m_unitCubeBuffer);
 }

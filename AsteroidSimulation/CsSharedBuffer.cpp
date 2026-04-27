@@ -125,7 +125,7 @@ bool CsSharedBuffer::InitShaderParameters()
 		return false;
 
 	//Settings buffer
-	ShaderUtils::CreateConstBuffer(device, result, &m_settingsBuffer, sizeof(CSSettings));
+	ShaderUtils::CreateConstBuffer(device, result, &m_settingsBuffer, sizeof(CsSettings));
 
 	if (FAILED(result))
 		return false;
@@ -178,7 +178,7 @@ void CsSharedBuffer::SetSettingParameter(uint32_t elementCount, uint32_t dispatc
 	if (FAILED(result))
 		return;
 
-	CSSettings* settings = (CSSettings*)mappedSettings.pData;
+	CsSettings* settings = (CsSettings*)mappedSettings.pData;
 	settings->elementCount = elementCount;
 	settings->dispatchGroupCount = dispatchGroupCount;
 	settings->digitPlace = digitPlace;

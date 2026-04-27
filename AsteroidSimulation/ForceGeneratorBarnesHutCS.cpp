@@ -102,8 +102,11 @@ void ForceGeneratorBarnesHutCS::SetShaderParameter()
 void ForceGeneratorBarnesHutCS::Exit()
 {
 	m_buffer.ReleaseShaderParameters();
-	m_computeShader.ShutdownShader();
+	m_csMortonCodes.ShutdownShader();
 	m_csUpfrontHistrogram.ShutdownShader();
+	m_csExclusiveSum.ShutdownShader();
+	m_csDigitBinning.ShutdownShader();
+	m_csCornerStone_F.ShutdownShader();
 }
 
 void ForceGeneratorBarnesHutCS::ApplyForceForObject(PhysicObject* physicObj) const

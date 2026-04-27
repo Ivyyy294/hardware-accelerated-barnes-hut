@@ -1,19 +1,19 @@
 #include "pch.h"
 #include "CSUpfrontHistogram.h"
 
-CSUpfrontHistogram::CSUpfrontHistogram()
+CsUpfrontHistogram::CsUpfrontHistogram()
 	: ComputeShader(L"CSUpfrontHistogram.hlsl")
 {
 }
 
-void CSUpfrontHistogram::BindShaderParameters(ID3D11DeviceContext* deviceContext)
+void CsUpfrontHistogram::BindShaderParameters(ID3D11DeviceContext* deviceContext)
 {
 	deviceContext->CSSetConstantBuffers(0, 1, &m_settingsBuffer);
 	deviceContext->CSSetShaderResources(0, 1, &m_srvMortonCodesBuffer);
 	deviceContext->CSSetUnorderedAccessViews(0, 1, &m_uavGlobalHistogramBuffer, nullptr);
 }
 
-void CSUpfrontHistogram::UnbindShaderParameters(ID3D11DeviceContext* deviceContext)
+void CsUpfrontHistogram::UnbindShaderParameters(ID3D11DeviceContext* deviceContext)
 {
 	ID3D11Buffer* nullBuffer = nullptr;
 	ID3D11UnorderedAccessView* nullUAV = nullptr;
@@ -24,11 +24,11 @@ void CSUpfrontHistogram::UnbindShaderParameters(ID3D11DeviceContext* deviceConte
 	deviceContext->CSSetUnorderedAccessViews(0, 1, &nullUAV, nullptr);
 }
 
-bool CSUpfrontHistogram::InitShaderParameters(ID3D11Device* device)
+bool CsUpfrontHistogram::InitShaderParameters(ID3D11Device* device)
 {
     return true;
 }
 
-void CSUpfrontHistogram::ReleaseShaderParameters()
+void CsUpfrontHistogram::ReleaseShaderParameters()
 {
 }

@@ -2,7 +2,7 @@
 
 #include <IvyyyComputeShader.h>
 
-class CSMortonCodes :
+class CsMortonCodes :
     public ComputeShader
 {
 //Definitions
@@ -25,7 +25,7 @@ private:
 
 //Methods
 public:
-	CSMortonCodes();
+	CsMortonCodes();
 
 	void SetShaderParameter (XMFLOAT3 boundsMin, XMFLOAT3 boundsMax);
 

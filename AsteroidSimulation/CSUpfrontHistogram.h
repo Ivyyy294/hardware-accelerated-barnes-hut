@@ -2,7 +2,7 @@
 
 #include <IvyyyComputeShader.h>
 
-class CSUpfrontHistogram :
+class CsUpfrontHistogram :
     public ComputeShader
 {
 //Variables
@@ -12,7 +12,7 @@ public:
 	ID3D11UnorderedAccessView* m_uavGlobalHistogramBuffer = nullptr;
 //Methods
 public:
-	CSUpfrontHistogram();
+	CsUpfrontHistogram();
 
 private:
 	void BindShaderParameters(ID3D11DeviceContext* deviceContext) override;

@@ -69,16 +69,16 @@
     <ClCompile Include="ForceGeneratorBarnesHutBase.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="CSMortonCodes.cpp">
+    <ClCompile Include="CsMortonCodes.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="CSUpfrontHistogram.cpp">
+    <ClCompile Include="CsUpfrontHistogram.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="CSExclusiveSum.cpp">
+    <ClCompile Include="CsExclusiveSum.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="CSDigitBinning.cpp">
+    <ClCompile Include="CsDigitBinning.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ShaderUtils.cpp">
@@ -90,7 +90,7 @@
     <ClCompile Include="KeplerOrbit.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="CS_CornerStone_F.cpp">
+    <ClCompile Include="CsCornerStone_F.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="CsSharedBuffer.cpp">
@@ -146,19 +146,19 @@
     <ClInclude Include="ForceGeneratorBarnesHutBase.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="CSMortonCodes.h">
+    <ClInclude Include="CsMortonCodes.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="CSUpfrontHistogram.h">
+    <ClInclude Include="CsUpfrontHistogram.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="CSSettings.h">
+    <ClInclude Include="CsSettings.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="CSExclusiveSum.h">
+    <ClInclude Include="CsExclusiveSum.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="CSDigitBinning.h">
+    <ClInclude Include="CsDigitBinning.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ShaderUtils.h">
@@ -170,7 +170,7 @@
     <ClInclude Include="KeplerOrbit.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="CS_CornerStone_F.h">
+    <ClInclude Include="CsCornerStone_F.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="FgbhSharedBuffer.h">

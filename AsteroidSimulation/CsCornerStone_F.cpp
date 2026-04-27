@@ -1,12 +1,12 @@
 #include "pch.h"
-#include "CS_CornerStone_F.h"
+#include "CsCornerStone_F.h"
 
-CS_CornerStone_F::CS_CornerStone_F()
+CsCornerStone_F::CsCornerStone_F()
 	: ComputeShader (L"CSCornerStone_F.hlsl")
 {
 }
 
-void CS_CornerStone_F::BindShaderParameters(ID3D11DeviceContext* deviceContext)
+void CsCornerStone_F::BindShaderParameters(ID3D11DeviceContext* deviceContext)
 {
 	deviceContext->CSSetConstantBuffers (0, 1, &m_settingsBuffer);
 
@@ -19,7 +19,7 @@ void CS_CornerStone_F::BindShaderParameters(ID3D11DeviceContext* deviceContext)
 	deviceContext->CSSetUnorderedAccessViews (0, 1, &m_uavNBuffer, nullptr);
 }
 
-void CS_CornerStone_F::UnbindShaderParameters(ID3D11DeviceContext* deviceContext)
+void CsCornerStone_F::UnbindShaderParameters(ID3D11DeviceContext* deviceContext)
 {
 	ID3D11Buffer* nullBuffer = nullptr;
 	ID3D11ShaderResourceView* nullSRV = nullptr;
@@ -30,11 +30,11 @@ void CS_CornerStone_F::UnbindShaderParameters(ID3D11DeviceContext* deviceContext
 	deviceContext->CSSetShaderResources(1, 1, &nullSRV);
 }
 
-bool CS_CornerStone_F::InitShaderParameters(ID3D11Device* device)
+bool CsCornerStone_F::InitShaderParameters(ID3D11Device* device)
 {
     return true;
 }
 
-void CS_CornerStone_F::ReleaseShaderParameters()
+void CsCornerStone_F::ReleaseShaderParameters()
 {
 }

@@ -2,7 +2,7 @@
 
 #include <IvyyyComputeShader.h>
 
-class CSDigitBinning :
+class CsDigitBinning :
     public ComputeShader
 {
 //Variables
@@ -28,7 +28,7 @@ private:
 
 //Methods
 public:
-	CSDigitBinning();
+	CsDigitBinning();
 private:
 	void BindShaderParameters(ID3D11DeviceContext* deviceContext) override;
 	void UnbindShaderParameters(ID3D11DeviceContext* deviceContext) override;

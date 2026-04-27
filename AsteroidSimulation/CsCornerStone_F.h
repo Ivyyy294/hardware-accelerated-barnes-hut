@@ -2,7 +2,7 @@
 
 #include <IvyyyComputeShader.h>
 
-class CS_CornerStone_F
+class CsCornerStone_F
 	 : public ComputeShader
 {
 //Variables
@@ -14,7 +14,7 @@ public:
 
 //Methods
 	public:
-	CS_CornerStone_F();
+	CsCornerStone_F();
 	void BindShaderParameters(ID3D11DeviceContext* deviceContext) override;
 	void UnbindShaderParameters(ID3D11DeviceContext* deviceContext) override;
 	bool InitShaderParameters(ID3D11Device* device) override;

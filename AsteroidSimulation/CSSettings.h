@@ -1,7 +1,7 @@
 #pragma once
 #include <cstdint>
 
-struct CSSettings
+struct CsSettings
 {
 	uint32_t elementCount;
 	uint32_t dispatchGroupCount;

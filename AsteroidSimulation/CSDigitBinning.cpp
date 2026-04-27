@@ -2,12 +2,12 @@
 #include "CSDigitBinning.h"
 #include "ShaderUtils.h"
 
-CSDigitBinning::CSDigitBinning()
+CsDigitBinning::CsDigitBinning()
 	: ComputeShader(L"CSDigitBinning.hlsl")
 {
 }
 
-void CSDigitBinning::BindShaderParameters(ID3D11DeviceContext* deviceContext)
+void CsDigitBinning::BindShaderParameters(ID3D11DeviceContext* deviceContext)
 {
 	UINT clearValues[4] = { 0, 0, 0, 0 };
 	deviceContext->ClearUnorderedAccessViewUint(m_uavScatterCountersBuffer, clearValues);
@@ -25,7 +25,7 @@ void CSDigitBinning::BindShaderParameters(ID3D11DeviceContext* deviceContext)
 	deviceContext->CSSetUnorderedAccessViews(3, 1, &m_uavMassBuffer, nullptr);
 }
 
-void CSDigitBinning::UnbindShaderParameters(ID3D11DeviceContext* deviceContext)
+void CsDigitBinning::UnbindShaderParameters(ID3D11DeviceContext* deviceContext)
 {
 	ID3D11Buffer* nullBuffer = nullptr;
 	ID3D11UnorderedAccessView* nullUAV = nullptr;
@@ -44,7 +44,7 @@ void CSDigitBinning::UnbindShaderParameters(ID3D11DeviceContext* deviceContext)
 	deviceContext->CSSetUnorderedAccessViews(3, 1, &nullUAV, nullptr);
 }
 
-bool CSDigitBinning::InitShaderParameters(ID3D11Device* device)
+bool CsDigitBinning::InitShaderParameters(ID3D11Device* device)
 {
 	HRESULT result;
 	bool ok = ShaderUtils::CreateResourceBuffer (device, result, &m_scatterCountersBuffer, sizeof(uint32_t), 1024)
@@ -53,7 +53,7 @@ bool CSDigitBinning::InitShaderParameters(ID3D11Device* device)
 	return ok;
 }
 
-void CSDigitBinning::ReleaseShaderParameters()
+void CsDigitBinning::ReleaseShaderParameters()
 {
 	ShaderUtils::SafeRelease(&m_scatterCountersBuffer);
 	ShaderUtils::SafeRelease(&m_uavScatterCountersBuffer);

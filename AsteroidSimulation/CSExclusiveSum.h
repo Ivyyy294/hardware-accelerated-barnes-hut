@@ -2,7 +2,7 @@
 
 #include <IvyyyComputeShader.h>
 
-class CSExclusiveSum :
+class CsExclusiveSum :
     public ComputeShader
 {
 //Variables
@@ -12,7 +12,7 @@ public:
 
 //Methods
 public:
-	CSExclusiveSum();
+	CsExclusiveSum();
 
 private:
 	void BindShaderParameters(ID3D11DeviceContext* deviceContext) override;
