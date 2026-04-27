@@ -8,11 +8,11 @@ CsCornerStone_G3::CsCornerStone_G3()
 
 void CsCornerStone_G3::BindShaderParameters(ID3D11DeviceContext* deviceContext)
 {
-	deviceContext->CSSetConstantBuffers(0, 1, &m_settingsBuffer);
 	deviceContext->CSSetShaderResources(0, 1, &m_srvKBuffer);
 	deviceContext->CSSetShaderResources(1, 1, &m_srvO1Buffer);
 	deviceContext->CSSetShaderResources(2, 1, &m_srvO2Buffer);
 	deviceContext->CSSetUnorderedAccessViews(0, 1, &m_uavKBuffer, nullptr);
+	deviceContext->CSSetUnorderedAccessViews(1, 1, &m_uavCounterBuffer, nullptr);
 }
 
 void CsCornerStone_G3::UnbindShaderParameters(ID3D11DeviceContext* deviceContext)
@@ -21,11 +21,11 @@ void CsCornerStone_G3::UnbindShaderParameters(ID3D11DeviceContext* deviceContext
 	ID3D11ShaderResourceView* nullSRV = nullptr;
 	ID3D11UnorderedAccessView* nullUAV = nullptr;
 
-	deviceContext->CSSetConstantBuffers(0, 1, &nullBuffer);
 	deviceContext->CSSetShaderResources(0, 1, &nullSRV);
 	deviceContext->CSSetShaderResources(1, 1, &nullSRV);
 	deviceContext->CSSetShaderResources(2, 1, &nullSRV);
 	deviceContext->CSSetUnorderedAccessViews(0, 1, &nullUAV, nullptr);
+	deviceContext->CSSetUnorderedAccessViews(1, 1, &nullUAV, nullptr);
 }
 
 bool CsCornerStone_G3::InitShaderParameters(ID3D11Device* device)

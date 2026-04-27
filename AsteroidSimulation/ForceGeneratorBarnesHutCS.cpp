@@ -42,24 +42,26 @@ void ForceGeneratorBarnesHutCS::Start()
 	m_csCornerStone_F.m_mortonKeyBuffer = m_buffer.m_srvMortonCodeBuffer;
 	m_csCornerStone_F.m_srvKBuffer = m_buffer.m_srvKBuffer;
 	m_csCornerStone_F.m_uavNBuffer = m_buffer.m_uavNBuffer;
+	m_csCornerStone_F.m_srvCounterBuffer = m_buffer.m_srvCounterBuffer;
 
 	m_csCornerStone_G1.Initialize();
 	m_csCornerStone_G1.m_settingsBuffer = m_buffer.m_settingsBuffer;
 	m_csCornerStone_G1.m_srvKBuffer = m_buffer.m_srvKBuffer;
 	m_csCornerStone_G1.m_srvNBuffer = m_buffer.m_srvNBuffer;
 	m_csCornerStone_G1.m_uavO1Buffer = m_buffer.m_uavO1Buffer;
+	m_csCornerStone_G1.m_srvCounterBuffer = m_buffer.m_srvCounterBuffer;
 
 	m_csCornerStone_G2.Initialize();
-	m_csCornerStone_G2.m_settingsBuffer = m_buffer.m_settingsBuffer;
 	m_csCornerStone_G2.m_srvO1Buffer = m_buffer.m_srvO1Buffer;
 	m_csCornerStone_G2.m_uavO2Buffer = m_buffer.m_uavO2Buffer;
+	m_csCornerStone_G2.m_srvCounterBuffer = m_buffer.m_srvCounterBuffer;
 
 	m_csCornerStone_G3.Initialize();
-	m_csCornerStone_G3.m_settingsBuffer = m_buffer.m_settingsBuffer;
 	m_csCornerStone_G3.m_srvKBuffer = m_buffer.m_srvKBuffer;
 	m_csCornerStone_G3.m_srvO1Buffer = m_buffer.m_srvO1Buffer;
 	m_csCornerStone_G3.m_srvO2Buffer = m_buffer.m_srvO2OBuffer;
 	m_csCornerStone_G3.m_uavKBuffer = m_buffer.m_uavKBuffer;
+	m_csCornerStone_G3.m_uavCounterBuffer = m_buffer.m_uavCounterBuffer;
 	//m_csDigitBinning.m_uavMassBuffer = m_uavMassBuffer;
 	//m_csDigitBinning.m_uavPositionBuffer = m_uavPositionBuffer;
 }
@@ -179,21 +181,18 @@ void ForceGeneratorBarnesHutCS::BuildOctree(uint32_t elementCount)
 {
 	//Repeat max L times, L = 10
 
-	uint32_t kSize = MAX_CAPACITY;
-	uint32_t groupCount = (kSize + 255) / 256;
+	uint32_t groupCount = (MAX_CAPACITY + 1 + 255) / 256;
 
 	for (uint32_t i = 0; i < 10; ++i)
 	{
-		m_buffer.SetSettingParameter (elementCount, kSize);
+		m_buffer.SetSettingParameter (elementCount, 0);
 		m_csCornerStone_F.Dispatch(groupCount,1,1);
 
-		m_buffer.SetSettingParameter(kSize, m_nCrit);
+		m_buffer.SetSettingParameter(m_nCrit, 0);
 		m_csCornerStone_G1.Dispatch(groupCount, 1, 1);
 
-		m_buffer.SetSettingParameter(kSize, 0);
 		m_csCornerStone_G2.Dispatch(groupCount, 1, 1);
 
-		m_buffer.SetSettingParameter(kSize, 0);
 		m_csCornerStone_G3.Dispatch(groupCount, 1, 1);
 
 		m_deviceContext->CopyResource(m_buffer.m_inKBuffer, m_buffer.m_outKBuffer);

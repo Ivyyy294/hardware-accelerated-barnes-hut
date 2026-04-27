@@ -1,12 +1,13 @@
 cbuffer SettingsBuffer : register(b0)
 {
-    uint kSize;
     uint nCrit;
-    uint sPadding[2];
+    uint sPadding[3];
 }
 
 StructuredBuffer<uint> kBuffer : register(t0);
 StructuredBuffer<uint> nBuffer : register(t1);
+StructuredBuffer<uint> outOBuffer : register(t2);
+StructuredBuffer<uint> counterBuffer : register(t3);
 RWStructuredBuffer<uint> oBuffer : register(u0);
 
 [numthreads(256, 1, 1)]
@@ -14,7 +15,9 @@ void main( uint3 DTid : SV_DispatchThreadID )
 {
     uint index = DTid.x;
     
-    if (index >= kSize)
+    uint kSize = counterBuffer[0];
+    
+    if (index > kSize)
         return;
     
     uint nVal = nBuffer[index];

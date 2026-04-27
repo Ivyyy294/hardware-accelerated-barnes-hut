@@ -1,12 +1,12 @@
 cbuffer SettingsBuffer : register(b0)
 {
     uint pSize;
-    uint kSize;
-    uint sPadding[2];
+    uint sPadding[3];
 }
 
 StructuredBuffer<uint> pBuffer : register(t0);
 StructuredBuffer<uint> kBuffer : register(t1);
+StructuredBuffer<uint> counterBuffer : register(t2);
 RWStructuredBuffer<uint> nBuffer : register(u0);
 
 uint BinarySearch(uint key)
@@ -34,7 +34,9 @@ void main( uint3 DTid : SV_DispatchThreadID )
 {
     uint intervalIndex = DTid.x;
     
-    if (intervalIndex >= kSize)
+    uint kSize = counterBuffer[0];
+    
+    if (intervalIndex > kSize)
         return;
  
     uint k0 = kBuffer[intervalIndex];
