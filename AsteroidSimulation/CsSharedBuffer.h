@@ -11,6 +11,8 @@ private:
 public:
 	//Debug buffer
 	ID3D11Buffer* m_outputBuffer{ nullptr };
+	ID3D11Buffer* m_debugBuffer{ nullptr };
+	ID3D11UnorderedAccessView* m_uavDebugBuffer = nullptr;
 
 	//Settings buffer
 	ID3D11Buffer* m_settingsBuffer{ nullptr };

@@ -8,7 +8,9 @@ StructuredBuffer<uint> kBuffer : register(t0);
 StructuredBuffer<uint> nBuffer : register(t1);
 StructuredBuffer<uint> outOBuffer : register(t2);
 StructuredBuffer<uint> counterBuffer : register(t3);
+
 RWStructuredBuffer<uint> oBuffer : register(u0);
+RWStructuredBuffer<uint> debugBuffer : register(u1);
 
 [numthreads(256, 1, 1)]
 void main( uint3 DTid : SV_DispatchThreadID )

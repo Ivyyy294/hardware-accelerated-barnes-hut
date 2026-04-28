@@ -111,7 +111,9 @@ bool CsSharedBuffer::InitShaderParameters()
 	HRESULT result;
 
 	//Debug buffer
-	ShaderUtils::CreateStagingBuffer(device, result, &m_outputBuffer, sizeof(uint32_t), MAX_CAPACITY + 1);
+	ShaderUtils::CreateStagingBuffer(device, result, &m_outputBuffer, sizeof(uint32_t), MAX_CAPACITY + MAX_CAPACITY);
+	ShaderUtils::CreateResourceBuffer(device, result, &m_debugBuffer, sizeof(uint32_t), MAX_CAPACITY + MAX_CAPACITY);
+	ShaderUtils::CreateUAVBuffer(device, result, m_debugBuffer, &m_uavDebugBuffer, MAX_CAPACITY + MAX_CAPACITY);
 
 	if (FAILED(result))
 		return false;

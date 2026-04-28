@@ -38,11 +38,7 @@ void ForceGeneratorBarnesHutCS::Start()
 	m_csDigitBinning.m_srvMassBuffer = m_buffer.m_srvMassBuffer;
 
 	m_csCornerStone_F.Initialize();
-	m_csCornerStone_F.m_settingsBuffer = m_buffer.m_settingsBuffer;
-	m_csCornerStone_F.m_mortonKeyBuffer = m_buffer.m_srvMortonCodeBuffer;
-	m_csCornerStone_F.m_srvKBuffer = m_buffer.m_srvKBuffer;
-	m_csCornerStone_F.m_uavNBuffer = m_buffer.m_uavNBuffer;
-	m_csCornerStone_F.m_srvCounterBuffer = m_buffer.m_srvCounterBuffer;
+	m_csCornerStone_F.m_sharedBuffer = &m_buffer;
 
 	m_csCornerStone_G1.Initialize();
 	m_csCornerStone_G1.m_settingsBuffer = m_buffer.m_settingsBuffer;
@@ -142,10 +138,9 @@ void ForceGeneratorBarnesHutCS::Dispatch()
 	CallculateMortonKeys(capacity);
 	DispatchRadixSort (capacity);
 	BuildOctree (capacity);
-
-	m_deviceContext->Flush();
-	m_deviceContext->CopyResource(m_buffer.m_outputBuffer, m_buffer.m_outKBuffer);
 	CallculateForces (capacity);
+
+	m_deviceContext->CopyResource(m_buffer.m_outputBuffer, m_buffer.m_debugBuffer);
 }
 
 void ForceGeneratorBarnesHutCS::CallculateMortonKeys(uint32_t elementCount)
@@ -183,7 +178,7 @@ void ForceGeneratorBarnesHutCS::BuildOctree(uint32_t elementCount)
 
 	uint32_t groupCount = (MAX_CAPACITY + 1 + 255) / 256;
 
-	for (uint32_t i = 0; i < 10; ++i)
+	for (uint32_t i = 0; i < 1; ++i)
 	{
 		m_buffer.SetSettingParameter (elementCount, 0);
 		m_csCornerStone_F.Dispatch(groupCount,1,1);
@@ -222,9 +217,10 @@ void ForceGeneratorBarnesHutCS::CopyTestData()
 
 	if (SUCCEEDED(hr))
 	{
-		uint32_t data [1024];
+		const uint32_t size = MAX_CAPACITY + MAX_CAPACITY;
+		uint32_t data [size];
 
-		memcpy (&data[0], mappedResource.pData, sizeof(uint32_t) * 1024);
+		memcpy (&data[0], mappedResource.pData, sizeof(uint32_t) * size);
 
 		m_deviceContext->Unmap(m_buffer.m_outputBuffer, 0);
 	}
