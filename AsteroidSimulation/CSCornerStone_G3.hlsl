@@ -29,7 +29,6 @@ void main( uint3 DTid : SV_DispatchThreadID )
     {
         outKBuffer[outKIndex] = kVal;
         debugBuffer[outKIndex] = kVal;
-        InterlockedAdd(counterBuffer[0], 1);
     }
     else if (oVal == 8)
     {
@@ -40,11 +39,14 @@ void main( uint3 DTid : SV_DispatchThreadID )
         {
             outKBuffer[outKIndex + j] = kVal + j * iDelta;
             debugBuffer[outKIndex + j] = kVal + j * iDelta;
-            InterlockedAdd(counterBuffer[0], 1);
         }
     }
     
     GroupMemoryBarrierWithGroupSync();
     
+    if (index >= kSize)
+        return;
+    
+    InterlockedAdd(counterBuffer[0], oVal);
     //outKBuffer[0] = counterBuffer[0];
 }

@@ -14,19 +14,24 @@ uint Log8(uint val)
 void main( uint3 DTid : SV_DispatchThreadID )
 {
     uint kSize = counterBuffer[0];
-    uint leafCount = kSize - 1;
     uint index = DTid.x;
 
-    if (index > leafCount)
+    if (index >= kSize)
         return;
     
     uint k = kBuffer[index];
     uint k1 = kBuffer[index + 1];
-    uint kDelta = k1 - k;
+    uint keyRange = k1 - k;
     uint L = 10;
-    uint msd = 10 - floor(firstbithigh(kDelta) / 3);
+    //A key at level l covers 8^L-l keys
+    //L = 10
     
-    debugBuffer[index] = firstbithigh(4);
+    uint octalBitsCount = floor(firstbithigh(keyRange) / 3);
+    uint leafLevel = 10 - octalBitsCount;
+    uint octalBits = k >> octalBitsCount * 3;
+    uint wsKey = (1 << (leafLevel * 3)) | octalBits;
+    debugBuffer[index] = kSize;
+    
     //CountLeadingZeros()
     //uint test = k ^ k1;
     
