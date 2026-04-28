@@ -12,8 +12,9 @@ cbuffer SettingsBuffer : register(b0)
     uint sPadding[2];
 }
 
-StructuredBuffer<uint> mortonCodes : register(t0);
+StructuredBuffer<uint> keyBuffer : register(t0);
 RWStructuredBuffer<uint> globalHistogram : register(u0);
+RWStructuredBuffer<uint> debugBuffer : register(u1);
 
 groupshared uint localHistogram[NUM_DIGITS * NUM_BINS];
 
@@ -22,7 +23,6 @@ void main(uint3 DTid : SV_DispatchThreadID,
           uint3 GTid : SV_GroupThreadID,
           uint3 Gid : SV_GroupID)
 {
-   
     const uint tileSize = ITEM_PER_THREAD * NUM_THREADS;
     uint histSize = NUM_DIGITS * NUM_BINS;
     const uint groupId = Gid.x;
@@ -31,7 +31,7 @@ void main(uint3 DTid : SV_DispatchThreadID,
     //Clean local histogram
     for (uint i = threadId; i < histSize; i += NUM_THREADS)
         localHistogram[i] = 0;
-    
+ 
     //Blocks execution of all threads in a group until all group shared accesses have been completed
     //and all threads in the group have reached this call.
     GroupMemoryBarrierWithGroupSync();
@@ -46,8 +46,8 @@ void main(uint3 DTid : SV_DispatchThreadID,
             
             if (index < elementCount)
             {
-                uint val = mortonCodes[index];
-                
+                uint val = keyBuffer[index];
+
                 //Get digit per position
                 uint digit0 = (val >> 0) & 0xFF;
                 uint digit1 = (val >> 8) & 0xFF;

@@ -72,7 +72,7 @@
     <ClCompile Include="CsMortonCodes.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="CsUpfrontHistogram.cpp">
+    <ClCompile Include="CsRadixSort_1.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="CsExclusiveSum.cpp">
@@ -161,7 +161,7 @@
     <ClInclude Include="CsMortonCodes.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="CsUpfrontHistogram.h">
+    <ClInclude Include="CsRadixSort_1.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="CsSettings.h">
@@ -211,7 +211,7 @@
     <FxCompile Include="CSMortonCodes.hlsl">
       <Filter>Shader</Filter>
     </FxCompile>
-    <FxCompile Include="CSUpfrontHistogram.hlsl">
+    <FxCompile Include="CSRadixSort_1.hlsl">
       <Filter>Shader</Filter>
     </FxCompile>
     <FxCompile Include="CSExclusiveSum.hlsl">

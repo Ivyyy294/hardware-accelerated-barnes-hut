@@ -5,7 +5,7 @@
 #include "CsSharedBuffer.h"
 #include "CsSettings.h"
 #include "CsMortonCodes.h"
-#include "CsUpfrontHistogram.h"
+#include "CsRadixSort_1.h"
 #include "CsExclusiveSum.h"
 #include "CsDigitBinning.h"
 #include "CsCornerStone_F.h"
@@ -28,7 +28,7 @@ private:
 
 	//Compute shader kernel
 	CsMortonCodes m_csMortonCodes;
-	CsUpfrontHistogram m_csUpfrontHistrogram;
+	CsRadixSort_1 m_csRadixSort_1;
 	CsExclusiveSum m_csExclusiveSum;
 	CsDigitBinning m_csDigitBinning;
 	CsCornerStone_F m_csCornerStone_F;

@@ -62,6 +62,7 @@ void main( uint3 DTid : SV_DispatchThreadID )
         
     uint wsInt = GetWsKey(k, internalLevel);
     uint internalIndex = GetIndernalNodeId(k, internalLevel);
+    nkBuffer[internalIndex] = wsInt;
     debugBuffer[internalIndex] = wsInt;
         
     //debugBuffer[ni + index] = k;

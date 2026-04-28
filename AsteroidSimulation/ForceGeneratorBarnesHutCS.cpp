@@ -16,10 +16,8 @@ void ForceGeneratorBarnesHutCS::Start()
 	m_csMortonCodes.m_srvPositionBuffer = m_buffer.m_srvPositionBuffer;
 	m_csMortonCodes.m_settingsBuffer = m_buffer.m_settingsBuffer;
 
-	m_csUpfrontHistrogram.Initialize();
-	m_csUpfrontHistrogram.m_srvMortonCodesBuffer = m_buffer.m_srvMortonCodeBuffer;
-	m_csUpfrontHistrogram.m_uavGlobalHistogramBuffer = m_buffer.m_uavGlobalHistogramBuffer;
-	m_csUpfrontHistrogram.m_settingsBuffer = m_buffer.m_settingsBuffer;
+	m_csRadixSort_1.Initialize();
+	m_csRadixSort_1.m_sharedBuffer = &m_buffer;
 
 	m_csExclusiveSum.Initialize();
 	m_csExclusiveSum.m_srvGlobalHistogramBuffer = m_buffer.m_srvGlobalHistogramBuffer;
@@ -110,7 +108,7 @@ void ForceGeneratorBarnesHutCS::Exit()
 {
 	m_buffer.ReleaseShaderParameters();
 	m_csMortonCodes.ShutdownShader();
-	m_csUpfrontHistrogram.ShutdownShader();
+	m_csRadixSort_1.ShutdownShader();
 	m_csExclusiveSum.ShutdownShader();
 	m_csDigitBinning.ShutdownShader();
 	m_csCornerStone_F.ShutdownShader();
@@ -148,7 +146,8 @@ void ForceGeneratorBarnesHutCS::DispatchRadixSort(uint32_t elementCount)
 	//SM count for 3070 laptop is 40
 	//We dispatch the kernel per SM core
 	m_buffer.SetSettingParameter(elementCount, 40);
-	m_csUpfrontHistrogram.Dispatch(40, 1, 1);
+	m_csRadixSort_1.m_srvKeyBuffer = m_buffer.m_srvMortonCodeBuffer;
+	m_csRadixSort_1.Dispatch(40, 1, 1);
 
 	m_buffer.SetSettingParameter(elementCount, 4);
 	m_csExclusiveSum.Dispatch(4, 1, 1);
@@ -186,6 +185,10 @@ void ForceGeneratorBarnesHutCS::BuildOctree(uint32_t elementCount)
 	}
 	
 	m_csCornerStone_NK.Dispatch(groupCount, 1, 1);
+
+	m_csRadixSort_1.m_srvKeyBuffer = m_buffer.m_srvNkBuffer;
+	m_buffer.SetSettingParameter(elementCount + elementCount - 1, groupCount);
+	m_csRadixSort_1.Dispatch(groupCount, 1, 1);
 }
 
 void ForceGeneratorBarnesHutCS::CallculateForces(uint32_t elementCount)

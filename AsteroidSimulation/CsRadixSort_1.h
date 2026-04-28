@@ -1,18 +1,18 @@
 #pragma once
 
 #include <IvyyyComputeShader.h>
+#include "CsSharedBuffer.h"
 
-class CsUpfrontHistogram :
+class CsRadixSort_1 :
     public ComputeShader
 {
 //Variables
 public:
-	ID3D11Buffer* m_settingsBuffer = nullptr;
-	ID3D11ShaderResourceView* m_srvMortonCodesBuffer = nullptr;
-	ID3D11UnorderedAccessView* m_uavGlobalHistogramBuffer = nullptr;
+	CsSharedBuffer* m_sharedBuffer = nullptr;
+	ID3D11ShaderResourceView* m_srvKeyBuffer = nullptr;
 //Methods
 public:
-	CsUpfrontHistogram();
+	CsRadixSort_1();
 
 private:
 	void BindShaderParameters(ID3D11DeviceContext* deviceContext) override;

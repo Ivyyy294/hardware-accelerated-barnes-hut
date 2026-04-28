@@ -141,7 +141,7 @@
     <ClCompile Include="CsExclusiveSum.cpp" />
     <ClCompile Include="CsMortonCodes.cpp" />
     <ClCompile Include="CsSharedBuffer.cpp" />
-    <ClCompile Include="CsUpfrontHistogram.cpp" />
+    <ClCompile Include="CsRadixSort_1.cpp" />
     <ClCompile Include="CsCornerStone_F.cpp" />
     <ClCompile Include="ForceGeneratorBarnesHutCS.cpp" />
     <ClCompile Include="KeplerOrbit.cpp" />
@@ -177,7 +177,7 @@
     <ClInclude Include="CsMortonCodes.h" />
     <ClInclude Include="CsSettings.h" />
     <ClInclude Include="CsSharedBuffer.h" />
-    <ClInclude Include="CsUpfrontHistogram.h" />
+    <ClInclude Include="CsRadixSort_1.h" />
     <ClInclude Include="CsCornerStone_F.h" />
     <ClInclude Include="ForceGeneratorBarnesHutCS.h" />
     <ClInclude Include="KeplerOrbit.h" />
@@ -290,7 +290,7 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Compute</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
     </FxCompile>
-    <FxCompile Include="CSUpfrontHistogram.hlsl">
+    <FxCompile Include="CSRadixSort_1.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Compute</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Compute</ShaderType>
