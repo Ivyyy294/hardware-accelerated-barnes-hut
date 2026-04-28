@@ -1,18 +1,18 @@
 #pragma once
 
 #include <IvyyyComputeShader.h>
+#include "CsSharedBuffer.h"
 
-class CsExclusiveSum :
+class CsRadixSort_2 :
     public ComputeShader
 {
 //Variables
 public:
-	ID3D11ShaderResourceView* m_srvGlobalHistogramBuffer = nullptr;
-	ID3D11UnorderedAccessView* m_uavExclusivePrefixSumBuffer = nullptr;
+	CsSharedBuffer* m_sharedBuffer = nullptr;
 
 //Methods
 public:
-	CsExclusiveSum();
+	CsRadixSort_2();
 
 private:
 	void BindShaderParameters(ID3D11DeviceContext* deviceContext) override;

@@ -75,7 +75,7 @@
     <ClCompile Include="CsRadixSort_1.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="CsExclusiveSum.cpp">
+    <ClCompile Include="CsRadixSort_2.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="CsDigitBinning.cpp">
@@ -167,7 +167,7 @@
     <ClInclude Include="CsSettings.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="CsExclusiveSum.h">
+    <ClInclude Include="CsRadixSort_2.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="CsDigitBinning.h">
@@ -214,7 +214,7 @@
     <FxCompile Include="CSRadixSort_1.hlsl">
       <Filter>Shader</Filter>
     </FxCompile>
-    <FxCompile Include="CSExclusiveSum.hlsl">
+    <FxCompile Include="CSRadixSort_2.hlsl">
       <Filter>Shader</Filter>
     </FxCompile>
     <FxCompile Include="CSDigitBinning.hlsl">
