@@ -1,6 +1,6 @@
 #pragma once
 
-#define NUM_ASTEROIDS 16
+#define NUM_ASTEROIDS 64
 
 #include <string>
 #include <algorithm>

@@ -169,7 +169,7 @@ void ForceGeneratorBarnesHutCS::BuildOctree(uint32_t elementCount)
 
 	uint32_t groupCount = (MAX_CAPACITY + 1 + 255) / 256;
 
-	for (uint32_t i = 0; i < 2; ++i)
+	for (uint32_t i = 0; i < 10; ++i)
 	{
 		m_buffer.SetSettingParameter (elementCount, 0);
 		m_csCornerStone_F.Dispatch(groupCount,1,1);
@@ -181,10 +181,11 @@ void ForceGeneratorBarnesHutCS::BuildOctree(uint32_t elementCount)
 
 		m_csCornerStone_G3.Dispatch(groupCount, 1, 1);
 
-		m_csCornerStone_NK.Dispatch(groupCount, 1, 1);
 
 		m_deviceContext->CopyResource(m_buffer.m_inKBuffer, m_buffer.m_outKBuffer);
 	}
+	
+	m_csCornerStone_NK.Dispatch(groupCount, 1, 1);
 }
 
 void ForceGeneratorBarnesHutCS::CallculateForces(uint32_t elementCount)
