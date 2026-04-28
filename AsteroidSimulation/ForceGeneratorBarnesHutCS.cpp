@@ -51,6 +51,9 @@ void ForceGeneratorBarnesHutCS::Start()
 
 	m_csCornerStone_NK.Initialize();
 	m_csCornerStone_NK.m_sharedBuffer = &m_buffer;
+
+	m_csCornerStone_RS1.Initialize();
+	m_csCornerStone_RS1.m_sharedBuffer = &m_buffer;
 }
 
 
@@ -169,6 +172,7 @@ void ForceGeneratorBarnesHutCS::BuildOctree(uint32_t elementCount)
 
 	uint32_t groupCount = (MAX_CAPACITY + 1 + 255) / 256;
 
+	//ToDo: terminate loop after convergence
 	for (uint32_t i = 0; i < 10; ++i)
 	{
 		m_buffer.SetSettingParameter (elementCount, 0);
@@ -186,6 +190,11 @@ void ForceGeneratorBarnesHutCS::BuildOctree(uint32_t elementCount)
 	}
 	
 	m_csCornerStone_NK.Dispatch(groupCount, 1, 1);
+
+	//ToDo: correct element count
+	uint32_t sortCount = elementCount + elementCount -1;
+	m_buffer.SetSettingParameter(elementCount, 0);
+	m_csCornerStone_RS1.Dispatch(groupCount, 1, 1);
 }
 
 void ForceGeneratorBarnesHutCS::CallculateForces(uint32_t elementCount)
