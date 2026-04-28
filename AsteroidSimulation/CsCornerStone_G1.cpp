@@ -27,6 +27,7 @@ void CsCornerStone_G1::UnbindShaderParameters(ID3D11DeviceContext* deviceContext
 	deviceContext->CSSetShaderResources(1, 1, &nullSRV);
 	deviceContext->CSSetShaderResources(2, 1, &nullSRV);
 	deviceContext->CSSetUnorderedAccessViews(0, 1, &nullUAV, nullptr);
+	deviceContext->CSSetUnorderedAccessViews(1, 1, &nullUAV, nullptr);
 }
 
 bool CsCornerStone_G1::InitShaderParameters(ID3D11Device* device)

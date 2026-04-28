@@ -37,7 +37,7 @@ void main( uint3 DTid : SV_DispatchThreadID )
     
     uint kSize = counterBuffer[0];
  
-    if (intervalIndex > kSize)
+    if (intervalIndex >= kSize)
         return;
  
     uint k0 = kBuffer[intervalIndex];
@@ -47,4 +47,7 @@ void main( uint3 DTid : SV_DispatchThreadID )
     uint high = BinarySearch(k1);
     
     nBuffer[intervalIndex] = high >= low ? (high - low) : 0;
+    
+    debugBuffer[intervalIndex] = nBuffer[intervalIndex];
+
 }

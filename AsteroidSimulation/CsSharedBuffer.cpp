@@ -72,7 +72,7 @@ HRESULT CsSharedBuffer::InitCornerStoneShaderParameters(ID3D11Device* device)
 	D3D11_SUBRESOURCE_DATA initalK = {};
 	initalK.pSysMem = k;
 
-	uint32_t counter[1] = { 2 };
+	uint32_t counter[1] = { 1 };
 	D3D11_SUBRESOURCE_DATA initalCount = {};
 	initalCount.pSysMem = counter;
 
@@ -90,7 +90,7 @@ HRESULT CsSharedBuffer::InitCornerStoneShaderParameters(ID3D11Device* device)
 		&& ShaderUtils::CreateResourceViewBuffer(device, result, m_o1Buffer, &m_srvO1Buffer, maxK)
 		&& ShaderUtils::CreateUAVBuffer(device, result, m_o1Buffer, &m_uavO1Buffer, maxK)
 		&& ShaderUtils::CreateResourceBuffer(device, result, &m_o2Buffer, sizeof(uint32_t), maxK)
-		&& ShaderUtils::CreateResourceViewBuffer(device, result, m_o2Buffer, &m_srvO2OBuffer, maxK)
+		&& ShaderUtils::CreateResourceViewBuffer(device, result, m_o2Buffer, &m_srvO2Buffer, maxK)
 		&& ShaderUtils::CreateUAVBuffer(device, result, m_o2Buffer, &m_uavO2Buffer, maxK)
 		//Counter Buffer
 		&& ShaderUtils::CreateResourceBuffer(device, result, &m_counterBuffer, sizeof(uint32_t), 1, &initalCount)

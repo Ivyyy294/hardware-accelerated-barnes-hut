@@ -44,16 +44,10 @@ void ForceGeneratorBarnesHutCS::Start()
 	m_csCornerStone_G1.m_sharedBuffer = &m_buffer;
 
 	m_csCornerStone_G2.Initialize();
-	m_csCornerStone_G2.m_srvO1Buffer = m_buffer.m_srvO1Buffer;
-	m_csCornerStone_G2.m_uavO2Buffer = m_buffer.m_uavO2Buffer;
-	m_csCornerStone_G2.m_srvCounterBuffer = m_buffer.m_srvCounterBuffer;
+	m_csCornerStone_G2.m_sharedBuffer = &m_buffer;
 
 	m_csCornerStone_G3.Initialize();
-	m_csCornerStone_G3.m_srvKBuffer = m_buffer.m_srvKBuffer;
-	m_csCornerStone_G3.m_srvO1Buffer = m_buffer.m_srvO1Buffer;
-	m_csCornerStone_G3.m_srvO2Buffer = m_buffer.m_srvO2OBuffer;
-	m_csCornerStone_G3.m_uavKBuffer = m_buffer.m_uavKBuffer;
-	m_csCornerStone_G3.m_uavCounterBuffer = m_buffer.m_uavCounterBuffer;
+	m_csCornerStone_G3.m_sharedBuffer = &m_buffer;
 	//m_csDigitBinning.m_uavMassBuffer = m_uavMassBuffer;
 	//m_csDigitBinning.m_uavPositionBuffer = m_uavPositionBuffer;
 }
@@ -174,7 +168,7 @@ void ForceGeneratorBarnesHutCS::BuildOctree(uint32_t elementCount)
 
 	uint32_t groupCount = (MAX_CAPACITY + 1 + 255) / 256;
 
-	for (uint32_t i = 0; i < 1; ++i)
+	for (uint32_t i = 0; i < 2; ++i)
 	{
 		m_buffer.SetSettingParameter (elementCount, 0);
 		m_csCornerStone_F.Dispatch(groupCount,1,1);

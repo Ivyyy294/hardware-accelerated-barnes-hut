@@ -1,15 +1,14 @@
 #pragma once
 
 #include <IvyyyComputeShader.h>
+#include "CsSharedBuffer.h"
 
 class CsCornerStone_G2 :
     public ComputeShader
 {
 //Variables
 public:
-	ID3D11ShaderResourceView* m_srvO1Buffer = nullptr;
-	ID3D11ShaderResourceView* m_srvCounterBuffer = nullptr;
-	ID3D11UnorderedAccessView* m_uavO2Buffer = nullptr;
+	CsSharedBuffer* m_sharedBuffer {nullptr};
 
 //Methods
 public:

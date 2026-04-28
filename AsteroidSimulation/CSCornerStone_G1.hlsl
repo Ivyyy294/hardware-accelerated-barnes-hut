@@ -17,7 +17,7 @@ void main( uint3 DTid : SV_DispatchThreadID )
     
     uint kSize = counterBuffer[0];
  
-    if (index >= kSize - 1)
+    if (index > kSize)
         return;
 
     uint nVal = nBuffer[index];

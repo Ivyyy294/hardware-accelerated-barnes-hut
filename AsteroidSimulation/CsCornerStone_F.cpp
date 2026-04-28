@@ -31,6 +31,7 @@ void CsCornerStone_F::UnbindShaderParameters(ID3D11DeviceContext* deviceContext)
 	deviceContext->CSSetShaderResources(2, 1, &nullSRV);
 
 	deviceContext->CSSetUnorderedAccessViews(0, 1, &nullUAV, nullptr);
+	deviceContext->CSSetUnorderedAccessViews(1, 1, &nullUAV, nullptr);
 }
 
 bool CsCornerStone_F::InitShaderParameters(ID3D11Device* device)
