@@ -33,22 +33,18 @@ uint BinarySearch(uint key)
 [numthreads(256, 1, 1)]
 void main( uint3 DTid : SV_DispatchThreadID )
 {
-    
     uint intervalIndex = DTid.x;
     
     uint kSize = counterBuffer[0];
-    
+ 
     if (intervalIndex > kSize)
         return;
-    
  
     uint k0 = kBuffer[intervalIndex];
     uint k1 = kBuffer[intervalIndex + 1];
-    
     
     uint low = BinarySearch(k0);
     uint high = BinarySearch(k1);
     
     nBuffer[intervalIndex] = high >= low ? (high - low) : 0;
-    debugBuffer[DTid.x] = nBuffer[intervalIndex];
 }

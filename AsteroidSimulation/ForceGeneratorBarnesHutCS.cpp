@@ -41,11 +41,7 @@ void ForceGeneratorBarnesHutCS::Start()
 	m_csCornerStone_F.m_sharedBuffer = &m_buffer;
 
 	m_csCornerStone_G1.Initialize();
-	m_csCornerStone_G1.m_settingsBuffer = m_buffer.m_settingsBuffer;
-	m_csCornerStone_G1.m_srvKBuffer = m_buffer.m_srvKBuffer;
-	m_csCornerStone_G1.m_srvNBuffer = m_buffer.m_srvNBuffer;
-	m_csCornerStone_G1.m_uavO1Buffer = m_buffer.m_uavO1Buffer;
-	m_csCornerStone_G1.m_srvCounterBuffer = m_buffer.m_srvCounterBuffer;
+	m_csCornerStone_G1.m_sharedBuffer = &m_buffer;
 
 	m_csCornerStone_G2.Initialize();
 	m_csCornerStone_G2.m_srvO1Buffer = m_buffer.m_srvO1Buffer;
