@@ -8,6 +8,7 @@
 #include "CsRadixSort_1.h"
 #include "CsRadixSort_2.h"
 #include "CsRadixSort_3.h"
+#include "CsRadixSort_4.h"
 #include "CsCornerStone_F.h"
 #include "CsCornerStone_G1.h"
 #include "CsCornerStone_G2.h"
@@ -32,6 +33,7 @@ private:
 	CsRadixSort_1 m_csRadixSort_1;
 	CsRadixSort_2 m_csRadixSort_2;
 	CsRadixSort_3 m_csRadixSort_3;
+	CsRadixSort_4 m_csRadixSort_4;
 
 	CsCornerStone_F m_csCornerStone_F;
 	CsCornerStone_G1 m_csCornerStone_G1;
