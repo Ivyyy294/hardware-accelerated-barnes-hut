@@ -46,8 +46,6 @@ void main( uint3 DTid : SV_DispatchThreadID )
     uint leafLevel = 10 - octalBitsCount;
     uint wsKey = GetWsKey(k, leafLevel);
     nkBuffer[ni + index] = wsKey;
-    debugBuffer[ni + index] = wsKey;
-    //debugBuffer[ni + index] = k;
     
     //Add internal nodes to K'
     
@@ -63,9 +61,4 @@ void main( uint3 DTid : SV_DispatchThreadID )
     uint wsInt = GetWsKey(k, internalLevel);
     uint internalIndex = GetIndernalNodeId(k, internalLevel);
     nkBuffer[internalIndex] = wsInt;
-    debugBuffer[internalIndex] = wsInt;
-        
-    //debugBuffer[ni + index] = k;
-    //CountLeadingZeros()
-    //uint test = k ^ k1;
 }

@@ -26,20 +26,14 @@ void main( uint3 DTid : SV_DispatchThreadID )
     uint outKIndex = inO2Buffer[index];
 
     if (oVal == 1)
-    {
         outKBuffer[outKIndex] = kVal;
-        debugBuffer[outKIndex] = kVal;
-    }
     else if (oVal == 8)
     {
         uint kDelta = inKBuffer[index + 1] - kVal;
         uint iDelta = kDelta / 8;
         
         for (int j = 0; j < 8; ++j)
-        {
             outKBuffer[outKIndex + j] = kVal + j * iDelta;
-            debugBuffer[outKIndex + j] = kVal + j * iDelta;
-        }
     }
     
     GroupMemoryBarrierWithGroupSync();

@@ -261,7 +261,7 @@ void main(uint3 DTid : SV_DispatchThreadID)
         mortonCodeOut[dstIndex] = key;
         positionOut[dstIndex] = position;
         massOut[dstIndex] = mass;
+        debugBuffer[dstIndex] = key;
     }
     
-    //debugBuffer[dstIndex] = key;
 }

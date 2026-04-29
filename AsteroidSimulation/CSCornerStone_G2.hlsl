@@ -18,5 +18,4 @@ void main( uint3 DTid : SV_DispatchThreadID )
         localCounter += inOBuffer[i];
     
     outOBuffer[index] = localCounter;
-    debugBuffer[index] = localCounter;
 }
