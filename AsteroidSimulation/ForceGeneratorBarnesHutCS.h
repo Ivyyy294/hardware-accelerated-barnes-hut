@@ -7,7 +7,7 @@
 #include "CsMortonCodes.h"
 #include "CsRadixSort_1.h"
 #include "CsRadixSort_2.h"
-#include "CsDigitBinning.h"
+#include "CsRadixSort_3.h"
 #include "CsCornerStone_F.h"
 #include "CsCornerStone_G1.h"
 #include "CsCornerStone_G2.h"
@@ -28,9 +28,11 @@ private:
 
 	//Compute shader kernel
 	CsMortonCodes m_csMortonCodes;
+
 	CsRadixSort_1 m_csRadixSort_1;
 	CsRadixSort_2 m_csRadixSort_2;
-	CsDigitBinning m_csDigitBinning;
+	CsRadixSort_3 m_csRadixSort_3;
+
 	CsCornerStone_F m_csCornerStone_F;
 	CsCornerStone_G1 m_csCornerStone_G1;
 	CsCornerStone_G2 m_csCornerStone_G2;

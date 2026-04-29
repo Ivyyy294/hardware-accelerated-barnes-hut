@@ -23,6 +23,7 @@ void main(uint3 DTid : SV_DispatchThreadID,
           uint3 GTid : SV_GroupThreadID,
           uint3 Gid : SV_GroupID)
 {
+
     const uint tileSize = ITEM_PER_THREAD * NUM_THREADS;
     uint histSize = NUM_DIGITS * NUM_BINS;
     const uint groupId = Gid.x;
@@ -77,4 +78,6 @@ void main(uint3 DTid : SV_DispatchThreadID,
     
     //Sync point
     GroupMemoryBarrierWithGroupSync();
+
+
 }

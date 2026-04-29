@@ -22,17 +22,8 @@ void ForceGeneratorBarnesHutCS::Start()
 	m_csRadixSort_2.Initialize();
 	m_csRadixSort_2.m_sharedBuffer = &m_buffer;
 
-	m_csDigitBinning.Initialize();
-	m_csDigitBinning.m_settingsBuffer = m_buffer.m_settingsBuffer;
-	m_csDigitBinning.m_exclusivePrefixSumBufferSrv = m_buffer.m_srvEclusivePrefixSumBuffer;
-
-	m_csDigitBinning.m_uavMortonCodesBuffer = m_buffer.m_uavMortonCodeBuffer;
-	m_csDigitBinning.m_uavPositionBuffer = m_buffer.m_uavPositionBuffer;
-	m_csDigitBinning.m_uavMassBuffer = m_buffer.m_uavMassBuffer;
-
-	m_csDigitBinning.m_srvMortonCodesBuffer = m_buffer.m_srvMortonCodeBuffer;
-	m_csDigitBinning.m_srvPositionBuffer = m_buffer.m_srvPositionBuffer;
-	m_csDigitBinning.m_srvMassBuffer = m_buffer.m_srvMassBuffer;
+	m_csRadixSort_3.Initialize();
+	m_csRadixSort_3.m_sharedBuffer = &m_buffer;
 
 	m_csCornerStone_F.Initialize();
 	m_csCornerStone_F.m_sharedBuffer = &m_buffer;
@@ -109,7 +100,7 @@ void ForceGeneratorBarnesHutCS::Exit()
 	m_csMortonCodes.ShutdownShader();
 	m_csRadixSort_1.ShutdownShader();
 	m_csRadixSort_2.ShutdownShader();
-	m_csDigitBinning.ShutdownShader();
+	m_csRadixSort_3.ShutdownShader();
 	m_csCornerStone_F.ShutdownShader();
 }
 
@@ -153,10 +144,17 @@ void ForceGeneratorBarnesHutCS::DispatchRadixSort(uint32_t elementCount)
 
 	uint32_t groupCount = (elementCount + 255) / 256;
 
+	m_csRadixSort_3.m_uavKeyBuffer = m_buffer.m_uavMortonCodeBuffer;
+	m_csRadixSort_3.m_uavVal1Buffer = m_buffer.m_uavPositionBuffer;
+	m_csRadixSort_3.m_uavVal2Buffer = m_buffer.m_uavMassBuffer;
+	m_csRadixSort_3.m_srvKeyBuffer = m_buffer.m_srvMortonCodeBuffer;
+	m_csRadixSort_3.m_srvVal1Buffer = m_buffer.m_srvPositionBuffer;
+	m_csRadixSort_3.m_srvVal2Buffer = m_buffer.m_srvMassBuffer;
+
 	for (uint32_t i = 0; i < 4; ++i)
 	{
 		m_buffer.SetSettingParameter(elementCount, groupCount, i);
-		m_csDigitBinning.Dispatch(groupCount, 1, 1);
+		m_csRadixSort_3.Dispatch(groupCount, 1, 1);
 		m_buffer.SwapParticleBuffer();
 	}
 }
@@ -184,14 +182,32 @@ void ForceGeneratorBarnesHutCS::BuildOctree(uint32_t elementCount)
 	}
 	
 	m_csCornerStone_NK.Dispatch(groupCount, 1, 1);
+	//m_deviceContext->CopyResource(m_buffer.m_nk2Buffer, m_buffer.m_nk1Buffer);
 
 	//Sort NK
-	uint32_t nkCount = elementCount + elementCount - 1;
+	/*uint32_t nkCount = elementCount + elementCount - 1;
+
 	m_csRadixSort_1.m_srvKeyBuffer = m_buffer.m_srvNkBuffer;
-	m_buffer.SetSettingParameter(nkCount, groupCount);
-	m_csRadixSort_1.Dispatch(groupCount, 1, 1);
+	m_buffer.SetSettingParameter(nkCount, 40);
+	m_csRadixSort_1.Dispatch(40, 1, 1);
 	m_buffer.SetSettingParameter(nkCount, 4);
 	m_csRadixSort_2.Dispatch(4, 1, 1);
+
+	m_csRadixSort_3.m_uavKeyBuffer = m_buffer.m_uavMortonCodeBuffer;
+	m_csRadixSort_3.m_uavVal1Buffer = nullptr;
+	m_csRadixSort_3.m_uavVal2Buffer = nullptr;
+	m_csRadixSort_3.m_srvKeyBuffer = m_buffer.m_srvNkBuffer;
+	m_csRadixSort_3.m_srvVal1Buffer = nullptr;
+	m_csRadixSort_3.m_srvVal2Buffer = nullptr;
+
+	groupCount = (nkCount + 255) / 256;
+
+	for (uint32_t i = 0; i < 4; ++i)
+	{
+		m_buffer.SetSettingParameter(elementCount, groupCount, i);
+		m_csRadixSort_3.Dispatch(groupCount, 1, 1);
+		m_deviceContext->CopyResource(m_buffer.m_nk2Buffer, m_buffer.m_nk1Buffer);
+	}*/
 }
 
 void ForceGeneratorBarnesHutCS::CallculateForces(uint32_t elementCount)
@@ -202,7 +218,7 @@ void ForceGeneratorBarnesHutCS::ReadBack()
 {
 	Debug::Log("Wait for compute shader...");
 	
-	while (!m_csCornerStone_G3.IsDone())
+	while (!m_csCornerStone_NK.IsDone())
 		continue;
 
 	Debug::Log("´Compute shader done!");

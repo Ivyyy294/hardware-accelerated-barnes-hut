@@ -137,7 +137,7 @@
     <ClCompile Include="CsCornerStone_G2.cpp" />
     <ClCompile Include="CsCornerStone_G3.cpp" />
     <ClCompile Include="CsCornerStone_NK.cpp" />
-    <ClCompile Include="CsDigitBinning.cpp" />
+    <ClCompile Include="CsRadixSort_3.cpp" />
     <ClCompile Include="CsRadixSort_2.cpp" />
     <ClCompile Include="CsMortonCodes.cpp" />
     <ClCompile Include="CsSharedBuffer.cpp" />
@@ -172,7 +172,7 @@
     <ClInclude Include="CsCornerStone_G2.h" />
     <ClInclude Include="CsCornerStone_G3.h" />
     <ClInclude Include="CsCornerStone_NK.h" />
-    <ClInclude Include="CsDigitBinning.h" />
+    <ClInclude Include="CsRadixSort_3.h" />
     <ClInclude Include="CsRadixSort_2.h" />
     <ClInclude Include="CsMortonCodes.h" />
     <ClInclude Include="CsSettings.h" />
@@ -264,7 +264,7 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Compute</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
     </FxCompile>
-    <FxCompile Include="CSDigitBinning.hlsl">
+    <FxCompile Include="CSRadixSort_3.hlsl">
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Compute</ShaderType>

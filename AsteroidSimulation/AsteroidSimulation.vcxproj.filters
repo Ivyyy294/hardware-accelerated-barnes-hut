@@ -78,7 +78,7 @@
     <ClCompile Include="CsRadixSort_2.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="CsDigitBinning.cpp">
+    <ClCompile Include="CsRadixSort_3.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ShaderUtils.cpp">
@@ -170,7 +170,7 @@
     <ClInclude Include="CsRadixSort_2.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="CsDigitBinning.h">
+    <ClInclude Include="CsRadixSort_3.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ShaderUtils.h">
@@ -217,7 +217,7 @@
     <FxCompile Include="CSRadixSort_2.hlsl">
       <Filter>Shader</Filter>
     </FxCompile>
-    <FxCompile Include="CSDigitBinning.hlsl">
+    <FxCompile Include="CSRadixSort_3.hlsl">
       <Filter>Shader</Filter>
     </FxCompile>
     <FxCompile Include="CSCornerStone_F.hlsl">

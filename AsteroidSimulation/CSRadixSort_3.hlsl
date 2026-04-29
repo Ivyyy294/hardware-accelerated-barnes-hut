@@ -216,6 +216,7 @@ RWStructuredBuffer<uint> scatterCounters : register(u0);
 RWStructuredBuffer<uint> mortonCodeOut : register(u1);
 RWStructuredBuffer<float3> positionOut : register(u2);
 RWStructuredBuffer<float> massOut : register(u3);
+RWStructuredBuffer<uint> debugBuffer : register(u4);
 
 [numthreads(NUM_THREADS, 1, 1)]
 void main(uint3 DTid : SV_DispatchThreadID)
@@ -261,4 +262,6 @@ void main(uint3 DTid : SV_DispatchThreadID)
         positionOut[dstIndex] = position;
         massOut[dstIndex] = mass;
     }
+    
+    //debugBuffer[dstIndex] = key;
 }
