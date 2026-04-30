@@ -97,9 +97,10 @@ HRESULT CsSharedBuffer::InitCornerStoneShaderParameters(ID3D11Device* device)
 		&& ShaderUtils::CreateResourceViewBuffer(device, result, m_counterBuffer, &m_srvCounterBuffer, 1)
 		&& ShaderUtils::CreateUAVBuffer(device, result, m_counterBuffer, &m_uavCounterBuffer, 1)
 		//NK Buffer
-		&& ShaderUtils::CreateResourceBuffer(device, result, &m_nkBuffer, sizeof(uint32_t), MAX_CAPACITY + MAX_CAPACITY, &initalCount)
-		&& ShaderUtils::CreateResourceViewBuffer(device, result, m_nkBuffer, &m_srvNkBuffer, MAX_CAPACITY + MAX_CAPACITY)
-		&& ShaderUtils::CreateUAVBuffer(device, result, m_nkBuffer, &m_uavNkBuffer, MAX_CAPACITY + MAX_CAPACITY);
+		&& ShaderUtils::CreateResourceBuffer(device, result, &m_inNkBuffer, sizeof(uint32_t), MAX_CAPACITY + MAX_CAPACITY)
+		&& ShaderUtils::CreateResourceBuffer(device, result, &m_outNkBuffer, sizeof(uint32_t), MAX_CAPACITY + MAX_CAPACITY)
+		&& ShaderUtils::CreateResourceViewBuffer(device, result, m_inNkBuffer, &m_srvNkBuffer, MAX_CAPACITY + MAX_CAPACITY)
+		&& ShaderUtils::CreateUAVBuffer(device, result, m_outNkBuffer, &m_uavNkBuffer, MAX_CAPACITY + MAX_CAPACITY);
 
 	return result;
 }
@@ -115,9 +116,9 @@ bool CsSharedBuffer::InitShaderParameters()
 	HRESULT result;
 
 	//Debug buffer
-	ShaderUtils::CreateStagingBuffer(device, result, &m_outputBuffer, sizeof(uint32_t), MAX_CAPACITY + MAX_CAPACITY);
-	ShaderUtils::CreateResourceBuffer(device, result, &m_debugBuffer, sizeof(uint32_t), MAX_CAPACITY + MAX_CAPACITY);
-	ShaderUtils::CreateUAVBuffer(device, result, m_debugBuffer, &m_uavDebugBuffer, MAX_CAPACITY + MAX_CAPACITY);
+	ShaderUtils::CreateStagingBuffer(device, result, &m_outputBuffer, sizeof(uint32_t), 1024);
+	ShaderUtils::CreateResourceBuffer(device, result, &m_debugBuffer, sizeof(uint32_t), 1024);
+	ShaderUtils::CreateUAVBuffer(device, result, m_debugBuffer, &m_uavDebugBuffer, 1024);
 
 	if (FAILED(result))
 		return false;
@@ -200,7 +201,8 @@ void CsSharedBuffer::ReleaseShaderParameters()
 	ShaderUtils::SafeRelease(&m_uavCounterBuffer);
 	ShaderUtils::SafeRelease(&m_srvCounterBuffer);
 
-	ShaderUtils::SafeRelease(&m_nkBuffer);
+	ShaderUtils::SafeRelease(&m_inNkBuffer);
+	ShaderUtils::SafeRelease(&m_outNkBuffer);
 	ShaderUtils::SafeRelease(&m_uavNkBuffer);
 	ShaderUtils::SafeRelease(&m_srvNkBuffer);
 }

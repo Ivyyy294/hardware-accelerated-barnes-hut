@@ -17,12 +17,12 @@ RWStructuredBuffer<uint> mortonCodeOut : register(u1);
 RWStructuredBuffer<uint> debugBuffer : register(u2);
 
 [numthreads(NUM_THREADS, 1, 1)]
-void main(uint3 DTid : SV_DispatchThreadID)
+void main(uint3 DTid : SV_DispatchThreadID,
+        uint3 GTid : SV_GroupThreadID,
+          uint3 Gid : SV_GroupID)
 {
-    uint index = DTid.x;
-
-    //debugBuffer[index] = mortonCodeIn[index];
-    //return;
+    uint index = Gid.x * NUM_THREADS + GTid.x;
+    //debugBuffer[index] = exclusivePrefixSum[index];
     
     if (index >= elementCount)
         return;
@@ -58,6 +58,8 @@ void main(uint3 DTid : SV_DispatchThreadID)
     if (dstIndex < elementCount)
     {
         mortonCodeOut[dstIndex] = key;
-        debugBuffer[dstIndex] = key;
     }
+    
+    GroupMemoryBarrierWithGroupSync();
+    //debugBuffer[index] = mortonCodeOut[index];
 }

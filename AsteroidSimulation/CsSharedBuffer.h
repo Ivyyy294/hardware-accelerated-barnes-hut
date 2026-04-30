@@ -71,7 +71,8 @@ public:
 	ID3D11UnorderedAccessView* m_uavCounterBuffer = nullptr;
 	ID3D11ShaderResourceView* m_srvCounterBuffer = nullptr;
 
-	ID3D11Buffer* m_nkBuffer{ nullptr };
+	ID3D11Buffer* m_inNkBuffer{ nullptr };
+	ID3D11Buffer* m_outNkBuffer{ nullptr };
 	ID3D11UnorderedAccessView* m_uavNkBuffer = nullptr;
 	ID3D11ShaderResourceView* m_srvNkBuffer = nullptr;
 

@@ -34,7 +34,7 @@ void ForceGeneratorBarnesHutCS::Start()
 	m_csRadixSort_4.Initialize();
 	m_csRadixSort_4.m_sharedBuffer = &m_buffer;
 	m_csRadixSort_4.m_srvKeyBuffer = m_buffer.m_srvNkBuffer;
-	//m_csRadixSort_4.m_uavKeyBuffer = m_buffer.m_uavNkBuffer;
+	m_csRadixSort_4.m_uavKeyBuffer = m_buffer.m_uavNkBuffer;
 
 	m_csCornerStone_F.Initialize();
 	m_csCornerStone_F.m_sharedBuffer = &m_buffer;
@@ -188,12 +188,14 @@ void ForceGeneratorBarnesHutCS::BuildOctree(uint32_t elementCount)
 	
 	m_csCornerStone_NK.Dispatch(groupCount, 1, 1);
 
-	//m_deviceContext->CopyResource(m_inMortonCodeBuffer, m_buffer.nk);
+	m_deviceContext->CopyResource(m_buffer.m_inNkBuffer, m_buffer.m_outNkBuffer);
 
 	//Sort NK
-	elementCount = 33;
+
+	//ToDo: Determine correct is absolutly critical!!!!
+	elementCount = 25;
 	m_buffer.SetSettingParameter(elementCount, 40);
-	m_csRadixSort_1.m_srvKeyBuffer = m_buffer.m_srvMortonCodeBuffer;
+	m_csRadixSort_1.m_srvKeyBuffer = m_buffer.m_srvNkBuffer;
 	m_csRadixSort_1.Dispatch(40, 1, 1);
 
 	m_buffer.SetSettingParameter(elementCount, 4);
@@ -205,6 +207,7 @@ void ForceGeneratorBarnesHutCS::BuildOctree(uint32_t elementCount)
 	{
 		m_buffer.SetSettingParameter(elementCount, groupCount, i);
 		m_csRadixSort_4.Dispatch(groupCount, 1, 1);
+		m_deviceContext->CopyResource(m_buffer.m_inNkBuffer, m_buffer.m_outNkBuffer);
 	}
 }
 
@@ -216,7 +219,7 @@ void ForceGeneratorBarnesHutCS::ReadBack()
 {
 	Debug::Log("Wait for compute shader...");
 	
-	while (!m_csCornerStone_NK.IsDone())
+	while (!m_csRadixSort_4.IsDone())
 		continue;
 
 	Debug::Log("´Compute shader done!");
@@ -231,7 +234,7 @@ void ForceGeneratorBarnesHutCS::CopyTestData()
 
 	if (SUCCEEDED(hr))
 	{
-		const uint32_t size = MAX_CAPACITY + MAX_CAPACITY;
+		const uint32_t size = 1024;
 		uint32_t data [size];
 
 		memcpy (&data[0], mappedResource.pData, sizeof(uint32_t) * size);
