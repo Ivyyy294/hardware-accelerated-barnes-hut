@@ -72,7 +72,7 @@ HRESULT CsSharedBuffer::InitCornerStoneShaderParameters(ID3D11Device* device)
 	D3D11_SUBRESOURCE_DATA initalK = {};
 	initalK.pSysMem = k;
 
-	uint32_t counter[1] = { 1 };
+	uint32_t counter[2] = { 1, 0 };
 	D3D11_SUBRESOURCE_DATA initalCount = {};
 	initalCount.pSysMem = counter;
 
@@ -93,9 +93,10 @@ HRESULT CsSharedBuffer::InitCornerStoneShaderParameters(ID3D11Device* device)
 		&& ShaderUtils::CreateResourceViewBuffer(device, result, m_o2Buffer, &m_srvO2Buffer, maxK)
 		&& ShaderUtils::CreateUAVBuffer(device, result, m_o2Buffer, &m_uavO2Buffer, maxK)
 		//Counter Buffer
-		&& ShaderUtils::CreateResourceBuffer(device, result, &m_counterBuffer, sizeof(uint32_t), 1, &initalCount)
-		&& ShaderUtils::CreateResourceViewBuffer(device, result, m_counterBuffer, &m_srvCounterBuffer, 1)
-		&& ShaderUtils::CreateUAVBuffer(device, result, m_counterBuffer, &m_uavCounterBuffer, 1)
+		&& ShaderUtils::CreateResourceBuffer(device, result, &m_counterBuffer, sizeof(uint32_t), 2, &initalCount)
+		&& ShaderUtils::CreateStagingBuffer(device, result, &m_stagingCounterBuffer, sizeof(uint32_t), 2)
+		&& ShaderUtils::CreateResourceViewBuffer(device, result, m_counterBuffer, &m_srvCounterBuffer, 2)
+		&& ShaderUtils::CreateUAVBuffer(device, result, m_counterBuffer, &m_uavCounterBuffer, 2)
 		//NK Buffer
 		&& ShaderUtils::CreateResourceBuffer(device, result, &m_inNkBuffer, sizeof(uint32_t), MAX_CAPACITY + MAX_CAPACITY)
 		&& ShaderUtils::CreateResourceBuffer(device, result, &m_outNkBuffer, sizeof(uint32_t), MAX_CAPACITY + MAX_CAPACITY)
@@ -206,6 +207,7 @@ void CsSharedBuffer::ReleaseShaderParameters()
 	ShaderUtils::SafeRelease(&m_uavO2Buffer);
 
 	ShaderUtils::SafeRelease(&m_counterBuffer);
+	ShaderUtils::SafeRelease(&m_stagingCounterBuffer);
 	ShaderUtils::SafeRelease(&m_uavCounterBuffer);
 	ShaderUtils::SafeRelease(&m_srvCounterBuffer);
 

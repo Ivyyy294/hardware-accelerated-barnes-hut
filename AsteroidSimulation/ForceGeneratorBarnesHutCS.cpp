@@ -198,8 +198,23 @@ void ForceGeneratorBarnesHutCS::BuildOctree(uint32_t elementCount)
 
 	//Sort NK
 
-	//ToDo: Determine correct is absolutly critical!!!!
-	elementCount = 25;
+	//Determine nk size 
+	m_deviceContext->CopyResource(m_buffer.m_stagingCounterBuffer, m_buffer.m_counterBuffer);
+	D3D11_MAPPED_SUBRESOURCE mappedResource;
+	HRESULT hr = m_deviceContext->Map(m_buffer.m_stagingCounterBuffer, 0, D3D11_MAP_READ, 0, &mappedResource);
+
+	if (SUCCEEDED(hr))
+	{
+		const uint32_t size = 2;
+		uint32_t data[size];
+
+		memcpy(&data[0], mappedResource.pData, sizeof(uint32_t) * size);
+		m_deviceContext->Unmap(m_buffer.m_stagingCounterBuffer, 0);
+
+		//ToDo: why is ni aka data[1], 1 bigger than expected?
+		elementCount = data[0] + data [1] - 1;
+	}
+
 	m_buffer.SetSettingParameter(elementCount, 40);
 	m_csRadixSort_1.m_srvKeyBuffer = m_buffer.m_srvNkBuffer;
 	m_csRadixSort_1.Dispatch(40, 1, 1);

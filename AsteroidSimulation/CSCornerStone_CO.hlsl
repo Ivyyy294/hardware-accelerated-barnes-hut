@@ -1,5 +1,4 @@
 #define L 10
-#define ni 3
 #define NUM_THREADS 256
 
 StructuredBuffer<uint> counterBuffer : register(t0);
@@ -14,10 +13,12 @@ void main(uint3 GTid : SV_GroupThreadID,
           uint3 Gid : SV_GroupID)
 {
     uint index = Gid.x * NUM_THREADS + GTid.x;
+    //debugBuffer[index] = nkBuffer[index];
+    uint ni = counterBuffer[1];
     
     if (index >= ni)
     {
-        debugBuffer[index] = 0;
+        //debugBuffer[index] = 0;
         return;
     }
     //debugBuffer[index] = nkBuffer[index];

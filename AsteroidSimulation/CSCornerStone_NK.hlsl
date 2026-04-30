@@ -1,10 +1,10 @@
 #define NUM_THREADS 256
 #define L 10
 
-StructuredBuffer<uint> counterBuffer : register(t0);
-StructuredBuffer<uint> kBuffer : register(t1);
+StructuredBuffer<uint> kBuffer : register(t0);
 RWStructuredBuffer<uint> nkBuffer : register(u0);
-RWStructuredBuffer<uint> debugBuffer : register(u1);
+RWStructuredBuffer<uint> counterBuffer : register(u1);
+RWStructuredBuffer<uint> debugBuffer : register(u2);
 
 uint GetWsKey(uint val, uint level)
 {
@@ -35,6 +35,11 @@ void main( uint3 DTid : SV_DispatchThreadID )
     if (index >= kSize)
         return;
     
+    if (index == 0)
+        counterBuffer[1] = 0;
+    
+    GroupMemoryBarrierWithGroupSync();
+    
     //Add leaf node to K'
     uint k = kBuffer[index];
     uint k1 = kBuffer[index + 1];
@@ -61,4 +66,6 @@ void main( uint3 DTid : SV_DispatchThreadID )
     uint wsInt = GetWsKey(k, internalLevel);
     uint internalIndex = GetIndernalNodeId(k, internalLevel);
     nkBuffer[internalIndex] = wsInt;
+    InterlockedAdd(counterBuffer[1], 1);
+    GroupMemoryBarrierWithGroupSync();
 }

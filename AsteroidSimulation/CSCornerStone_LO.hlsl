@@ -47,5 +47,5 @@ void main(uint3 GTid : SV_GroupThreadID,
     loBuffer[index] = indexFirstNodeOnLevel;
     
     GroupMemoryBarrierWithGroupSync();
-    debugBuffer[index] = loBuffer[index];
+    //debugBuffer[index] = loBuffer[index];
 }

@@ -68,6 +68,7 @@ public:
 	ID3D11ShaderResourceView* m_srvO2Buffer = nullptr;
 
 	ID3D11Buffer* m_counterBuffer{ nullptr };
+	ID3D11Buffer* m_stagingCounterBuffer{ nullptr };
 	ID3D11UnorderedAccessView* m_uavCounterBuffer = nullptr;
 	ID3D11ShaderResourceView* m_srvCounterBuffer = nullptr;
 
