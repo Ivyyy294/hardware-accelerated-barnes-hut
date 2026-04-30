@@ -50,6 +50,9 @@ void ForceGeneratorBarnesHutCS::Start()
 
 	m_csCornerStone_NK.Initialize();
 	m_csCornerStone_NK.m_sharedBuffer = &m_buffer;
+
+	m_csCornerStone_LO.Initialize();
+	m_csCornerStone_LO.m_sharedBuffer = &m_buffer;
 }
 
 
@@ -209,6 +212,8 @@ void ForceGeneratorBarnesHutCS::BuildOctree(uint32_t elementCount)
 		m_csRadixSort_4.Dispatch(groupCount, 1, 1);
 		m_deviceContext->CopyResource(m_buffer.m_inNkBuffer, m_buffer.m_outNkBuffer);
 	}
+
+	m_csCornerStone_LO.Dispatch(1,1,1);
 }
 
 void ForceGeneratorBarnesHutCS::CallculateForces(uint32_t elementCount)
@@ -219,7 +224,7 @@ void ForceGeneratorBarnesHutCS::ReadBack()
 {
 	Debug::Log("Wait for compute shader...");
 	
-	while (!m_csRadixSort_4.IsDone())
+	while (!m_csCornerStone_LO.IsDone())
 		continue;
 
 	Debug::Log("´Compute shader done!");

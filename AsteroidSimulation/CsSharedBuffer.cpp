@@ -100,7 +100,11 @@ HRESULT CsSharedBuffer::InitCornerStoneShaderParameters(ID3D11Device* device)
 		&& ShaderUtils::CreateResourceBuffer(device, result, &m_inNkBuffer, sizeof(uint32_t), MAX_CAPACITY + MAX_CAPACITY)
 		&& ShaderUtils::CreateResourceBuffer(device, result, &m_outNkBuffer, sizeof(uint32_t), MAX_CAPACITY + MAX_CAPACITY)
 		&& ShaderUtils::CreateResourceViewBuffer(device, result, m_inNkBuffer, &m_srvNkBuffer, MAX_CAPACITY + MAX_CAPACITY)
-		&& ShaderUtils::CreateUAVBuffer(device, result, m_outNkBuffer, &m_uavNkBuffer, MAX_CAPACITY + MAX_CAPACITY);
+		&& ShaderUtils::CreateUAVBuffer(device, result, m_outNkBuffer, &m_uavNkBuffer, MAX_CAPACITY + MAX_CAPACITY)
+		//LO Buffer
+		&& ShaderUtils::CreateResourceBuffer(device, result, &m_loBuffer, sizeof(uint32_t), 12)
+		&& ShaderUtils::CreateResourceViewBuffer(device, result, m_counterBuffer, &m_srvLoBuffer, 12)
+		&& ShaderUtils::CreateUAVBuffer(device, result, m_counterBuffer, &m_uavLoBuffer, 12);
 
 	return result;
 }
@@ -205,6 +209,10 @@ void CsSharedBuffer::ReleaseShaderParameters()
 	ShaderUtils::SafeRelease(&m_outNkBuffer);
 	ShaderUtils::SafeRelease(&m_uavNkBuffer);
 	ShaderUtils::SafeRelease(&m_srvNkBuffer);
+
+	ShaderUtils::SafeRelease(&m_loBuffer);
+	ShaderUtils::SafeRelease(&m_uavLoBuffer);
+	ShaderUtils::SafeRelease(&m_srvLoBuffer);
 }
 
 
@@ -238,6 +246,7 @@ void CsSharedBuffer::ClearUavBuffer()
 	m_deviceContext->ClearUnorderedAccessViewUint(m_uavNBuffer, clearValues);
 	m_deviceContext->ClearUnorderedAccessViewUint(m_uavO2Buffer, clearValues);
 	m_deviceContext->ClearUnorderedAccessViewUint(m_uavNkBuffer, clearValues);
+	m_deviceContext->ClearUnorderedAccessViewUint(m_uavLoBuffer, clearValues);
 }
 
 void CsSharedBuffer::SwapParticleBuffer()

@@ -1,4 +1,4 @@
-
+#define NUM_THREADS 256
 #define L 10
 
 StructuredBuffer<uint> counterBuffer : register(t0);

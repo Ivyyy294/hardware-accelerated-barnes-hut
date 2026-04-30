@@ -111,6 +111,9 @@
     <ClCompile Include="CsRadixSort_4.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="CsCornerStone_LO.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SceneDirectIntegration.h">
@@ -206,6 +209,9 @@
     <ClInclude Include="CsRadixSort_4.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="CsCornerStone_LO.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="color.hlsl">
@@ -242,6 +248,9 @@
       <Filter>Shader</Filter>
     </FxCompile>
     <FxCompile Include="CSRadixSort_4.hlsl">
+      <Filter>Shader</Filter>
+    </FxCompile>
+    <FxCompile Include="CSCornerStone_LO.hlsl">
       <Filter>Shader</Filter>
     </FxCompile>
   </ItemGroup>

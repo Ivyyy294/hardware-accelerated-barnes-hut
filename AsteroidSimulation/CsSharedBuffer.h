@@ -76,6 +76,10 @@ public:
 	ID3D11UnorderedAccessView* m_uavNkBuffer = nullptr;
 	ID3D11ShaderResourceView* m_srvNkBuffer = nullptr;
 
+	ID3D11Buffer* m_loBuffer{ nullptr };
+	ID3D11UnorderedAccessView* m_uavLoBuffer = nullptr;
+	ID3D11ShaderResourceView* m_srvLoBuffer = nullptr;
+
 //Methods
 public:
 	CsSharedBuffer();
