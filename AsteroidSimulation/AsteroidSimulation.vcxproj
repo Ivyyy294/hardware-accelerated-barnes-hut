@@ -133,6 +133,7 @@
   <ItemGroup>
     <ClCompile Include="Asteroid.cpp" />
     <ClCompile Include="BarnesHutCS.cpp" />
+    <ClCompile Include="CsCornerStone_CO.cpp" />
     <ClCompile Include="CsCornerStone_G1.cpp" />
     <ClCompile Include="CsCornerStone_G2.cpp" />
     <ClCompile Include="CsCornerStone_G3.cpp" />
@@ -170,6 +171,7 @@
   <ItemGroup>
     <ClInclude Include="Asteroid.h" />
     <ClInclude Include="BarnesHutCS.h" />
+    <ClInclude Include="CsCornerStone_CO.h" />
     <ClInclude Include="CsCornerStone_G1.h" />
     <ClInclude Include="CsCornerStone_G2.h" />
     <ClInclude Include="CsCornerStone_G3.h" />
@@ -217,6 +219,16 @@
     <FxCompile Include="color.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="CSCornerStone_CO.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Compute</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Compute</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">4.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Compute</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">4.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Compute</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
     </FxCompile>
     <FxCompile Include="CSCornerStone_F.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Compute</ShaderType>

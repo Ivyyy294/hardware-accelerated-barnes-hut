@@ -53,6 +53,9 @@ void ForceGeneratorBarnesHutCS::Start()
 
 	m_csCornerStone_LO.Initialize();
 	m_csCornerStone_LO.m_sharedBuffer = &m_buffer;
+
+	m_csCornerStone_CO.Initialize();
+	m_csCornerStone_CO.m_sharedBuffer = &m_buffer;
 }
 
 
@@ -214,6 +217,7 @@ void ForceGeneratorBarnesHutCS::BuildOctree(uint32_t elementCount)
 	}
 
 	m_csCornerStone_LO.Dispatch(1,1,1);
+	m_csCornerStone_CO.Dispatch(groupCount,1,1);
 }
 
 void ForceGeneratorBarnesHutCS::CallculateForces(uint32_t elementCount)
@@ -224,7 +228,7 @@ void ForceGeneratorBarnesHutCS::ReadBack()
 {
 	Debug::Log("Wait for compute shader...");
 	
-	while (!m_csCornerStone_LO.IsDone())
+	while (!m_csCornerStone_CO.IsDone())
 		continue;
 
 	Debug::Log("´Compute shader done!");
@@ -243,7 +247,6 @@ void ForceGeneratorBarnesHutCS::CopyTestData()
 		uint32_t data [size];
 
 		memcpy (&data[0], mappedResource.pData, sizeof(uint32_t) * size);
-
 		m_deviceContext->Unmap(m_buffer.m_outputBuffer, 0);
 	}
 }

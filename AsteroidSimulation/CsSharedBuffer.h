@@ -80,6 +80,10 @@ public:
 	ID3D11UnorderedAccessView* m_uavLoBuffer = nullptr;
 	ID3D11ShaderResourceView* m_srvLoBuffer = nullptr;
 
+	ID3D11Buffer* m_coBuffer{ nullptr };
+	ID3D11UnorderedAccessView* m_uavCoBuffer = nullptr;
+	ID3D11ShaderResourceView* m_srvCoBuffer = nullptr;
+
 //Methods
 public:
 	CsSharedBuffer();

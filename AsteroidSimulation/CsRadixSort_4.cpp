@@ -30,8 +30,8 @@ void CsRadixSort_4::UnbindShaderParameters(ID3D11DeviceContext* deviceContext)
 
 	deviceContext->CSSetConstantBuffers(0, 1, &nullBuffer);
 
-	deviceContext->CSGetShaderResources(0, 1, &nullSRV);
-	deviceContext->CSGetShaderResources(1, 1, &nullSRV);
+	deviceContext->CSSetShaderResources(0, 1, &nullSRV);
+	deviceContext->CSSetShaderResources(1, 1, &nullSRV);
 
 	deviceContext->CSSetUnorderedAccessViews(0, 1, &nullUAV, nullptr);
 	deviceContext->CSSetUnorderedAccessViews(1, 1, &nullUAV, nullptr);

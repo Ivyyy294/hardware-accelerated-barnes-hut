@@ -18,10 +18,10 @@ void CsCornerStone_LO::UnbindShaderParameters(ID3D11DeviceContext* deviceContext
 {
 	ID3D11ShaderResourceView* nullSRV = nullptr;
 	ID3D11UnorderedAccessView* nullUAV = nullptr;
-	deviceContext->CSGetShaderResources(0, 1, &nullSRV);
-	deviceContext->CSGetShaderResources(1, 1, &nullSRV);
-	deviceContext->CSGetUnorderedAccessViews(0, 1, &nullUAV);
-	deviceContext->CSGetUnorderedAccessViews(1, 1, &nullUAV);
+	deviceContext->CSSetShaderResources(0, 1, &nullSRV);
+	deviceContext->CSSetShaderResources(1, 1, &nullSRV);
+	deviceContext->CSSetUnorderedAccessViews(0, 1, &nullUAV, nullptr);
+	deviceContext->CSSetUnorderedAccessViews(1, 1, &nullUAV, nullptr);
 }
 
 bool CsCornerStone_LO::InitShaderParameters(ID3D11Device* device)

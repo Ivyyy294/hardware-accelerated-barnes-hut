@@ -15,6 +15,7 @@
 #include "CsCornerStone_G3.h"
 #include "CsCornerStone_NK.h"
 #include "CsCornerStone_LO.h"
+#include "CsCornerStone_CO.h"
 
 class ForceGeneratorBarnesHutCS :
     public ForceGeneratorBarnesHutBase
@@ -42,6 +43,7 @@ private:
 	CsCornerStone_G3 m_csCornerStone_G3;
 	CsCornerStone_NK m_csCornerStone_NK;
 	CsCornerStone_LO m_csCornerStone_LO;
+	CsCornerStone_CO m_csCornerStone_CO;
 
 	XMFLOAT3 m_boundsMin {0.f, 0.f, 0.f};
 	XMFLOAT3 m_boundsMax { 0.f, 0.f, 0.f };

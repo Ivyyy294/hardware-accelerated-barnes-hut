@@ -114,6 +114,9 @@
     <ClCompile Include="CsCornerStone_LO.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="CsCornerStone_CO.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SceneDirectIntegration.h">
@@ -212,6 +215,9 @@
     <ClInclude Include="CsCornerStone_LO.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="CsCornerStone_CO.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="color.hlsl">
@@ -251,6 +257,9 @@
       <Filter>Shader</Filter>
     </FxCompile>
     <FxCompile Include="CSCornerStone_LO.hlsl">
+      <Filter>Shader</Filter>
+    </FxCompile>
+    <FxCompile Include="CSCornerStone_CO.hlsl">
       <Filter>Shader</Filter>
     </FxCompile>
   </ItemGroup>
