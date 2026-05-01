@@ -276,5 +276,8 @@
     <None Include="color.ps">
       <Filter>Shader</Filter>
     </None>
+    <None Include="CSUtils.hlsli">
+      <Filter>Shader</Filter>
+    </None>
   </ItemGroup>
 </Project>

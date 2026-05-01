@@ -84,7 +84,7 @@ void ForceGeneratorBarnesHutCS::SetShaderParameter()
 	XMFLOAT3* positionPtr = (XMFLOAT3*)mappedPosition.pData;
 	float* massPtr = (float*)mappedMass.pData;
 
-	for (int i = 0; i < m_objects.size() && i < MAX_CAPACITY; ++i)
+	for (int i = 0; i < m_objects.size() && i < MAX_PARTICLE_COUNT; ++i)
 	{
 		Vector3 pos = m_objects[i]->GetTransform()->GetPosition();
 		positionPtr[i].x = pos.x;
@@ -174,7 +174,7 @@ void ForceGeneratorBarnesHutCS::BuildOctree(uint32_t elementCount)
 {
 	//Repeat max L times, L = 10
 
-	uint32_t groupCount = (MAX_CAPACITY + 1 + 255) / 256;
+	uint32_t groupCount = (MAX_PARTICLE_COUNT + 1 + 255) / 256;
 
 	for (uint32_t i = 0; i < 10; ++i)
 	{

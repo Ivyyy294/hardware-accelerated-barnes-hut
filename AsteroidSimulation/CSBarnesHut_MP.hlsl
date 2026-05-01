@@ -1,3 +1,5 @@
+#include "CSUtils.hlsli"
+
 #define L 10
 #define NUM_THREADS 256
 
@@ -18,6 +20,7 @@ StructuredBuffer<uint> kBuffer : register(t3);
 StructuredBuffer<uint> nkBuffer : register(t4);
 StructuredBuffer<uint> loBuffer : register(t5);
 StructuredBuffer<uint> coBuffer : register(t6);
+StructuredBuffer<uint> counterBuffer : register(t7);
 
 //Multipole data
 RWStructuredBuffer<float3> centerOfMass : register(u0);
@@ -34,6 +37,15 @@ void main(uint3 GTid : SV_GroupThreadID,
     
     const uint index = Gid.x * NUM_THREADS + GTid.x;
     
+    const uint myKey = keyBuffer[index];
+    const uint parentKIndex = BinarySearch(myKey, kBuffer, counterBuffer[0]);
+    
+    //ToDo: Fix number of internodes is one to big!!! 
+    const uint parentNkIndex = parentKIndex + counterBuffer[1] - 1;
+    
+    //const uint iStart = kBuffer[parentKIndex];
+    //const uint iEnd;
+    
     //debugBuffer[index] = keyBuffer[index];
-    debugBuffer[index] = coBuffer[index];
+    debugBuffer[index] = parentNkIndex;
 }

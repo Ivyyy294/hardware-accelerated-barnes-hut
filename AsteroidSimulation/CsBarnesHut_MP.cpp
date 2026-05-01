@@ -16,6 +16,7 @@ void CsBarnesHut_MP::BindShaderParameters(ID3D11DeviceContext* deviceContext)
 	deviceContext->CSSetShaderResources(4, 1, &m_sharedBuffer->m_srvNkBuffer);
 	deviceContext->CSSetShaderResources(5, 1, &m_sharedBuffer->m_srvLoBuffer);
 	deviceContext->CSSetShaderResources(6, 1, &m_sharedBuffer->m_srvCoBuffer);
+	deviceContext->CSSetShaderResources(7, 1, &m_sharedBuffer->m_srvCounterBuffer);
 
 	deviceContext->CSSetUnorderedAccessViews(7, 1, &m_sharedBuffer->m_uavDebugBuffer, nullptr);
 }
@@ -31,6 +32,9 @@ void CsBarnesHut_MP::UnbindShaderParameters(ID3D11DeviceContext* deviceContext)
 	deviceContext->CSSetShaderResources(4, 1, &nullSRV);
 	deviceContext->CSSetShaderResources(5, 1, &nullSRV);
 	deviceContext->CSSetShaderResources(6, 1, &nullSRV);
+	deviceContext->CSSetShaderResources(7, 1, &nullSRV);
+
+	deviceContext->CSSetUnorderedAccessViews(7, 1, &nullUAV, nullptr);
 }
 
 bool CsBarnesHut_MP::InitShaderParameters(ID3D11Device* device)
