@@ -16,31 +16,30 @@ void main( uint3 DTid : SV_DispatchThreadID )
     
     GroupMemoryBarrierWithGroupSync();
     
-    
-    if (index > kSize)
-        return;
-    
-    uint kVal = inKBuffer[index];
-    uint oVal = inOBuffer[index];
-
-    uint outKIndex = inO2Buffer[index];
-
-    if (oVal == 1)
-        outKBuffer[outKIndex] = kVal;
-    else if (oVal == 8)
+    if (index <= kSize)
     {
-        uint kDelta = inKBuffer[index + 1] - kVal;
-        uint iDelta = kDelta / 8;
+        uint kVal = inKBuffer[index];
+        uint oVal = inOBuffer[index];
+
+        uint outKIndex = inO2Buffer[index];
+
+        if (oVal == 1)
+            outKBuffer[outKIndex] = kVal;
+        else if (oVal == 8)
+        {
+            uint kDelta = inKBuffer[index + 1] - kVal;
+            uint iDelta = kDelta / 8;
         
-        for (int j = 0; j < 8; ++j)
-            outKBuffer[outKIndex + j] = kVal + j * iDelta;
+            for (int j = 0; j < 8; ++j)
+                outKBuffer[outKIndex + j] = kVal + j * iDelta;
+        }
+    
+        GroupMemoryBarrierWithGroupSync();
+    
+        if (index < kSize)
+            InterlockedAdd(counterBuffer[0], oVal);
     }
     
-    GroupMemoryBarrierWithGroupSync();
-    
-    if (index >= kSize)
-        return;
-    
-    InterlockedAdd(counterBuffer[0], oVal);
+    //debugBuffer[index] = outKBuffer[index];
     //outKBuffer[0] = counterBuffer[0];
 }
