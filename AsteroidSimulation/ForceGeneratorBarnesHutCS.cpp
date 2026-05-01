@@ -56,6 +56,9 @@ void ForceGeneratorBarnesHutCS::Start()
 
 	m_csCornerStone_CO.Initialize();
 	m_csCornerStone_CO.m_sharedBuffer = &m_buffer;
+
+	m_csBarnesHut_MP.Initialize();
+	m_csBarnesHut_MP.m_sharedBuffer = &m_buffer;
 }
 
 
@@ -101,6 +104,7 @@ void ForceGeneratorBarnesHutCS::SetShaderParameter()
 	m_deviceContext->CopyResource(m_buffer.m_inPositionBuffer, m_buffer.m_upPositionBuffer);
 	m_deviceContext->CopyResource(m_buffer.m_inMassBuffer, m_buffer.m_upMassBuffer);
 
+	m_maxCoord = std::ceilf(m_maxCoord);
 	m_csMortonCodes.SetShaderParameter({-m_maxCoord, -m_maxCoord, -m_maxCoord}, { m_maxCoord, m_maxCoord, m_maxCoord });
 
 	//Clear UAV
@@ -184,7 +188,6 @@ void ForceGeneratorBarnesHutCS::BuildOctree(uint32_t elementCount)
 
 		m_csCornerStone_G3.Dispatch(groupCount, 1, 1);
 
-
 		m_deviceContext->CopyResource(m_buffer.m_inKBuffer, m_buffer.m_outKBuffer);
 	}
 	
@@ -233,13 +236,15 @@ void ForceGeneratorBarnesHutCS::BuildOctree(uint32_t elementCount)
 
 void ForceGeneratorBarnesHutCS::CallculateForces(uint32_t elementCount)
 {
+	uint32_t groupCount = (elementCount + 255) / 256;
+	m_csBarnesHut_MP.Dispatch(groupCount, 1, 1);
 }
 
 void ForceGeneratorBarnesHutCS::ReadBack()
 {
 	Debug::Log("Wait for compute shader...");
 	
-	while (!m_csCornerStone_CO.IsDone())
+	while (!m_csBarnesHut_MP.IsDone())
 		continue;
 
 	Debug::Log("´Compute shader done!");

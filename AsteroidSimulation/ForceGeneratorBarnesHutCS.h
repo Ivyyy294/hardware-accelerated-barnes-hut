@@ -17,6 +17,8 @@
 #include "CsCornerStone_LO.h"
 #include "CsCornerStone_CO.h"
 
+#include "CsBarnesHut_MP.h"
+
 class ForceGeneratorBarnesHutCS :
     public ForceGeneratorBarnesHutBase
 {
@@ -44,6 +46,8 @@ private:
 	CsCornerStone_NK m_csCornerStone_NK;
 	CsCornerStone_LO m_csCornerStone_LO;
 	CsCornerStone_CO m_csCornerStone_CO;
+
+	CsBarnesHut_MP m_csBarnesHut_MP;
 
 	float m_maxCoord = 0.f;
 
