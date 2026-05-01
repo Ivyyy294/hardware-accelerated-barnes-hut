@@ -51,6 +51,7 @@ void main( uint3 DTid : SV_DispatchThreadID )
     uint leafLevel = 10 - octalBitsCount;
     uint wsKey = GetWsKey(k, leafLevel);
     nkBuffer[ni + index] = wsKey;
+    //debugBuffer[ni + index] = nkBuffer[ni + index];
     
     //Add internal nodes to K'
     
@@ -66,6 +67,6 @@ void main( uint3 DTid : SV_DispatchThreadID )
     uint wsInt = GetWsKey(k, internalLevel);
     uint internalIndex = GetIndernalNodeId(k, internalLevel);
     nkBuffer[internalIndex] = wsInt;
+    //debugBuffer[internalIndex] = nkBuffer[internalIndex];
     InterlockedAdd(counterBuffer[1], 1);
-    GroupMemoryBarrierWithGroupSync();
 }

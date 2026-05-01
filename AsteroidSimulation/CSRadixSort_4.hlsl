@@ -62,4 +62,5 @@ void main(uint3 DTid : SV_DispatchThreadID,
     
     GroupMemoryBarrierWithGroupSync();
     //debugBuffer[index] = mortonCodeOut[index];
+    //debugBuffer[index] = elementCount;
 }

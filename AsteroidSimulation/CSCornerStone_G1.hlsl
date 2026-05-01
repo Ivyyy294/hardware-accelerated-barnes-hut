@@ -47,4 +47,6 @@ void main( uint3 DTid : SV_DispatchThreadID )
         oBuffer[index] = 0;
     else
         oBuffer[index] = 1;
+    
+    //debugBuffer[index] = oBuffer[index];
 }
