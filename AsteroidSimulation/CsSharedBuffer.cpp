@@ -114,6 +114,20 @@ HRESULT CsSharedBuffer::InitCornerStoneShaderParameters(ID3D11Device* device)
 	return result;
 }
 
+HRESULT CsSharedBuffer::InitBarnesHutShaderParameters(ID3D11Device* device)
+{
+	HRESULT result;
+
+	bool ok = ShaderUtils::CreateResourceBuffer(device, result, &m_centerMassBuffer, sizeof(XMFLOAT3), MAX_CAPACITY)
+		&& ShaderUtils::CreateResourceViewBuffer(device, result, m_centerMassBuffer, &m_srvCenterMassBuffer, MAX_CAPACITY)
+		&& ShaderUtils::CreateUAVBuffer(device, result, m_centerMassBuffer, &m_uavCenterMassBuffer, MAX_CAPACITY)
+		&& ShaderUtils::CreateResourceBuffer(device, result, &m_combinedMassBuffer, sizeof(XMFLOAT3), MAX_CAPACITY)
+		&& ShaderUtils::CreateResourceViewBuffer(device, result, m_combinedMassBuffer, &m_srvCombinedMassBuffer, MAX_CAPACITY)
+		&& ShaderUtils::CreateUAVBuffer(device, result, m_combinedMassBuffer, &m_uavCombinedMassBuffer, MAX_CAPACITY);
+
+	return result;
+}
+
 
 bool CsSharedBuffer::InitShaderParameters()
 {
@@ -160,7 +174,15 @@ bool CsSharedBuffer::InitShaderParameters()
 	if (FAILED(result))
 		return false;
 
-	InitCornerStoneShaderParameters(device);
+	result = InitCornerStoneShaderParameters(device);
+
+	if (FAILED(result))
+		return false;
+
+	result = InitBarnesHutShaderParameters(device);
+
+	if (FAILED(result))
+		return false;
 
 	return true;
 }
@@ -223,6 +245,14 @@ void CsSharedBuffer::ReleaseShaderParameters()
 	ShaderUtils::SafeRelease(&m_coBuffer);
 	ShaderUtils::SafeRelease(&m_uavCoBuffer);
 	ShaderUtils::SafeRelease(&m_srvCoBuffer);
+
+	ShaderUtils::SafeRelease(&m_centerMassBuffer);
+	ShaderUtils::SafeRelease(&m_uavCenterMassBuffer);
+	ShaderUtils::SafeRelease(&m_srvCenterMassBuffer);
+
+	ShaderUtils::SafeRelease(&m_combinedMassBuffer);
+	ShaderUtils::SafeRelease(&m_uavCombinedMassBuffer);
+	ShaderUtils::SafeRelease(&m_srvCombinedMassBuffer);
 }
 
 
@@ -258,6 +288,8 @@ void CsSharedBuffer::ClearUavBuffer()
 	m_deviceContext->ClearUnorderedAccessViewUint(m_uavNkBuffer, clearValues);
 	m_deviceContext->ClearUnorderedAccessViewUint(m_uavLoBuffer, clearValues);
 	m_deviceContext->ClearUnorderedAccessViewUint(m_uavCoBuffer, clearValues);
+	m_deviceContext->ClearUnorderedAccessViewUint(m_uavCombinedMassBuffer, clearValues);
+	m_deviceContext->ClearUnorderedAccessViewUint(m_uavCenterMassBuffer, clearValues);
 }
 
 void CsSharedBuffer::SwapParticleBuffer()

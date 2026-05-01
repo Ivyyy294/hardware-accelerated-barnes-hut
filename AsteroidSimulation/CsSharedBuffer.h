@@ -85,6 +85,14 @@ public:
 	ID3D11UnorderedAccessView* m_uavCoBuffer = nullptr;
 	ID3D11ShaderResourceView* m_srvCoBuffer = nullptr;
 
+	//Barnes hut buffer
+	ID3D11Buffer* m_centerMassBuffer{ nullptr };
+	ID3D11UnorderedAccessView* m_uavCenterMassBuffer = nullptr;
+	ID3D11ShaderResourceView* m_srvCenterMassBuffer = nullptr;
+
+	ID3D11Buffer* m_combinedMassBuffer{ nullptr };
+	ID3D11UnorderedAccessView* m_uavCombinedMassBuffer = nullptr;
+	ID3D11ShaderResourceView* m_srvCombinedMassBuffer = nullptr;
 //Methods
 public:
 	CsSharedBuffer();
@@ -102,6 +110,7 @@ private:
 	HRESULT InitMassShaderParameters(ID3D11Device* device);
 	HRESULT InitSortingShaderParameters(ID3D11Device* device);
 	HRESULT InitCornerStoneShaderParameters(ID3D11Device* device);
+	HRESULT InitBarnesHutShaderParameters(ID3D11Device* device);
 
 };
 

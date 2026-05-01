@@ -33,19 +33,71 @@ RWStructuredBuffer<uint> debugBuffer : register(u7);
 void main(uint3 GTid : SV_GroupThreadID,
           uint3 Gid : SV_GroupID)
 {
-    const float t_CellWidth = 17.f * 2.f;
-    
     const uint index = Gid.x * NUM_THREADS + GTid.x;
     
-    const uint myKey = keyBuffer[index];
-    const uint parentKIndex = BinarySearch(myKey, kBuffer, counterBuffer[0]);
+    const uint ni = counterBuffer[1] - 1;
+    const uint nl = counterBuffer[0];
     
-    //ToDo: Fix number of internodes is one to big!!! 
-    const uint parentNkIndex = parentKIndex + counterBuffer[1] - 1;
+    const uint indexK = index + ni;
     
-    //const uint iStart = kBuffer[parentKIndex];
-    //const uint iEnd;
+    //Init leaf nodes K
+    if (indexK >= nl)
+        return;
+
+    combinedMass[index] = -1.f;
     
-    //debugBuffer[index] = keyBuffer[index];
-    debugBuffer[index] = parentNkIndex;
+    float mass = 0.f;
+    float3 center;
+    
+    const uint kVal = kBuffer[index];
+    const uint k1Val = kBuffer[index + 1];
+        
+    uint indexBegin = BinarySearch(kVal, keyBuffer, 33);
+    uint indexLast = BinarySearch(k1Val, keyBuffer, 33);
+        
+    //debugBuffer[index] = indexLast;
+        
+    for (uint i = indexBegin; i < indexLast; ++i)
+    {
+        const float iMass = massBuffer[i];
+        mass += iMass;
+        
+        const float3 iPos = posBuffer[i];
+        center.x += iPos.x * iMass;
+        center.y += iPos.y * iMass;
+        center.z += iPos.z * iMass;
+    }
+    
+    centerOfMass[indexK] = center / mass;
+    combinedMass[indexK] = mass;
+
+    GroupMemoryBarrierWithGroupSync();
+    
+    if (index >= ni)
+        return;
+
+    mass = 0.f;
+    center = float3(0.f, 0.f, 0.f);
+    
+    indexBegin = coBuffer[index];
+    
+    for (uint i = indexBegin; i < indexBegin + 8;)
+    {
+        if (combinedMass[i] >= 0.f)
+        {
+            const float iMass = combinedMass[i];
+            mass += iMass;
+        
+            const float3 iPos = centerOfMass[i];
+            center.x += iPos.x * iMass;
+            center.y += iPos.y * iMass;
+            center.z += iPos.z * iMass;
+            debugBuffer[index] = mass;
+            ++i;
+        }
+    }
+    
+    centerOfMass[index] = center / mass;
+    combinedMass[index] = mass;
+    debugBuffer[index] = combinedMass[index];
 }
