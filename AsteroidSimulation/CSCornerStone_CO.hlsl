@@ -35,5 +35,5 @@ void main(uint3 GTid : SV_GroupThreadID,
     const uint firstChildIndex = childLeafLevelOffset + nodeIndexOffset;
     
     coBuffer[index] = firstChildIndex;
-    debugBuffer[index] = coBuffer[index];
+    //debugBuffer[index] = coBuffer[index];
 }

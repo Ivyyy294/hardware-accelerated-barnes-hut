@@ -39,7 +39,7 @@ void main(uint3 GTid : SV_GroupThreadID,
     if (index >= L + 2)
         return;
     
-    uint bufferSize = 25; //counterBuffer[0];
+    uint bufferSize = counterBuffer[0];
     uint searchVal = 1 << 3 * index;
     //debugBuffer[index] = searchVal;
     
