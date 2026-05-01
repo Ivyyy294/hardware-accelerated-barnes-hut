@@ -14,7 +14,7 @@ void main(uint3 GTid : SV_GroupThreadID,
 {
     uint index = Gid.x * NUM_THREADS + GTid.x;
     //debugBuffer[index] = nkBuffer[index];
-    uint ni = counterBuffer[1];
+    uint ni = counterBuffer[1] - 1;
     
     if (index >= ni)
     {
@@ -34,6 +34,6 @@ void main(uint3 GTid : SV_GroupThreadID,
     
     const uint firstChildIndex = childLeafLevelOffset + nodeIndexOffset;
     
-    //coBuffer[index] = firstChildIndex;
-    debugBuffer[index] = counterBuffer[0];
+    coBuffer[index] = firstChildIndex;
+    //debugBuffer[index] = counterBuffer[0];
 }
