@@ -6,7 +6,7 @@ SpatialOctree::SpatialOctree(Vector3 center, Vector3 halfExtents)
 	, m_halfExtents (halfExtents)
 	, m_children ()
 {
-	m_length = m_halfExtents.Magnitude() * 2.f;
+	m_length = m_halfExtents.x * 2.f;
 }
 
 bool SpatialOctree::CheckBounds(PhysicObject* physicObject)

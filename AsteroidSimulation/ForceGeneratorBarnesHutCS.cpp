@@ -89,13 +89,9 @@ void ForceGeneratorBarnesHutCS::SetShaderParameter()
 		positionPtr[i].z = pos.z;
 		massPtr[i] = m_objects[i]->GetMass();
 
-		m_boundsMax.x = max(m_boundsMax.x, pos.x);
-		m_boundsMax.y = max(m_boundsMax.y, pos.y);
-		m_boundsMax.z = max(m_boundsMax.z, pos.z);
-
-		m_boundsMin.x = min(m_boundsMin.x, pos.x);
-		m_boundsMin.y = min(m_boundsMin.y, pos.y);
-		m_boundsMin.z = min(m_boundsMin.z, pos.z);
+		m_maxCoord = max(m_maxCoord, std::abs(pos.x));
+		m_maxCoord = max(m_maxCoord, std::abs(pos.y));
+		m_maxCoord = max(m_maxCoord, std::abs(pos.z));
 	}
 
 	// Unlock the constant buffer.
@@ -105,7 +101,7 @@ void ForceGeneratorBarnesHutCS::SetShaderParameter()
 	m_deviceContext->CopyResource(m_buffer.m_inPositionBuffer, m_buffer.m_upPositionBuffer);
 	m_deviceContext->CopyResource(m_buffer.m_inMassBuffer, m_buffer.m_upMassBuffer);
 
-	m_csMortonCodes.SetShaderParameter(m_boundsMin, m_boundsMax);
+	m_csMortonCodes.SetShaderParameter({-m_maxCoord, -m_maxCoord, -m_maxCoord}, { m_maxCoord, m_maxCoord, m_maxCoord });
 
 	//Clear UAV
 	m_buffer.ClearUavBuffer();

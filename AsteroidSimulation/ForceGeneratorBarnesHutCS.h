@@ -45,8 +45,7 @@ private:
 	CsCornerStone_LO m_csCornerStone_LO;
 	CsCornerStone_CO m_csCornerStone_CO;
 
-	XMFLOAT3 m_boundsMin {0.f, 0.f, 0.f};
-	XMFLOAT3 m_boundsMax { 0.f, 0.f, 0.f };
+	float m_maxCoord = 0.f;
 
 //Methods
 public:
