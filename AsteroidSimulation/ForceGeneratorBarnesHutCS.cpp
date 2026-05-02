@@ -92,6 +92,8 @@ void ForceGeneratorBarnesHutCS::SetShaderParameter()
 		positionPtr[i].z = pos.z;
 		massPtr[i] = m_objects[i]->GetMass();
 
+		//ToDo: make bounding box tighter! We can make it smaller if the center is
+		//not at 00
 		m_maxCoord = max(m_maxCoord, std::abs(pos.x));
 		m_maxCoord = max(m_maxCoord, std::abs(pos.y));
 		m_maxCoord = max(m_maxCoord, std::abs(pos.z));
@@ -237,6 +239,7 @@ void ForceGeneratorBarnesHutCS::BuildOctree(uint32_t elementCount)
 void ForceGeneratorBarnesHutCS::CallculateForces(uint32_t elementCount)
 {
 	uint32_t groupCount = (elementCount + 255) / 256;
+	m_buffer.SetBhSettingsParameter (elementCount, m_maxCoord * 2.f);
 	m_csBarnesHut_MP.Dispatch(groupCount, 1, 1);
 }
 

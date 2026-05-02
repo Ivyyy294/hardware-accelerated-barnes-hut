@@ -2,6 +2,14 @@
 
 #include "CSSettings.h"
 
+struct BhSettings
+{
+	uint32_t pCount;
+	float globalCellWidth;
+	uint32_t padding[2];
+};
+
+
 class CsSharedBuffer
 {
 //Variables
@@ -86,6 +94,8 @@ public:
 	ID3D11ShaderResourceView* m_srvCoBuffer = nullptr;
 
 	//Barnes hut buffer
+	ID3D11Buffer* m_bhSettingsBuffer{ nullptr };
+
 	ID3D11Buffer* m_centerMassBuffer{ nullptr };
 	ID3D11UnorderedAccessView* m_uavCenterMassBuffer = nullptr;
 	ID3D11ShaderResourceView* m_srvCenterMassBuffer = nullptr;
@@ -100,7 +110,7 @@ public:
 	bool InitShaderParameters();
 	void ReleaseShaderParameters();
 	void SetSettingParameter(uint32_t elementCount, uint32_t dispatchGroupCount, uint32_t digitPlace = 0);
-
+	void SetBhSettingsParameter(uint32_t elementCount, float cellWidth);
 	void ClearUavBuffer();
 	void SwapParticleBuffer ();
 

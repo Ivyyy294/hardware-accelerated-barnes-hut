@@ -8,6 +8,8 @@ CsBarnesHut_MP::CsBarnesHut_MP()
 
 void CsBarnesHut_MP::BindShaderParameters(ID3D11DeviceContext* deviceContext)
 {
+	deviceContext->CSSetConstantBuffers(0, 1, &m_sharedBuffer->m_bhSettingsBuffer);
+
 	deviceContext->CSSetShaderResources(0, 1, &m_sharedBuffer->m_srvMortonCodeBuffer);
 	deviceContext->CSSetShaderResources(1, 1, &m_sharedBuffer->m_srvPositionBuffer);
 	deviceContext->CSSetShaderResources(2, 1, &m_sharedBuffer->m_srvMassBuffer);

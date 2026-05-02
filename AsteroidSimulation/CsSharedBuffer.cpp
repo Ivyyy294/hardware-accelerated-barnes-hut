@@ -118,7 +118,8 @@ HRESULT CsSharedBuffer::InitBarnesHutShaderParameters(ID3D11Device* device)
 {
 	HRESULT result;
 
-	bool ok = ShaderUtils::CreateResourceBuffer(device, result, &m_centerMassBuffer, sizeof(XMFLOAT3), MAX_CAPACITY)
+	bool ok = ShaderUtils::CreateConstBuffer(device, result, &m_bhSettingsBuffer, sizeof(BhSettings))
+		&& ShaderUtils::CreateResourceBuffer(device, result, &m_centerMassBuffer, sizeof(XMFLOAT3), MAX_CAPACITY)
 		&& ShaderUtils::CreateResourceViewBuffer(device, result, m_centerMassBuffer, &m_srvCenterMassBuffer, MAX_CAPACITY)
 		&& ShaderUtils::CreateUAVBuffer(device, result, m_centerMassBuffer, &m_uavCenterMassBuffer, MAX_CAPACITY)
 		&& ShaderUtils::CreateResourceBuffer(device, result, &m_combinedMassBuffer, sizeof(XMFLOAT3), MAX_CAPACITY)
@@ -272,6 +273,23 @@ void CsSharedBuffer::SetSettingParameter(uint32_t elementCount, uint32_t dispatc
 	settings->digitPlace = digitPlace;
 
 	m_deviceContext->Unmap(m_settingsBuffer, 0);
+}
+
+void CsSharedBuffer::SetBhSettingsParameter(uint32_t elementCount, float cellWidth)
+{
+	//Settings buffer
+	D3D11_MAPPED_SUBRESOURCE mappedSettings;
+
+	HRESULT result = m_deviceContext->Map(m_bhSettingsBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedSettings);
+
+	if (FAILED(result))
+		return;
+
+	BhSettings* settings = (BhSettings*)mappedSettings.pData;
+	settings->pCount = elementCount;
+	settings->globalCellWidth = cellWidth;
+
+	m_deviceContext->Unmap(m_bhSettingsBuffer, 0);
 }
 
 void CsSharedBuffer::ClearUavBuffer()

@@ -18,3 +18,14 @@ uint BinarySearch(uint key, StructuredBuffer<uint> buffer, uint bufferSize)
     
     return low;
 }
+
+uint Clz30 (uint val)
+{
+    return 29 - firstbithigh(val);
+}
+
+uint GetTreeLevelFromWs(uint ws)
+{
+    const uint msb = firstbithigh(ws);
+    return msb / 3;
+}

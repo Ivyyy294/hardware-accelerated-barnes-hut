@@ -1,6 +1,8 @@
 #define NUM_THREADS 256
 #define L 10
 
+#include "CSUtils.hlsli"
+
 StructuredBuffer<uint> kBuffer : register(t0);
 RWStructuredBuffer<uint> nkBuffer : register(u0);
 RWStructuredBuffer<uint> counterBuffer : register(u1);
@@ -78,7 +80,7 @@ void main(uint3 GTid : SV_GroupThreadID,
     
     //Add internal nodes to K'
     //30-bit clz
-    const uint d = 29 - firstbithigh(k ^ k1);
+    const uint d = Clz30(k ^ k1);
     const bool isInternalNode = d % 3 == 0;
     const uint internalLevel = d / 3;
     
