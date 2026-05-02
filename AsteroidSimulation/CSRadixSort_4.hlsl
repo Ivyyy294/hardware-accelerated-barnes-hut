@@ -23,7 +23,7 @@ void main(uint3 DTid : SV_DispatchThreadID,
 {
     uint index = Gid.x * NUM_THREADS + GTid.x;
     //debugBuffer[index] = exclusivePrefixSum[index];
-    
+    //debugBuffer[index] = mortonCodeIn[index];
     if (index >= elementCount)
         return;
     

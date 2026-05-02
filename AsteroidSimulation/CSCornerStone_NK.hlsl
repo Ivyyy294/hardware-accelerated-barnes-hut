@@ -6,6 +6,8 @@ RWStructuredBuffer<uint> nkBuffer : register(u0);
 RWStructuredBuffer<uint> counterBuffer : register(u1);
 RWStructuredBuffer<uint> debugBuffer : register(u2);
 
+static const int MU[8] = { 0, -1, -2, -3, 3, 2, 1, 0 };
+
 uint GetWsKey(uint val, uint level)
 {
     uint shiftInt = 3 * (L - level);
@@ -14,29 +16,47 @@ uint GetWsKey(uint val, uint level)
     return wsInt;
 }
 
-uint GetIndernalNodeId (uint k, uint l)
+uint GetOctalDigit (uint ki, uint t)
 {
-    uint baseCount = ((1 << (3 * l)) - 1) / 7;
-
-    uint prefix = k >> 3 * (L - l);
-    
-    uint internalIndex = baseCount + prefix;
-    return internalIndex;
+    // shift amount = 3 * (L - t)
+    uint shift = 3u * (L - t);
+    // extract 3 bits
+    return (ki >> shift) & 7u;
 }
 
-[numthreads(256, 1, 1)]
-void main( uint3 DTid : SV_DispatchThreadID )
+int GetIndernalDelta (uint ki, uint d)
+{
+    uint max = (d / 3) + 1;
+    
+    int delta = 0;
+    
+    for (uint i = 0; i < max; ++i)
+    {
+        uint octalBit = GetOctalDigit(ki, (i + 1));
+        delta += MU[octalBit];
+    }
+    
+    return delta;
+}
+
+[numthreads(NUM_THREADS, 1, 1)]
+void main(uint3 GTid : SV_GroupThreadID,
+          uint3 Gid : SV_GroupID)
 {
     uint kSize = counterBuffer[0];
     uint ni = (kSize - 1) / 7;
     
-    uint index = DTid.x;
+    uint index = Gid.x * NUM_THREADS + GTid.x;
+    //debugBuffer[index] = ni;
+    //return;
 
     if (index >= kSize)
         return;
     
+    //debugBuffer[index] = 999;
+    
     if (index == 0)
-        counterBuffer[1] = 0;
+        counterBuffer[1] = ni;
     
     GroupMemoryBarrierWithGroupSync();
     
@@ -47,26 +67,32 @@ void main( uint3 DTid : SV_DispatchThreadID )
     
     //A key at level l covers 8^L-l keys
     //L = 10
-    uint octalBitsCount = floor(firstbithigh(keyRange) / 3);
+    uint octalBitsCount = firstbithigh(keyRange) / 3;
     uint leafLevel = 10 - octalBitsCount;
     uint wsKey = GetWsKey(k, leafLevel);
     nkBuffer[ni + index] = wsKey;
     //debugBuffer[ni + index] = nkBuffer[ni + index];
     
+    if (index >= kSize - 1)
+        return;
+    
     //Add internal nodes to K'
-    
     //30-bit clz
-    uint d = 29 - firstbithigh(k ^ k1);
-    bool isInternalNode = d % 3 == 0;
-    uint internalLevel = d / 3;
-    
+    const uint d = 29 - firstbithigh(k ^ k1);
+    const bool isInternalNode = d % 3 == 0;
+    const uint internalLevel = d / 3;
     
     if (!isInternalNode)
         return;
-        
-    uint wsInt = GetWsKey(k, internalLevel);
-    uint internalIndex = GetIndernalNodeId(k, internalLevel);
+    
+    GroupMemoryBarrierWithGroupSync();
+    
+    const uint wsInt = GetWsKey(k, internalLevel);
+    int internalKeyDelta = GetIndernalDelta(k, d);
+    uint internalIndex = (index + internalKeyDelta) / 7;
     nkBuffer[internalIndex] = wsInt;
-    //debugBuffer[internalIndex] = nkBuffer[internalIndex];
-    InterlockedAdd(counterBuffer[1], 1);
+    GroupMemoryBarrierWithGroupSync();
+    //debugBuffer[index] = internalIndex;
+    
+    //nkBuffer[0] = 1999;
 }

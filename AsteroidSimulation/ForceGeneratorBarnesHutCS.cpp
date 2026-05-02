@@ -211,7 +211,7 @@ void ForceGeneratorBarnesHutCS::BuildOctree(uint32_t elementCount)
 		m_deviceContext->Unmap(m_buffer.m_stagingCounterBuffer, 0);
 
 		//ToDo: why is ni aka data[1], 1 bigger than expected?
-		elementCount = data[0] + data [1] - 1;
+		elementCount = data[0] + data [1];
 	}
 
 	m_buffer.SetSettingParameter(elementCount, 40);
