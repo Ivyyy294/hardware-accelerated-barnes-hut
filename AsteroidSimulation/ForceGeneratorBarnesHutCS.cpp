@@ -1,6 +1,5 @@
 #include "pch.h"
 #include "ForceGeneratorBarnesHutCS.h"
-#include "ShaderUtils.h"
 
 ForceGeneratorBarnesHutCS::ForceGeneratorBarnesHutCS()
 	: m_deviceContext (D3D::Instance().GetDeviceContext())
@@ -59,6 +58,9 @@ void ForceGeneratorBarnesHutCS::Start()
 
 	m_csBarnesHut_MP.Initialize();
 	m_csBarnesHut_MP.m_sharedBuffer = &m_buffer;
+
+	m_csBarnesHut_CF.Initialize();
+	m_csBarnesHut_CF.m_sharedBuffer = &m_buffer;
 }
 
 
@@ -139,7 +141,7 @@ void ForceGeneratorBarnesHutCS::Dispatch()
 	BuildOctree (capacity);
 	CallculateForces (capacity);
 
-	m_deviceContext->CopyResource(m_buffer.m_outputBuffer, m_buffer.m_debugBuffer);
+	CopyTestData();
 }
 
 void ForceGeneratorBarnesHutCS::CallculateMortonKeys(uint32_t elementCount)
@@ -239,24 +241,27 @@ void ForceGeneratorBarnesHutCS::BuildOctree(uint32_t elementCount)
 void ForceGeneratorBarnesHutCS::CallculateForces(uint32_t elementCount)
 {
 	uint32_t groupCount = (elementCount + 255) / 256;
-	m_buffer.SetBhSettingsParameter (elementCount, m_maxCoord * 2.f);
+	m_buffer.SetBhSettingsParameter (elementCount, m_maxCoord * 2.f, IvyyyPhysic::GravitationalConstant(), m_theta);
 	m_csBarnesHut_MP.Dispatch(groupCount, 1, 1);
-}
+	m_csBarnesHut_CF.Dispatch(groupCount, 1, 1);
 
-void ForceGeneratorBarnesHutCS::ReadBack()
-{
-	Debug::Log("Wait for compute shader...");
-	
-	while (!m_csBarnesHut_MP.IsDone())
-		continue;
+	m_deviceContext->CopyResource(m_buffer.m_outForceBuffer, m_buffer.m_forceBuffer);
 
-	Debug::Log("´Compute shader done!");
-	
-	CopyTestData();
+	//Determine nk size 
+	D3D11_MAPPED_SUBRESOURCE mappedResource;
+	HRESULT hr = m_deviceContext->Map(m_buffer.m_outForceBuffer, 0, D3D11_MAP_READ, 0, &mappedResource);
+
+	if (SUCCEEDED(hr))
+	{
+		memcpy(&m_forceBuffer, mappedResource.pData, sizeof(float) * MAX_CAPACITY);
+		m_deviceContext->Unmap(m_buffer.m_stagingCounterBuffer, 0);
+	}
 }
 
 void ForceGeneratorBarnesHutCS::CopyTestData()
 {
+	m_deviceContext->CopyResource(m_buffer.m_outputBuffer, m_buffer.m_debugBuffer);
+
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
 	HRESULT hr = m_deviceContext->Map(m_buffer.m_outputBuffer, 0, D3D11_MAP_READ, 0, &mappedResource);
 

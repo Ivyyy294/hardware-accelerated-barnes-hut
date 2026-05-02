@@ -120,6 +120,9 @@
     <ClCompile Include="CsBarnesHut_MP.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="CsBarnesHut_CF.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SceneDirectIntegration.h">
@@ -224,6 +227,9 @@
     <ClInclude Include="CsBarnesHut_MP.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="CsBarnesHut_CF.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="color.hlsl">
@@ -269,6 +275,9 @@
       <Filter>Shader</Filter>
     </FxCompile>
     <FxCompile Include="CSBarnesHut_MP.hlsl">
+      <Filter>Shader</Filter>
+    </FxCompile>
+    <FxCompile Include="CSBarnesHut_CF.hlsl">
       <Filter>Shader</Filter>
     </FxCompile>
   </ItemGroup>

@@ -6,7 +6,8 @@ struct BhSettings
 {
 	uint32_t pCount;
 	float globalCellWidth;
-	uint32_t padding[2];
+	float ugc;
+	float theta;
 };
 
 
@@ -103,6 +104,11 @@ public:
 	ID3D11Buffer* m_combinedMassBuffer{ nullptr };
 	ID3D11UnorderedAccessView* m_uavCombinedMassBuffer = nullptr;
 	ID3D11ShaderResourceView* m_srvCombinedMassBuffer = nullptr;
+
+	ID3D11Buffer* m_forceBuffer{ nullptr };
+	ID3D11Buffer* m_outForceBuffer{ nullptr };
+	ID3D11UnorderedAccessView* m_uavForceBuffer = nullptr;
+
 //Methods
 public:
 	CsSharedBuffer();
@@ -110,7 +116,7 @@ public:
 	bool InitShaderParameters();
 	void ReleaseShaderParameters();
 	void SetSettingParameter(uint32_t elementCount, uint32_t dispatchGroupCount, uint32_t digitPlace = 0);
-	void SetBhSettingsParameter(uint32_t elementCount, float cellWidth);
+	void SetBhSettingsParameter(uint32_t elementCount, float cellWidth, float ugc, float theta);
 	void ClearUavBuffer();
 	void SwapParticleBuffer ();
 

@@ -124,7 +124,10 @@ HRESULT CsSharedBuffer::InitBarnesHutShaderParameters(ID3D11Device* device)
 		&& ShaderUtils::CreateUAVBuffer(device, result, m_centerMassBuffer, &m_uavCenterMassBuffer, MAX_CAPACITY)
 		&& ShaderUtils::CreateResourceBuffer(device, result, &m_combinedMassBuffer, sizeof(XMFLOAT3), MAX_CAPACITY)
 		&& ShaderUtils::CreateResourceViewBuffer(device, result, m_combinedMassBuffer, &m_srvCombinedMassBuffer, MAX_CAPACITY)
-		&& ShaderUtils::CreateUAVBuffer(device, result, m_combinedMassBuffer, &m_uavCombinedMassBuffer, MAX_CAPACITY);
+		&& ShaderUtils::CreateUAVBuffer(device, result, m_combinedMassBuffer, &m_uavCombinedMassBuffer, MAX_CAPACITY)
+		&& ShaderUtils::CreateResourceBuffer(device, result, &m_forceBuffer, sizeof(XMFLOAT3), MAX_CAPACITY)
+		&& ShaderUtils::CreateStagingBuffer(device, result, &m_outForceBuffer, sizeof(XMFLOAT3), MAX_CAPACITY)
+		&& ShaderUtils::CreateUAVBuffer(device, result, m_forceBuffer, &m_uavForceBuffer, MAX_CAPACITY);
 
 	return result;
 }
@@ -275,7 +278,7 @@ void CsSharedBuffer::SetSettingParameter(uint32_t elementCount, uint32_t dispatc
 	m_deviceContext->Unmap(m_settingsBuffer, 0);
 }
 
-void CsSharedBuffer::SetBhSettingsParameter(uint32_t elementCount, float cellWidth)
+void CsSharedBuffer::SetBhSettingsParameter(uint32_t elementCount, float cellWidth, float ugc, float theta)
 {
 	//Settings buffer
 	D3D11_MAPPED_SUBRESOURCE mappedSettings;
@@ -288,6 +291,8 @@ void CsSharedBuffer::SetBhSettingsParameter(uint32_t elementCount, float cellWid
 	BhSettings* settings = (BhSettings*)mappedSettings.pData;
 	settings->pCount = elementCount;
 	settings->globalCellWidth = cellWidth;
+	settings->ugc = ugc;
+	settings->theta = theta;
 
 	m_deviceContext->Unmap(m_bhSettingsBuffer, 0);
 }

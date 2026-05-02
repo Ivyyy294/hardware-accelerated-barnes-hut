@@ -27,8 +27,12 @@ void CsBarnesHut_MP::BindShaderParameters(ID3D11DeviceContext* deviceContext)
 
 void CsBarnesHut_MP::UnbindShaderParameters(ID3D11DeviceContext* deviceContext)
 {
+	ID3D11Buffer* nullBuffer = nullptr;
 	ID3D11ShaderResourceView* nullSRV = nullptr;
 	ID3D11UnorderedAccessView* nullUAV = nullptr;
+
+	deviceContext->CSSetConstantBuffers(0,1,&nullBuffer);
+
 	deviceContext->CSSetShaderResources(0, 1, &nullSRV);
 	deviceContext->CSSetShaderResources(1, 1, &nullSRV);
 	deviceContext->CSSetShaderResources(2, 1, &nullSRV);

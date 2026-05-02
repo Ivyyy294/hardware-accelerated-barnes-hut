@@ -4,11 +4,14 @@
 
 #include "CsSharedBuffer.h"
 #include "CsSettings.h"
+
 #include "CsMortonCodes.h"
+
 #include "CsRadixSort_1.h"
 #include "CsRadixSort_2.h"
 #include "CsRadixSort_3.h"
 #include "CsRadixSort_4.h"
+
 #include "CsCornerStone_F.h"
 #include "CsCornerStone_G1.h"
 #include "CsCornerStone_G2.h"
@@ -18,6 +21,9 @@
 #include "CsCornerStone_CO.h"
 
 #include "CsBarnesHut_MP.h"
+#include "CsBarnesHut_CF.h"
+
+#include "ShaderUtils.h"
 
 class ForceGeneratorBarnesHutCS :
     public ForceGeneratorBarnesHutBase
@@ -25,6 +31,7 @@ class ForceGeneratorBarnesHutCS :
 //Variables
 private:
 	const uint32_t m_nCrit {16};
+	float m_forceBuffer [MAX_CAPACITY];
 
 	ID3D11DeviceContext* m_deviceContext {nullptr};
 	
@@ -48,6 +55,7 @@ private:
 	CsCornerStone_CO m_csCornerStone_CO;
 
 	CsBarnesHut_MP m_csBarnesHut_MP;
+	CsBarnesHut_CF m_csBarnesHut_CF;
 
 	float m_maxCoord = 0.f;
 
@@ -59,7 +67,6 @@ public:
 	void Exit() override;
 	void ApplyForceForObject(PhysicObject* physicObj) const override;
 	void Dispatch();
-	void ReadBack();
 
 private:
 	void SetShaderParameter();

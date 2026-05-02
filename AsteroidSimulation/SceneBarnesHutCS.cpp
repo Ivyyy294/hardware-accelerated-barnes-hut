@@ -19,7 +19,6 @@ void SceneBarnesHutCS::AdjustFixedUpdateLoop()
 
 	auto fixedUpdateNodes = physicNode->GetChildren();
 	fixedUpdateNodes.emplace(fixedUpdateNodes.begin() + 2,std::make_shared <MainLoopNode>("BarnesHutCSForceGenerator", Event().Bind<ForceGeneratorBarnesHutCS, &ForceGeneratorBarnesHutCS::Dispatch>(m_forceGenerator)));
-	fixedUpdateNodes.emplace(fixedUpdateNodes.begin() + 3,std::make_shared <MainLoopNode>("BarnesHutCSForceGenerator", Event().Bind<ForceGeneratorBarnesHutCS, &ForceGeneratorBarnesHutCS::ReadBack>(m_forceGenerator)));
 	physicNode->SetChildren(fixedUpdateNodes);
 }
 

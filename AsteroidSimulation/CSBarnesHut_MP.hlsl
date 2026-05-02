@@ -7,7 +7,7 @@ cbuffer SettingsBuffer : register(b0)
 {
     uint pCount;
     float globallCellWidth;
-    uint sPadding[2];
+    float sPadding[2];
 }
 
 //Particle data buffer
@@ -25,7 +25,6 @@ StructuredBuffer<uint> counterBuffer : register(t7);
 //Multipole data
 RWStructuredBuffer<float3> centerOfMass : register(u0);
 RWStructuredBuffer<float> combinedMass : register(u1);
-RWStructuredBuffer<float> cellWidth : register(u2);
 
 RWStructuredBuffer<uint> debugBuffer : register(u7);
 
@@ -84,13 +83,20 @@ void CallculateInternalNodes(const uint index, const uint ni, const uint n)
             {
                 const uint indexLastChild = coBuffer[niIndex + 1];
                 float mass = 0.f;
-            
+                float3 center;
+                
                 for (uint j = indexFirstChild; j < indexLastChild; ++j)
                 {
                     const float iMass = combinedMass[j];
                     mass += iMass;
+                    
+                    const float3 iPos = posBuffer[i];
+                    center.x += iPos.x * iMass;
+                    center.y += iPos.y * iMass;
+                    center.z += iPos.z * iMass;
                 }
-            
+                
+                centerOfMass[niIndex] = center / mass;
                 combinedMass[niIndex] = mass;
             }
         }
@@ -113,45 +119,12 @@ void main(uint3 GTid : SV_GroupThreadID,
     GroupMemoryBarrierWithGroupSync();
     
     CallculateInternalNodes(index, ni, n);
-    debugBuffer[index] = combinedMass[index];
+    //debugBuffer[index] = combinedMass[index];
     //debugBuffer[index] = pCount;
     //debugBuffer[index] = kBuffer[index];
     //debugBuffer[index] = loBuffer[index];
     //debugBuffer[index] = coBuffer[index];
     //debugBuffer[index] = nl;
     //debugBuffer[index] = nkBuffer[index];
-    //uint leafSearchStart = levelRange[level + 1];
-    //uint leafSearchEnd = levelRange[level + 2];
     return;
-
-    //if (index >= ni)
-    //    return;
-
-    //mass = 0.f;
-    //center = float3(0.f, 0.f, 0.f);
-    
-    //indexBegin = coBuffer[index];
-    
-    ////debugBuffer[index] = indexBegin;
-    //return;
-    
-    //for (uint i = indexBegin; i < indexBegin + 8;)
-    //{
-    //    if (combinedMass[i] >= 0.f)
-    //    {
-    //        const float iMass = combinedMass[i];
-    //        mass += iMass;
-        
-    //        const float3 iPos = centerOfMass[i];
-    //        center.x += iPos.x * iMass;
-    //        center.y += iPos.y * iMass;
-    //        center.z += iPos.z * iMass;
-    //        debugBuffer[index] = mass;
-    //        ++i;
-    //    }
-    //}
-    
-    //centerOfMass[index] = center / mass;
-    //combinedMass[index] = mass;
-    //debugBuffer[index] = combinedMass[index];
 }
