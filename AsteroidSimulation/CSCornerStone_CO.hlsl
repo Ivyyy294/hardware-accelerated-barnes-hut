@@ -16,7 +16,7 @@ void main(uint3 GTid : SV_GroupThreadID,
     //debugBuffer[index] = nkBuffer[index];
     uint ni = counterBuffer[1];
     
-    if (index >= ni)
+    if (index > ni)
     {
         //debugBuffer[index] = 0;
         return;

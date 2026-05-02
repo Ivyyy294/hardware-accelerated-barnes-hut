@@ -29,7 +29,7 @@ RWStructuredBuffer<float> cellWidth : register(u2);
 
 RWStructuredBuffer<uint> debugBuffer : register(u7);
 
-void CallculateLeafNodes (const uint index, const uint nl, const uint pCount)
+void CallculateLeafNodes(const uint index, const uint nl, const uint ni, const uint pCount)
 {
     for (int i = 0; i < nl; i += NUM_THREADS)
     {
@@ -57,10 +57,45 @@ void CallculateLeafNodes (const uint index, const uint nl, const uint pCount)
                 center.z += iPos.z * iMass;
             }
     
-            centerOfMass[nlIndex] = center / mass;
-            combinedMass[nlIndex] = mass;
-            debugBuffer[nlIndex] = combinedMass[nlIndex];
+            const uint destIndex = ni + nlIndex;
+            centerOfMass[destIndex] = center / mass;
+            combinedMass[destIndex] = mass;
         }
+    }
+}
+
+void CallculateInternalNodes(const uint index, const uint ni, const uint n)
+{
+    int startLevel = GetTreeLevelFromWs(nkBuffer[ni]);
+    
+    //ToDo: improve traversal!
+    //Traverse per level upward
+    for (int i = startLevel; i >= 0; --i)
+    {
+        const uint startIndex = loBuffer[i];
+        const uint endIndex = loBuffer[i+1];
+        const uint niIndex = startIndex + index;
+        
+        if (niIndex < endIndex)
+        {
+            const uint indexFirstChild = coBuffer[niIndex];
+            
+            if (indexFirstChild < n)
+            {
+                const uint indexLastChild = coBuffer[niIndex + 1];
+                float mass = 0.f;
+            
+                for (uint j = indexFirstChild; j < indexLastChild; ++j)
+                {
+                    const float iMass = combinedMass[j];
+                    mass += iMass;
+                }
+            
+                combinedMass[niIndex] = mass;
+            }
+        }
+        
+        GroupMemoryBarrierWithGroupSync();
     }
 }
 
@@ -73,81 +108,50 @@ void main(uint3 GTid : SV_GroupThreadID,
     const uint nl = counterBuffer[0];
     const uint n = ni + nl;
     
-    CallculateLeafNodes(index, nl, pCount);
+    CallculateLeafNodes(index, nl, ni, pCount);
     
     GroupMemoryBarrierWithGroupSync();
+    
+    CallculateInternalNodes(index, ni, n);
+    debugBuffer[index] = combinedMass[index];
     //debugBuffer[index] = pCount;
     //debugBuffer[index] = kBuffer[index];
-    //debugBuffer[index] = nkBuffer[index];
+    //debugBuffer[index] = loBuffer[index];
     //debugBuffer[index] = coBuffer[index];
+    //debugBuffer[index] = nl;
+    //debugBuffer[index] = nkBuffer[index];
+    //uint leafSearchStart = levelRange[level + 1];
+    //uint leafSearchEnd = levelRange[level + 2];
     return;
+
+    //if (index >= ni)
+    //    return;
+
+    //mass = 0.f;
+    //center = float3(0.f, 0.f, 0.f);
+    
+    //indexBegin = coBuffer[index];
+    
+    ////debugBuffer[index] = indexBegin;
     //return;
     
-    
-    for (int i = 0; i < nl; i += NUM_THREADS)
-    {
-    }
-    
-    const uint indexK = index + ni;
-    //Init leaf nodes K
-        if (indexK >= nl)
-            return;
-
-    combinedMass[index] = -1.f;
-    
-    float mass = 0.f;
-    float3 center;
-    
-    const uint kVal = kBuffer[index];
-    const uint k1Val = kBuffer[index + 1];
+    //for (uint i = indexBegin; i < indexBegin + 8;)
+    //{
+    //    if (combinedMass[i] >= 0.f)
+    //    {
+    //        const float iMass = combinedMass[i];
+    //        mass += iMass;
         
-    uint indexBegin = BinarySearch(kVal, keyBuffer, 65);
-    uint indexLast = BinarySearch(k1Val, keyBuffer, 65);
-        
-    for (uint i = indexBegin; i < indexLast; ++i)
-    {
-        const float iMass = massBuffer[i];
-        mass += iMass;
-        
-        const float3 iPos = posBuffer[i];
-        center.x += iPos.x * iMass;
-        center.y += iPos.y * iMass;
-        center.z += iPos.z * iMass;
-    }
+    //        const float3 iPos = centerOfMass[i];
+    //        center.x += iPos.x * iMass;
+    //        center.y += iPos.y * iMass;
+    //        center.z += iPos.z * iMass;
+    //        debugBuffer[index] = mass;
+    //        ++i;
+    //    }
+    //}
     
-    centerOfMass[indexK] = center / mass;
-    combinedMass[indexK] = mass;
-    debugBuffer[indexK] = combinedMass[indexK];
-    GroupMemoryBarrierWithGroupSync();
-    return;
-    if (index >= ni)
-        return;
-
-    mass = 0.f;
-    center = float3(0.f, 0.f, 0.f);
-    
-    indexBegin = coBuffer[index];
-    
-    //debugBuffer[index] = indexBegin;
-    return;
-    
-    for (uint i = indexBegin; i < indexBegin + 8;)
-    {
-        if (combinedMass[i] >= 0.f)
-        {
-            const float iMass = combinedMass[i];
-            mass += iMass;
-        
-            const float3 iPos = centerOfMass[i];
-            center.x += iPos.x * iMass;
-            center.y += iPos.y * iMass;
-            center.z += iPos.z * iMass;
-            debugBuffer[index] = mass;
-            ++i;
-        }
-    }
-    
-    centerOfMass[index] = center / mass;
-    combinedMass[index] = mass;
+    //centerOfMass[index] = center / mass;
+    //combinedMass[index] = mass;
     //debugBuffer[index] = combinedMass[index];
 }

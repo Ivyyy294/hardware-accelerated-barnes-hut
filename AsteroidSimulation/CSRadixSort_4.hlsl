@@ -1,6 +1,7 @@
 #define NUM_BINS 256
 #define NUM_THREADS 256
 
+//ToDo: check if neccesary!!!
 cbuffer SettingsBuffer : register(b0)
 {
     uint elementCount;
