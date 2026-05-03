@@ -113,8 +113,10 @@ void main(uint3 GTid : SV_GroupThreadID,
         else
         {
             const uint firstChild = coBuffer[nodeIndex];
+            const uint nextChild = coBuffer[nodeIndex + 1];
+            const uint count = min(8, nextChild - firstChild);
             
-            for (uint i = 0; i < 8; ++i)
+            for (uint i = 0; i < count; ++i)
                 stack[++current] = firstChild + i;
         }
     }
