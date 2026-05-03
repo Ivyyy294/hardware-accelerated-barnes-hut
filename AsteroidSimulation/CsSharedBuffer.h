@@ -47,6 +47,12 @@ public:
 	ID3D11UnorderedAccessView* m_uavMassBuffer = nullptr;
 	ID3D11ShaderResourceView* m_srvMassBuffer = nullptr;
 
+	//New To Old index buffer
+	ID3D11Buffer* m_inNewToOldIndexBuffer{ nullptr };
+	ID3D11Buffer* m_outNewToOldIndexBuffer{ nullptr };
+	ID3D11UnorderedAccessView* m_uavNewToOldIndexBuffer = nullptr;
+	ID3D11ShaderResourceView* m_srvNewToOldIndexBuffer = nullptr;
+
 	//Sorting Buffer
 	ID3D11Buffer* m_globalHistogramBuffer{ nullptr };
 	ID3D11UnorderedAccessView* m_uavGlobalHistogramBuffer = nullptr;
@@ -123,6 +129,7 @@ public:
 private:
 	HRESULT InitMortonCodeShaderParameters(ID3D11Device* device);
 	HRESULT InitPositionShaderParameters(ID3D11Device* device);
+	HRESULT InitIndexMappingShaderParameters (ID3D11Device* device);
 	HRESULT InitMassShaderParameters(ID3D11Device* device);
 	HRESULT InitSortingShaderParameters(ID3D11Device* device);
 	HRESULT InitCornerStoneShaderParameters(ID3D11Device* device);

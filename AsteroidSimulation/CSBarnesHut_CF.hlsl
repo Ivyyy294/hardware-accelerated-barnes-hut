@@ -15,19 +15,20 @@ cbuffer SettingsBuffer : register(b0)
 StructuredBuffer<uint> keyBuffer : register(t0);
 StructuredBuffer<float3> posBuffer : register(t1);
 StructuredBuffer<float> massBuffer : register(t2);
+StructuredBuffer<uint> newToOldIndexBuffer : register(t3);
 
 //Tree data buffer
-StructuredBuffer<uint> kBuffer : register(t3);
-StructuredBuffer<uint> nkBuffer : register(t4);
-StructuredBuffer<uint> loBuffer : register(t5);
-StructuredBuffer<uint> coBuffer : register(t6);
-StructuredBuffer<uint> counterBuffer : register(t7);
+StructuredBuffer<uint> kBuffer : register(t4);
+StructuredBuffer<uint> nkBuffer : register(t5);
+StructuredBuffer<uint> loBuffer : register(t6);
+StructuredBuffer<uint> coBuffer : register(t7);
+StructuredBuffer<uint> counterBuffer : register(t8);
 
 //Multipole data
-StructuredBuffer<float3> centerOfMass : register(t8);
-StructuredBuffer<float> combinedMass : register(t9);
+StructuredBuffer<float3> centerOfMass : register(t9);
+StructuredBuffer<float> combinedMass : register(t10);
 
-RWStructuredBuffer<float> forceBuffer : register(u0);
+RWStructuredBuffer<float3> forceBuffer : register(u0);
 RWStructuredBuffer<uint> debugBuffer : register(u7);
 
 
@@ -44,13 +45,18 @@ void main(uint3 GTid : SV_GroupThreadID,
 
     const float3 pPos = posBuffer[index];
     const float pMass = massBuffer[index];
+    const uint pDestIndex = newToOldIndexBuffer[index];
     float3 pForce = {0.f, 0.f, 0.f};
     
-    uint stack[32];
+    //pForce = -pPos * 0.1f;
+    //forceBuffer[pDestIndex] = pForce;
+    //return;
+    
+    uint stack[64];
     int current = 0;
     
     stack[0] = 0;
-    
+
     while (current >= 0)
     {
         const uint nodeIndex = stack[current--];
@@ -106,6 +112,5 @@ void main(uint3 GTid : SV_GroupThreadID,
         }
     }
     
-    forceBuffer[index] = pForce;
-    //forceBuffer[index] = float3 (3.f, 3.f, 3.f);
+    forceBuffer[pDestIndex] = pForce;
 }

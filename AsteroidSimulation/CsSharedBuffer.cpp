@@ -34,6 +34,18 @@ HRESULT CsSharedBuffer::InitPositionShaderParameters(ID3D11Device* device)
 	return result;
 }
 
+HRESULT CsSharedBuffer::InitIndexMappingShaderParameters(ID3D11Device* device)
+{
+	HRESULT result;
+
+	bool ok = ShaderUtils::CreateResourceBuffer(device, result, &m_inNewToOldIndexBuffer, sizeof(uint32_t), MAX_PARTICLE_COUNT)
+		&& ShaderUtils::CreateResourceBuffer(device, result, &m_outNewToOldIndexBuffer, sizeof(uint32_t), MAX_PARTICLE_COUNT)
+		&& ShaderUtils::CreateUAVBuffer(device, result, m_outNewToOldIndexBuffer, &m_uavNewToOldIndexBuffer, MAX_PARTICLE_COUNT)
+		&& ShaderUtils::CreateResourceViewBuffer(device, result, m_inNewToOldIndexBuffer, &m_srvNewToOldIndexBuffer, MAX_PARTICLE_COUNT);
+
+	return result;
+}
+
 HRESULT CsSharedBuffer::InitMassShaderParameters(ID3D11Device* device)
 {
 	HRESULT result;
@@ -125,9 +137,9 @@ HRESULT CsSharedBuffer::InitBarnesHutShaderParameters(ID3D11Device* device)
 		&& ShaderUtils::CreateResourceBuffer(device, result, &m_combinedMassBuffer, sizeof(XMFLOAT3), MAX_CAPACITY)
 		&& ShaderUtils::CreateResourceViewBuffer(device, result, m_combinedMassBuffer, &m_srvCombinedMassBuffer, MAX_CAPACITY)
 		&& ShaderUtils::CreateUAVBuffer(device, result, m_combinedMassBuffer, &m_uavCombinedMassBuffer, MAX_CAPACITY)
-		&& ShaderUtils::CreateResourceBuffer(device, result, &m_forceBuffer, sizeof(XMFLOAT3), MAX_CAPACITY)
-		&& ShaderUtils::CreateStagingBuffer(device, result, &m_outForceBuffer, sizeof(XMFLOAT3), MAX_CAPACITY)
-		&& ShaderUtils::CreateUAVBuffer(device, result, m_forceBuffer, &m_uavForceBuffer, MAX_CAPACITY);
+		&& ShaderUtils::CreateResourceBuffer(device, result, &m_forceBuffer, sizeof(XMFLOAT3), MAX_PARTICLE_COUNT)
+		&& ShaderUtils::CreateStagingBuffer(device, result, &m_outForceBuffer, sizeof(XMFLOAT3), MAX_PARTICLE_COUNT)
+		&& ShaderUtils::CreateUAVBuffer(device, result, m_forceBuffer, &m_uavForceBuffer, MAX_PARTICLE_COUNT);
 
 	return result;
 }
@@ -162,6 +174,11 @@ bool CsSharedBuffer::InitShaderParameters()
 		return false;
 
 	result = InitMassShaderParameters(device);
+
+	if (FAILED(result))
+		return false;
+
+	result = InitIndexMappingShaderParameters(device);
 
 	if (FAILED(result))
 		return false;
@@ -313,6 +330,7 @@ void CsSharedBuffer::ClearUavBuffer()
 	m_deviceContext->ClearUnorderedAccessViewUint(m_uavCoBuffer, clearValues);
 	m_deviceContext->ClearUnorderedAccessViewUint(m_uavCombinedMassBuffer, clearValues);
 	m_deviceContext->ClearUnorderedAccessViewUint(m_uavCenterMassBuffer, clearValues);
+	m_deviceContext->ClearUnorderedAccessViewUint(m_uavNewToOldIndexBuffer, clearValues);
 }
 
 void CsSharedBuffer::SwapParticleBuffer()
@@ -320,4 +338,5 @@ void CsSharedBuffer::SwapParticleBuffer()
 	m_deviceContext->CopyResource(m_inMortonCodeBuffer, m_outMortonCodeBuffer);
 	m_deviceContext->CopyResource(m_inPositionBuffer, m_outPositionBuffer);
 	m_deviceContext->CopyResource(m_inMassBuffer, m_outMassBuffer);
+	m_deviceContext->CopyResource(m_inNewToOldIndexBuffer, m_outNewToOldIndexBuffer);
 }

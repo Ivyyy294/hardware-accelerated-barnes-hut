@@ -128,6 +128,20 @@ void ForceGeneratorBarnesHutCS::Exit()
 
 void ForceGeneratorBarnesHutCS::ApplyForceForObject(PhysicObject* physicObj) const
 {
+	auto it = std::find(m_objects.begin(), m_objects.end(), physicObj);
+
+	if (it != m_objects.end())
+	{
+		size_t index = std::distance(m_objects.begin(), it);
+		//XMFLOAT3 force = m_forceBuffer[index];
+		Vector3 force = Vector3 (m_forceBuffer[index].x, m_forceBuffer[index].y, m_forceBuffer[index].z);
+		physicObj->ApplyForce (force);
+
+		if (force.SquareMagnitude() == 0.f)
+			return;
+	}
+	else
+		return;
 }
 
 void ForceGeneratorBarnesHutCS::Dispatch()
@@ -141,6 +155,7 @@ void ForceGeneratorBarnesHutCS::Dispatch()
 	BuildOctree (capacity);
 	CallculateForces (capacity);
 
+	CopyForceData();
 	CopyTestData();
 }
 
@@ -244,18 +259,6 @@ void ForceGeneratorBarnesHutCS::CallculateForces(uint32_t elementCount)
 	m_buffer.SetBhSettingsParameter (elementCount, m_maxCoord * 2.f, IvyyyPhysic::GravitationalConstant(), m_theta);
 	m_csBarnesHut_MP.Dispatch(groupCount, 1, 1);
 	m_csBarnesHut_CF.Dispatch(groupCount, 1, 1);
-
-	m_deviceContext->CopyResource(m_buffer.m_outForceBuffer, m_buffer.m_forceBuffer);
-
-	//Determine nk size 
-	D3D11_MAPPED_SUBRESOURCE mappedResource;
-	HRESULT hr = m_deviceContext->Map(m_buffer.m_outForceBuffer, 0, D3D11_MAP_READ, 0, &mappedResource);
-
-	if (SUCCEEDED(hr))
-	{
-		memcpy(&m_forceBuffer, mappedResource.pData, sizeof(float) * MAX_CAPACITY);
-		m_deviceContext->Unmap(m_buffer.m_stagingCounterBuffer, 0);
-	}
 }
 
 void ForceGeneratorBarnesHutCS::CopyTestData()
@@ -272,6 +275,22 @@ void ForceGeneratorBarnesHutCS::CopyTestData()
 
 		memcpy (&data[0], mappedResource.pData, sizeof(uint32_t) * size);
 		m_deviceContext->Unmap(m_buffer.m_outputBuffer, 0);
+	}
+}
+
+void ForceGeneratorBarnesHutCS::CopyForceData()
+{
+	//Copy Force
+	m_deviceContext->CopyResource(m_buffer.m_outForceBuffer, m_buffer.m_forceBuffer);
+
+	//Determine nk size 
+	D3D11_MAPPED_SUBRESOURCE mappedResource;
+	HRESULT hr = m_deviceContext->Map(m_buffer.m_outForceBuffer, 0, D3D11_MAP_READ, 0, &mappedResource);
+
+	if (SUCCEEDED(hr))
+	{
+		memcpy(m_forceBuffer, mappedResource.pData, sizeof(XMFLOAT3) * MAX_PARTICLE_COUNT);
+		m_deviceContext->Unmap(m_buffer.m_stagingCounterBuffer, 0);
 	}
 }
 

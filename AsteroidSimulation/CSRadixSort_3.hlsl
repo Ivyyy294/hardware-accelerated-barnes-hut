@@ -211,12 +211,14 @@ StructuredBuffer<uint> exclusivePrefixSum : register(t0);
 StructuredBuffer<uint> mortonCodeIn : register(t1);
 StructuredBuffer<float3> positionIn : register(t2);
 StructuredBuffer<float> massIn : register(t3);
+StructuredBuffer<uint> newToOldIndexIn : register(t4);
 
 RWStructuredBuffer<uint> scatterCounters : register(u0);
 RWStructuredBuffer<uint> mortonCodeOut : register(u1);
 RWStructuredBuffer<float3> positionOut : register(u2);
 RWStructuredBuffer<float> massOut : register(u3);
-RWStructuredBuffer<uint> debugBuffer : register(u4);
+RWStructuredBuffer<uint> newToOldIndexOut : register(u4);
+RWStructuredBuffer<uint> debugBuffer : register(u5);
 
 [numthreads(NUM_THREADS, 1, 1)]
 void main(uint3 DTid : SV_DispatchThreadID)
@@ -230,6 +232,7 @@ void main(uint3 DTid : SV_DispatchThreadID)
     uint key = mortonCodeIn[index];
     float3 position = positionIn[index];
     float mass = massIn[index];
+    uint oldIndex = digitPlace == 0 ? index : newToOldIndexIn[index];
     
     //Get radix
     uint shift = digitPlace * 8;
@@ -261,6 +264,8 @@ void main(uint3 DTid : SV_DispatchThreadID)
         mortonCodeOut[dstIndex] = key;
         positionOut[dstIndex] = position;
         massOut[dstIndex] = mass;
+        newToOldIndexOut[dstIndex] = oldIndex;
     }
     
+    debugBuffer[index] = newToOldIndexOut[index];
 }
