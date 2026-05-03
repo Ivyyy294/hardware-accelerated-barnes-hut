@@ -28,8 +28,33 @@ StructuredBuffer<uint> counterBuffer : register(t8);
 StructuredBuffer<float3> centerOfMass : register(t9);
 StructuredBuffer<float> combinedMass : register(t10);
 
+StructuredBuffer<uint> liBuffer : register(t11);
+StructuredBuffer<uint> lcBuffer : register(t12);
+
 RWStructuredBuffer<float3> forceBuffer : register(u0);
 RWStructuredBuffer<uint> debugBuffer : register(u7);
+
+float3 ApplyForceFromNode(float pMass, float p2Mass, float3 direction, float sqrDistance)
+{
+    const float forceMag = ugc * ((p2Mass * pMass) / sqrDistance);
+    const float3 forceDirection = normalize(direction);
+    return forceDirection * forceMag;
+}
+
+float3 GetForceFromParticle(float pMass, float3 pPos, uint p2Index)
+{
+    float forceMag = 0.f;
+    const float p2Mass = massBuffer[p2Index];
+    const float3 p2Pos = posBuffer[p2Index];
+    float3 forceDirection = p2Pos - pPos;
+    const float sqrDistance = dot(forceDirection, forceDirection);
+    forceDirection = normalize(forceDirection);
+                
+    if (sqrDistance > 0.f)
+        forceMag = ugc * ((p2Mass * pMass) / sqrDistance);
+    
+    return forceDirection * forceMag;
+}
 
 
 [numthreads(NUM_THREADS, 1, 1)]
@@ -40,7 +65,7 @@ void main(uint3 GTid : SV_GroupThreadID,
     const uint ni = counterBuffer[1];
     const uint maxLevel = GetTreeLevelFromWs(nkBuffer[ni]);
     
-    if (index >= pCount)
+    if (index > pCount)
         return;
 
     const float3 pPos = posBuffer[index];
@@ -48,11 +73,7 @@ void main(uint3 GTid : SV_GroupThreadID,
     const uint pDestIndex = newToOldIndexBuffer[index];
     float3 pForce = {0.f, 0.f, 0.f};
     
-    //pForce = -pPos * 0.1f;
-    //forceBuffer[pDestIndex] = pForce;
-    //return;
-    
-    uint stack[64];
+    uint stack[2048];
     int current = 0;
     
     stack[0] = 0;
@@ -74,9 +95,7 @@ void main(uint3 GTid : SV_GroupThreadID,
         if (criterium < theta && sqrDistance > 0.f)
         {
             const float nodeMass = combinedMass[nodeIndex];
-            const float force = ugc * ((nodeMass * pMass) / sqrDistance);
-            const float3 nDirection = normalize(direction);
-            pForce += nDirection * force;
+            pForce += ApplyForceFromNode(pMass, nodeMass, direction, sqrDistance);
         }
         //apply child particle
         else if (isLeaf)
@@ -84,23 +103,11 @@ void main(uint3 GTid : SV_GroupThreadID,
             const uint kVal = kBuffer[nodeIndex];
             const uint k1Val = kBuffer[nodeIndex + 1];
         
-            uint indexBegin = BinarySearch(kVal, keyBuffer, pCount);
-            uint indexLast = BinarySearch(k1Val, keyBuffer, pCount);
+            uint indexBegin = liBuffer[nodeIndex];
+            uint count = lcBuffer[nodeIndex];
         
-            for (uint i = indexBegin; i < indexLast; ++i)
-            {
-                const float p2Mass = massBuffer[i];
-                const float3 p2Pos = posBuffer[i];
-                float3 direction = p2Pos - pPos;
-                const float p2SqrDistance = dot(direction, direction);
-                
-                if (p2SqrDistance > 0.f)
-                {
-                    direction = normalize(direction);
-                    const float force = ugc * ((p2Mass * pMass) / p2SqrDistance);
-                    pForce += direction * force;
-                }
-            }
+            for (uint i = indexBegin; i < count; ++i)
+                pForce += GetForceFromParticle(pMass, pPos, i);
         }
         //push childen
         else

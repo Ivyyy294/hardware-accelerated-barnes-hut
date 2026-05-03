@@ -100,6 +100,14 @@ public:
 	ID3D11UnorderedAccessView* m_uavCoBuffer = nullptr;
 	ID3D11ShaderResourceView* m_srvCoBuffer = nullptr;
 
+	ID3D11Buffer* m_liBuffer{ nullptr };
+	ID3D11UnorderedAccessView* m_uavLiBuffer = nullptr;
+	ID3D11ShaderResourceView* m_srvLiBuffer = nullptr;
+
+	ID3D11Buffer* m_lcBuffer{ nullptr };
+	ID3D11UnorderedAccessView* m_uavLcBuffer = nullptr;
+	ID3D11ShaderResourceView* m_srvLcBuffer = nullptr;
+
 	//Barnes hut buffer
 	ID3D11Buffer* m_bhSettingsBuffer{ nullptr };
 

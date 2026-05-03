@@ -25,6 +25,8 @@ StructuredBuffer<uint> counterBuffer : register(t7);
 //Multipole data
 RWStructuredBuffer<float3> centerOfMass : register(u0);
 RWStructuredBuffer<float> combinedMass : register(u1);
+RWStructuredBuffer<uint> liBuffer : register(u2);
+RWStructuredBuffer<uint> lcBuffer : register(u3);
 
 RWStructuredBuffer<uint> debugBuffer : register(u7);
 
@@ -59,6 +61,8 @@ void CallculateLeafNodes(const uint index, const uint nl, const uint ni, const u
             const uint destIndex = ni + nlIndex;
             centerOfMass[destIndex] = center / mass;
             combinedMass[destIndex] = mass;
+            liBuffer[destIndex] = indexBegin;
+            lcBuffer[destIndex] = indexLast - indexBegin;
         }
     }
 }
@@ -126,5 +130,7 @@ void main(uint3 GTid : SV_GroupThreadID,
     //debugBuffer[index] = coBuffer[index];
     //debugBuffer[index] = nl;
     //debugBuffer[index] = nkBuffer[index];
+    //debugBuffer[index] = liBuffer[ index];
+    //debugBuffer[index] = lcBuffer[index];
     return;
 }
