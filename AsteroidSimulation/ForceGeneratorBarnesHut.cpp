@@ -33,7 +33,7 @@ void ForceGeneratorBarnesHut::ApplyForceForObject(PhysicObject* physicObj) const
 
 			if (distance > 0.f)
 			{
-				float force = Ivyyy::IvyyyPhysic::GravitationalConstant() * ((current->Mass() * physicObj->GetMass()) / (distance * distance));
+				float force = (Ivyyy::IvyyyPhysic::GravitationalConstant() * current->Mass() * physicObj->GetMass()) / (distance * distance);
 
 				Vector3 forceVec = direction * force;
 

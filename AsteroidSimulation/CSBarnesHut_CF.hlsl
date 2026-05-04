@@ -36,7 +36,7 @@ RWStructuredBuffer<uint> debugBuffer : register(u7);
 
 float3 ApplyForceFromNode(float pMass, float p2Mass, float3 direction, float sqrDistance)
 {
-    const float forceMag = ugc * ((p2Mass * pMass) / sqrDistance);
+    const float forceMag = (ugc * p2Mass * pMass) / sqrDistance;
     const float3 forceDirection = normalize(direction);
     return forceDirection * forceMag;
 }
@@ -51,7 +51,7 @@ float3 GetForceFromParticle(float pMass, float3 pPos, uint p2Index)
     forceDirection = normalize(forceDirection);
                 
     if (sqrDistance > 0.f)
-        forceMag = ugc * ((p2Mass * pMass) / sqrDistance);
+        forceMag = (ugc * p2Mass * pMass) / sqrDistance;
     
     return forceDirection * forceMag;
 }

@@ -4,7 +4,7 @@
 
 void SceneBarnesHut::Init()
 {
-	Gizmo::Draw = true;
+	//Gizmo::Draw = true;
 	m_forceGenerator = AddGameObject()->AddComponent<ForceGeneratorBarnesHut>().get();
 	SceneAsteroidBase::Init();
 
