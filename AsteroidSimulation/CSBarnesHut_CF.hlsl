@@ -109,9 +109,9 @@ void main(uint3 GTid : SV_GroupThreadID,
         const uint nodeIndex = stack[current--];
         const uint nk = nkBuffer[nodeIndex];
         const uint level = GetTreeLevelFromWs(nk);
-        const bool isLeaf = nodeIndex > ni;
+        const bool isLeaf = coBuffer[nodeIndex] <= 0;
         
-        const float cellWidth = globallCellWidth / (level + 1);
+        const float cellWidth = globallCellWidth / (1 << level);
         
         const float3 nodeCoM = centerOfMass[nodeIndex];
         const float nodeMass = combinedMass[nodeIndex];
