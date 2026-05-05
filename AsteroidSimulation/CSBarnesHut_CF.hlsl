@@ -36,26 +36,46 @@ RWStructuredBuffer<uint> debugBuffer : register(u7);
 
 float3 ApplyForceFromNode(float pMass, float p2Mass, float3 direction, float sqrDistance)
 {
-    const float forceMag = (ugc * p2Mass * pMass) / sqrDistance;
+    if (sqrDistance < 1e-12f)
+        return float3(0, 0, 0);
+    
+    float forceMag = (ugc * p2Mass * pMass) / sqrDistance;
+    
     const float3 forceDirection = normalize(direction);
-    return forceDirection * forceMag;
-}
-
-float3 GetForceFromParticle(float pMass, float3 pPos, uint p2Index)
-{
-    float forceMag = 0.f;
-    const float p2Mass = massBuffer[p2Index];
-    const float3 p2Pos = posBuffer[p2Index];
-    float3 forceDirection = p2Pos - pPos;
-    const float sqrDistance = dot(forceDirection, forceDirection);
-    forceDirection = normalize(forceDirection);
-                
-    if (sqrDistance > 0.f)
-        forceMag = (ugc * p2Mass * pMass) / sqrDistance;
     
     return forceDirection * forceMag;
 }
 
+float3 GetForceFromParticle(const float pMass, const float3 pPos, uint p2Index)
+{
+    const float p2Mass = massBuffer[p2Index];
+    const float3 p2Pos = posBuffer[p2Index];
+    float3 forceDirection = p2Pos - pPos;
+    const float sqrDistance = dot(forceDirection, forceDirection);
+    
+    if (sqrDistance < 1e-12f)
+        return float3(0, 0, 0);
+    
+    forceDirection = normalize(forceDirection);
+    float forceMag = (ugc * p2Mass * pMass) / sqrDistance;
+    
+    return forceDirection * forceMag;
+}
+
+float3 ApplyCloseRangeForces(const float pMass, const float3 pPos, const uint nodeIndex)
+{
+    float3 force = 0.f;
+    const uint kVal = kBuffer[nodeIndex];
+    const uint k1Val = kBuffer[nodeIndex + 1];
+        
+    uint indexBegin = liBuffer[nodeIndex];
+    uint count = lcBuffer[nodeIndex];
+        
+    for (uint i = indexBegin; i < count; ++i)
+        force += GetForceFromParticle(pMass, pPos, i);
+    
+    return force;
+}
 
 [numthreads(NUM_THREADS, 1, 1)]
 void main(uint3 GTid : SV_GroupThreadID,
@@ -77,6 +97,11 @@ void main(uint3 GTid : SV_GroupThreadID,
     uint stack[2048];
     int current = 0;
     
+    //pForce = ApplyCloseRangeForces(pMass, pPos, 0);
+    //forceBuffer[pDestIndex] = pForce;
+    //debugBuffer[index] = pForce.x;
+    //return;
+    
     stack[0] = 0;
 
     while (current >= 0)
@@ -87,29 +112,20 @@ void main(uint3 GTid : SV_GroupThreadID,
         const bool isLeaf = nodeIndex > ni;
         
         const float cellWidth = globallCellWidth / (level + 1);
+        
         const float3 nodeCoM = centerOfMass[nodeIndex];
+        const float nodeMass = combinedMass[nodeIndex];
+        
         float3 direction = nodeCoM - pPos;
         float sqrDistance = dot(direction, direction);
         float criterium = (cellWidth * cellWidth) / sqrDistance;
         
         //apply 
-        if (criterium < theta && sqrDistance > 0.f)
-        {
-            const float nodeMass = combinedMass[nodeIndex];
+        if (criterium < theta)
             pForce += ApplyForceFromNode(pMass, nodeMass, direction, sqrDistance);
-        }
         //apply child particle
         else if (isLeaf)
-        {
-            const uint kVal = kBuffer[nodeIndex];
-            const uint k1Val = kBuffer[nodeIndex + 1];
-        
-            uint indexBegin = liBuffer[nodeIndex];
-            uint count = lcBuffer[nodeIndex];
-        
-            for (uint i = indexBegin; i < count; ++i)
-                pForce += GetForceFromParticle(pMass, pPos, i);
-        }
+            pForce += ApplyCloseRangeForces(pMass, pPos, nodeIndex);
         //push childen
         else
         {
