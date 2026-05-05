@@ -30,85 +30,6 @@ RWStructuredBuffer<uint> lcBuffer : register(u3);
 
 RWStructuredBuffer<uint> debugBuffer : register(u7);
 
-void CallculateLeafNodes(const uint index, const uint nl, const uint ni, const uint pCount)
-{
-    for (int i = 0; i < nl; i += NUM_THREADS)
-    {
-        uint nlIndex = i + index;
-        
-        if (nlIndex < nl)
-        {
-            float mass = 0.f;
-            float3 center;
-    
-            const uint kVal = kBuffer[index];
-            const uint k1Val = kBuffer[index + 1];
-        
-            uint indexBegin = BinarySearch(kVal, keyBuffer, pCount);
-            uint indexLast = BinarySearch(k1Val, keyBuffer, pCount);
-        
-            for (uint i = indexBegin; i < indexLast; ++i)
-            {
-                const float iMass = massBuffer[i];
-                mass += iMass;
-        
-                const float3 iPos = posBuffer[i];
-                center.x += iPos.x * iMass;
-                center.y += iPos.y * iMass;
-                center.z += iPos.z * iMass;
-            }
-    
-            const uint destIndex = ni + nlIndex;
-            centerOfMass[destIndex] = center / mass;
-            combinedMass[destIndex] = mass;
-            liBuffer[destIndex] = indexBegin;
-            lcBuffer[destIndex] = indexLast - indexBegin;
-        }
-    }
-}
-
-void CallculateInternalNodes(const uint index, const uint ni, const uint n)
-{
-    int startLevel = GetTreeLevelFromWs(nkBuffer[ni]);
-    
-    //ToDo: improve traversal!
-    //Traverse per level upward
-    for (int i = startLevel; i >= 0; --i)
-    {
-        const uint startIndex = loBuffer[i];
-        const uint endIndex = loBuffer[i+1];
-        const uint niIndex = startIndex + index;
-        
-        if (niIndex < endIndex)
-        {
-            const uint indexFirstChild = coBuffer[niIndex];
-            
-            if (indexFirstChild < n)
-            {
-                const uint indexLastChild = coBuffer[niIndex + 1];
-                float mass = 0.f;
-                float3 center;
-                
-                for (uint j = indexFirstChild; j < indexLastChild; ++j)
-                {
-                    const float iMass = combinedMass[j];
-                    mass += iMass;
-                    
-                    const float3 iPos = posBuffer[i];
-                    center.x += iPos.x * iMass;
-                    center.y += iPos.y * iMass;
-                    center.z += iPos.z * iMass;
-                }
-                
-                centerOfMass[niIndex] = center / mass;
-                combinedMass[niIndex] = mass;
-            }
-        }
-        
-        GroupMemoryBarrierWithGroupSync();
-    }
-}
-
 [numthreads(NUM_THREADS, 1, 1)]
 void main(uint3 GTid : SV_GroupThreadID,
           uint3 Gid : SV_GroupID)
@@ -118,12 +39,47 @@ void main(uint3 GTid : SV_GroupThreadID,
     const uint nl = counterBuffer[0];
     const uint n = ni + nl;
     
-    CallculateLeafNodes(index, nl, ni, pCount);
+    if (index >= n)
+        return;
     
-    GroupMemoryBarrierWithGroupSync();
+    uint ws = nkBuffer[index];
+    uint level = GetTreeLevelFromWs(ws);
+    uint prefix = ws - (1 << (3 * level));
+    uint range = 3 * (L - level);
     
-    CallculateInternalNodes(index, ni, n);
-    //debugBuffer[index] = combinedMass[index];
+    uint begin = prefix << range;
+    uint end = (prefix + 1) << (range);
+    
+    uint indexBegin = BinarySearch(begin, keyBuffer, pCount);
+    uint indexLast = BinarySearch(end, keyBuffer, pCount);
+    uint count = indexLast - indexBegin;
+    debugBuffer[index] = count;
+    
+    float mass = 0.f;
+    float3 center;
+        
+    for (uint i = indexBegin; i < indexLast; ++i)
+    {
+        const float iMass = massBuffer[i];
+        mass += iMass;
+        
+        const float3 iPos = posBuffer[i];
+        center.x += iPos.x * iMass;
+        center.y += iPos.y * iMass;
+        center.z += iPos.z * iMass;
+    }
+    
+    if (mass > 0.f)
+        centerOfMass[index] = center / mass;
+            
+    combinedMass[index] = mass;
+            
+    liBuffer[index] = indexBegin;
+    lcBuffer[index] = count;
+    //GroupMemoryBarrierWithGroupSync();
+    
+    //CallculateInternalNodes(index, ni, n);
+    debugBuffer[index] = combinedMass[index];
     //debugBuffer[index] = pCount;
     //debugBuffer[index] = kBuffer[index];
     //debugBuffer[index] = loBuffer[index];
