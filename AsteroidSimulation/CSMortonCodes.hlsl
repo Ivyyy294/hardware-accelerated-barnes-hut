@@ -15,6 +15,7 @@ cbuffer UnitCube : register(b1)
 
 StructuredBuffer<float3> positions : register(t0);
 RWStructuredBuffer<uint> mortonCodes : register(u0);
+RWStructuredBuffer<uint> debugBuffer : register(u1);
 
 uint Part1By2(uint val)
 {
@@ -59,4 +60,5 @@ void main( uint3 DTid : SV_DispatchThreadID )
         return;
 
     mortonCodes[index] = GetMortonKey(positions[index]);
+    //debugBuffer[index] = positions[index];
 }

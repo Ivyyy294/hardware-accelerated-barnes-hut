@@ -53,7 +53,7 @@ void main(uint3 GTid : SV_GroupThreadID,
     uint indexBegin = BinarySearch(begin, keyBuffer, pCount);
     uint indexLast = BinarySearch(end, keyBuffer, pCount);
     uint count = indexLast - indexBegin;
-    debugBuffer[index] = count;
+    //debugBuffer[index] = count;
     
     float mass = 0.f;
     float3 center;

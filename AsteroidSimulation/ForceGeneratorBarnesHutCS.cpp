@@ -11,9 +11,7 @@ void ForceGeneratorBarnesHutCS::Start()
 	m_buffer.InitShaderParameters();
 
 	m_csMortonCodes.Initialize();
-	m_csMortonCodes.m_uavMortonCodesBuffer = m_buffer.m_uavMortonCodeBuffer;
-	m_csMortonCodes.m_srvPositionBuffer = m_buffer.m_srvPositionBuffer;
-	m_csMortonCodes.m_settingsBuffer = m_buffer.m_settingsBuffer;
+	m_csMortonCodes.m_sharedBuffer = &m_buffer;
 
 	m_csRadixSort_1.Initialize();
 	m_csRadixSort_1.m_sharedBuffer = &m_buffer;
@@ -85,6 +83,8 @@ void ForceGeneratorBarnesHutCS::SetShaderParameter()
 	// Get a pointer to the data in the constant buffer.
 	XMFLOAT3* positionPtr = (XMFLOAT3*)mappedPosition.pData;
 	float* massPtr = (float*)mappedMass.pData;
+
+	m_maxCoord = 0.f;
 
 	for (int i = 0; i < m_objects.size() && i < MAX_PARTICLE_COUNT; ++i)
 	{
@@ -289,8 +289,10 @@ void ForceGeneratorBarnesHutCS::CopyForceData()
 
 	if (SUCCEEDED(hr))
 	{
-		memcpy(m_forceBuffer, mappedResource.pData, sizeof(XMFLOAT3) * MAX_PARTICLE_COUNT);
-		m_deviceContext->Unmap(m_buffer.m_stagingCounterBuffer, 0);
+		XMFLOAT3* dataPtr = (XMFLOAT3*)mappedResource.pData;
+		XMFLOAT3 test = dataPtr[MAX_PARTICLE_COUNT-1];
+		memcpy(m_forceBuffer, dataPtr, sizeof(XMFLOAT3) * (MAX_PARTICLE_COUNT));
+		m_deviceContext->Unmap(m_buffer.m_outForceBuffer, 0);
 	}
 }
 

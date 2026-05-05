@@ -267,5 +267,5 @@ void main(uint3 DTid : SV_DispatchThreadID)
         newToOldIndexOut[dstIndex] = oldIndex;
     }
     
-    debugBuffer[index] = newToOldIndexOut[index];
+    //debugBuffer[index] = newToOldIndexOut[index];
 }

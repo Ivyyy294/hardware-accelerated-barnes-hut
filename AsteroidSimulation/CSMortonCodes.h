@@ -1,6 +1,7 @@
 #pragma once
 
 #include <IvyyyComputeShader.h>
+#include "CsSharedBuffer.h"
 
 class CsMortonCodes :
     public ComputeShader
@@ -16,9 +17,7 @@ private:
 
 //Variables
 public:
-	ID3D11Buffer* m_settingsBuffer = nullptr;
-	ID3D11UnorderedAccessView* m_uavMortonCodesBuffer = nullptr;
-	ID3D11ShaderResourceView* m_srvPositionBuffer = nullptr;
+	CsSharedBuffer* m_sharedBuffer = nullptr;
 
 private:
 	ID3D11Buffer* m_unitCubeBuffer{ nullptr };

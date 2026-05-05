@@ -62,11 +62,12 @@ void main(uint3 GTid : SV_GroupThreadID,
           uint3 Gid : SV_GroupID)
 {
     const uint index = Gid.x * NUM_THREADS + GTid.x;
+
+    if (index >= pCount)
+        return;
+    
     const uint ni = counterBuffer[1];
     const uint maxLevel = GetTreeLevelFromWs(nkBuffer[ni]);
-    
-    if (index > pCount)
-        return;
 
     const float3 pPos = posBuffer[index];
     const float pMass = massBuffer[index];
@@ -122,4 +123,5 @@ void main(uint3 GTid : SV_GroupThreadID,
     }
     
     forceBuffer[pDestIndex] = pForce;
+    //debugBuffer[index] = combinedMass[index];
 }
