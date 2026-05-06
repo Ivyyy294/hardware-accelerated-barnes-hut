@@ -8,6 +8,9 @@
 #include <array>
 #include <vector>
 #include <queue>
+#include <map>
+#include <iostream>
+#include <fstream>
 
 #include <DirectXMath.h>
 
@@ -22,6 +25,8 @@
 #include <IvyyyDebug.h>
 #include <IvyyyD3D.h>
 #include <IvyyyMathF.h>
+#include <IvyyyVector3.h>
 
 using namespace Ivyyy;
 using namespace DirectX;
+using namespace std;

@@ -1,0 +1,25 @@
+#pragma once
+
+#include <IvyyyComponent.h>
+#include "SessionFile.h"
+
+class SessionLoggerManager :
+    public Component
+{
+//variables
+public:
+	SessionFile m_variables;
+
+private:
+	static SessionLoggerManager* m_me;
+
+//Methods
+public:
+	SessionLoggerManager();
+	static SessionLoggerManager* Me();
+
+	void OnEnable() override;
+	void Update() override;
+	void OnDisable() override;
+};
+

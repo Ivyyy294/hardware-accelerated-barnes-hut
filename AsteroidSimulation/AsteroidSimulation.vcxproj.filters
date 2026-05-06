@@ -16,6 +16,9 @@
     <Filter Include="Shader">
       <UniqueIdentifier>{91090326-f5e5-4ee7-81ca-97e77c56a93f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Scenes">
+      <UniqueIdentifier>{d81f9371-13b9-4887-b9ab-b88e3416edcf}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -123,11 +126,17 @@
     <ClCompile Include="CsBarnesHut_CF.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="SessionLogger.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SessionFile.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SessionLoggerManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="SceneDirectIntegration.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Asteroid.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -158,16 +167,10 @@
     <ClInclude Include="SceneAsteroidBase.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="SceneBarnesHut.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="BarnesHutCS.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ForceGeneratorBarnesHutCS.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="SceneBarnesHutCS.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ForceGeneratorBarnesHutBase.h">
@@ -228,6 +231,27 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="CsBarnesHut_CF.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SceneDirectIntegration.h">
+      <Filter>Scenes</Filter>
+    </ClInclude>
+    <ClInclude Include="SceneBarnesHutCS.h">
+      <Filter>Scenes</Filter>
+    </ClInclude>
+    <ClInclude Include="SceneBarnesHut.h">
+      <Filter>Scenes</Filter>
+    </ClInclude>
+    <ClInclude Include="SessionLogger.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SessionFile.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SessionLoggerManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SessionVariables.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

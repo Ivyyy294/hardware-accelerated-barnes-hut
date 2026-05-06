@@ -2,16 +2,27 @@
 
 #include <IvyyyDirectionalLight.h>
 #include <IvyyyCamera.h>
+#include <random>
 
 #include "SceneAsteroidBase.h"
 #include "DebugInfoUi.h"
 #include "CameraMovement.h"
 #include "Planet.h"
-#include <random>
+#include "SessionLoggerManager.h"
+
+SceneAsteroidBase::SceneAsteroidBase()
+{
+	m_sVar.numAsteroids = NUM_ASTEROIDS;
+	m_sVar.ugc = 0.00005f;
+	m_sVar.fixedDeltaTime = Time::UnscaledFixedDeltaTime();
+	m_sVar.distRange = { 10.f, 15.f };
+	m_sVar.eRange = { 0.f, 0.25f };
+	m_sVar.iRange = { -10.f, 10.f };
+}
 
 void SceneAsteroidBase::Init()
 {
-	IvyyyPhysic::SetGravitationalConstant(0.00005f);
+	IvyyyPhysic::SetGravitationalConstant(m_sVar.ugc);
 
 	//Add Light
 	auto light = AddGameObject<GameObject>()->AddComponent<DirectionalLight>();
@@ -20,6 +31,7 @@ void SceneAsteroidBase::Init()
 
 	//Add Camera movement
 	Camera::MainCamera()->GetGameObject()->AddComponent<CameraMovement>();
+	Camera::MainCamera()->GetGameObject()->AddComponent<SessionLoggerManager>();
 
 	//Add Debug UI
 	AddGameObject<DebugInfoUi>();
@@ -29,7 +41,9 @@ void SceneAsteroidBase::Init()
 	OnOrbitalBodySpawned (planet);
 
 	//Add Asteroids
-	SpawnAsteroids (NUM_ASTEROIDS, {10.f, 15.f}, {0.f, 0.25f}, {-10.f, 10.f}, planet);
+	SpawnAsteroids (m_sVar.numAsteroids, m_sVar.distRange, m_sVar.eRange, m_sVar.iRange, planet);
+
+	LogSessionVariables();
 }
 
 void SceneAsteroidBase::SpawnAsteroids(int num, float dist, float speed)
@@ -86,3 +100,15 @@ void SceneAsteroidBase::SpawnAsteroids(int num, Vector2 dist, Vector2 e, Vector2
 			OnOrbitalBodySpawned(asteroid);
 		}
 }
+
+void SceneAsteroidBase::LogSessionVariables()
+{
+	SessionLoggerManager* slm = SessionLoggerManager::Me();
+	slm->m_variables.WriteLine("numAsteroids;" + std::to_string(m_sVar.numAsteroids));
+	slm->m_variables.WriteLine("ugc;" + std::to_string(m_sVar.ugc));
+	slm->m_variables.WriteLine("fixedDeltaTime;" + std::to_string(m_sVar.fixedDeltaTime));
+	slm->m_variables.WriteLine("distRange;" + std::to_string(m_sVar.distRange.x) + ";" + std::to_string(m_sVar.distRange.y));
+	slm->m_variables.WriteLine("eRange;" + std::to_string(m_sVar.eRange.x) + ";" + std::to_string(m_sVar.eRange.y));
+	slm->m_variables.WriteLine("iRange;" + std::to_string(m_sVar.iRange.x) + ";" + std::to_string(m_sVar.iRange.y));
+}
+
