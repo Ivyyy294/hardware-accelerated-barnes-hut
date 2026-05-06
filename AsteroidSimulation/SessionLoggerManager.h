@@ -9,6 +9,8 @@ class SessionLoggerManager :
 //variables
 public:
 	SessionFile m_variables;
+	SessionFile m_position;
+	SessionFile m_force;
 
 private:
 	static SessionLoggerManager* m_me;

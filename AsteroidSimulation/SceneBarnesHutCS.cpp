@@ -4,6 +4,7 @@
 
 void SceneBarnesHutCS::Init()
 {
+	m_sVar.method = "barnes-hut-cs";
 	m_forceGenerator = AddGameObject()->AddComponent<ForceGeneratorBarnesHutCS>().get();
 	SceneAsteroidBase::Init();
 

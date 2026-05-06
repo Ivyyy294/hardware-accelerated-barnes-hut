@@ -8,6 +8,7 @@
 
 void SceneDirectIntegration::Init()
 {
+	m_sVar.method = "direct";
 	SceneAsteroidBase::Init();
 }
 

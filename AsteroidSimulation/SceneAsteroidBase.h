@@ -8,7 +8,7 @@ class SceneAsteroidBase :
     public Scene
 {
 //Variables
-private:
+protected:
 	SessionVariables m_sVar;
 
 //Methods

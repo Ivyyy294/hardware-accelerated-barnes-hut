@@ -14,6 +14,8 @@ protected:
 public:
 	inline void AddForceSource(PhysicObject* obj) { m_objects.push_back(obj); };
 
+	void FixedUpdate() override;
+
 protected:
 	float GetMaxCoordinate();
 };

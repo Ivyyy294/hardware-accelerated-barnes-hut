@@ -4,6 +4,7 @@
 
 struct SessionVariables
 {
+	string method;
 	int numAsteroids;
 	float ugc;
 	float fixedDeltaTime;

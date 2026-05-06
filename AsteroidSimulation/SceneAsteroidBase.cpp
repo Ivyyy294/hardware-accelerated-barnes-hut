@@ -104,6 +104,7 @@ void SceneAsteroidBase::SpawnAsteroids(int num, Vector2 dist, Vector2 e, Vector2
 void SceneAsteroidBase::LogSessionVariables()
 {
 	SessionLoggerManager* slm = SessionLoggerManager::Me();
+	slm->m_variables.WriteLine("method;" + m_sVar.method);
 	slm->m_variables.WriteLine("numAsteroids;" + std::to_string(m_sVar.numAsteroids));
 	slm->m_variables.WriteLine("ugc;" + std::to_string(m_sVar.ugc));
 	slm->m_variables.WriteLine("fixedDeltaTime;" + std::to_string(m_sVar.fixedDeltaTime));
