@@ -21,11 +21,15 @@ void main(uint3 GTid : SV_GroupThreadID,
     if (index >= L + 2)
         return;
     
+    uint ni = counterBuffer[1];
+    uint nl = counterBuffer[0];
+    uint n = ni + nl;
+    
     uint bufferSize = counterBuffer[0];
     uint searchVal = 1 << 3 * index;
     //debugBuffer[index] = searchVal;
     
-    uint indexFirstNodeOnLevel = BinarySearch(searchVal, nkBuffer, bufferSize);
+    uint indexFirstNodeOnLevel = BinarySearch(searchVal, nkBuffer, n);
     loBuffer[index] = indexFirstNodeOnLevel;
     
     GroupMemoryBarrierWithGroupSync();
