@@ -32,7 +32,7 @@ void main( uint3 DTid : SV_DispatchThreadID )
     
     bool split = nVal >= nCrit;
     bool firstOctant = kVal % iDelta == 0;
-    bool consecutive = kBuffer[indexFirstSibling] + iDelta == kBuffer[indexLastSibling];
+    bool consecutive = indexLastSibling < kSize && kBuffer[indexFirstSibling] + iDelta == kBuffer[indexLastSibling];
     
     uint combinedParticleCount = 0;
     
@@ -48,5 +48,9 @@ void main( uint3 DTid : SV_DispatchThreadID )
     else
         oBuffer[index] = 1;
     
+    //debugBuffer[index] = combinedParticleCount;
+    //debugBuffer[index] = consecutive;
+    //debugBuffer[index] = nVal;
+    //debugBuffer[index] = indexFirstSibling;
     //debugBuffer[index] = oBuffer[index];
 }
