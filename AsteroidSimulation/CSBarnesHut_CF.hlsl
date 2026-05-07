@@ -118,7 +118,8 @@ void main(uint3 GTid : SV_GroupThreadID,
         const uint nodeIndex = stack[current--];
         const uint nk = nkBuffer[nodeIndex];
         const uint level = GetTreeLevelFromWs(nk);
-        const bool isInternalNode = nodeIndex >= ni;
+        const uint firstChild = coBuffer[nodeIndex];
+        const bool isInternalNode = firstChild > 0;
         
         const float cellWidth = globallCellWidth / (1 << level);
         
@@ -136,9 +137,7 @@ void main(uint3 GTid : SV_GroupThreadID,
         //push childen
         else if (isInternalNode)
         {
-            const uint firstChild = coBuffer[nodeIndex];
-            const uint nextChild = coBuffer[nodeIndex + 1];
-            const uint count = nextChild - firstChild;
+            const uint count = 8;
             
             for (uint i = 0; i < count; ++i)
                 stack[++current] = firstChild + i;
