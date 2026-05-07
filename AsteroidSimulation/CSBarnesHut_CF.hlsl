@@ -100,9 +100,11 @@ void main(uint3 GTid : SV_GroupThreadID,
     
     //pForce = ApplyCloseRangeForces(pMass, pPos, 0);
     //forceBuffer[pDestIndex] = pForce;
-    //debugBuffer[index] = nkBuffer[index];
+    //debugBuffer[index] = kBuffer[index];
     //debugBuffer[index] = lcBuffer[index];
     //debugBuffer[index] = coBuffer[index];
+    //debugBuffer[index] = loBuffer[index];
+    //debugBuffer[index] = liBuffer[index];
     //return;
     //debugBuffer[index] = combinedMass[index];
     //return;
@@ -116,7 +118,7 @@ void main(uint3 GTid : SV_GroupThreadID,
         const uint nodeIndex = stack[current--];
         const uint nk = nkBuffer[nodeIndex];
         const uint level = GetTreeLevelFromWs(nk);
-        const bool isInternalNode = nodeIndex < ni;
+        const bool isInternalNode = nodeIndex >= ni;
         
         const float cellWidth = globallCellWidth / (1 << level);
         
@@ -125,8 +127,8 @@ void main(uint3 GTid : SV_GroupThreadID,
         
         float3 direction = nodeCoM - pPos;
         float sqrDistance = dot(direction, direction);
-        float criterium = (cellWidth * cellWidth) / sqrDistance;
         
+        float criterium = sqrDistance > 0.f ? (cellWidth * cellWidth) / sqrDistance : theta;
         
         //apply node
         if (criterium < theta)
