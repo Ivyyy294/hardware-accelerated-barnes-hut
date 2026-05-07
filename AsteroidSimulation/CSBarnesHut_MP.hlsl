@@ -79,7 +79,7 @@ void main(uint3 GTid : SV_GroupThreadID,
     //GroupMemoryBarrierWithGroupSync();
     
     //CallculateInternalNodes(index, ni, n);
-    debugBuffer[index] = combinedMass[index];
+    //debugBuffer[index] = combinedMass[index];
     //debugBuffer[index] = pCount;
     //debugBuffer[index] = kBuffer[index];
     //debugBuffer[index] = loBuffer[index];
