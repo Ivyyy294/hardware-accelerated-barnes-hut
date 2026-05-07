@@ -18,7 +18,7 @@ void main(uint3 GTid : SV_GroupThreadID,
     
     //debugBuffer[index] = nkBuffer[index];
     
-    if (index >= L + 2)
+    if (index > L + 2)
         return;
     
     uint ni = counterBuffer[1];
@@ -31,6 +31,9 @@ void main(uint3 GTid : SV_GroupThreadID,
     
     uint indexFirstNodeOnLevel = BinarySearch(searchVal, nkBuffer, n);
     loBuffer[index] = indexFirstNodeOnLevel;
+    
+    if (index > L)
+        loBuffer[index] = n;
     
     GroupMemoryBarrierWithGroupSync();
     //debugBuffer[index] = loBuffer[index];
