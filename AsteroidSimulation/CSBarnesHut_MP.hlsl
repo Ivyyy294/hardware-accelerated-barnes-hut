@@ -56,7 +56,7 @@ void main(uint3 GTid : SV_GroupThreadID,
     //debugBuffer[index] = count;
     
     float mass = 0.f;
-    float3 center;
+    float3 center = float3(0.f, 0.f, 0.f);
         
     for (uint i = indexBegin; i < indexLast; ++i)
     {
