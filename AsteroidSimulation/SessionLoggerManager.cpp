@@ -27,6 +27,7 @@ SessionLoggerManager::SessionLoggerManager()
 	: m_variables ("variables.csv")
 	, m_position ("positions.csv")
 	, m_force ("force.csv")
+	, m_gpuMemDump ("gpuMemDump.csv")
 {
 }
 

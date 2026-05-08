@@ -8,6 +8,21 @@ CsSharedBuffer::CsSharedBuffer()
 {
 }
 
+HRESULT CsSharedBuffer::InitDebugShaderParameters(ID3D11Device* device)
+{
+	HRESULT result;
+
+	bool ok = ShaderUtils::CreateStagingBuffer(device, result, &m_outputBuffer, sizeof(uint32_t), 1024)
+		&& ShaderUtils::CreateResourceBuffer(device, result, &m_debugBuffer, sizeof(uint32_t), 1024)
+		&& ShaderUtils::CreateUAVBuffer(device, result, m_debugBuffer, &m_uavDebugBuffer, 1024)
+		&& ShaderUtils::CreateStagingBuffer(device, result, &m_dUint32Buffer_MaxCap, sizeof(uint32_t), MAX_CAPACITY)
+		&& ShaderUtils::CreateStagingBuffer(device, result, &m_dUint32Buffer_MaxPar, sizeof(uint32_t), MAX_PARTICLE_COUNT)
+		&& ShaderUtils::CreateStagingBuffer(device, result, &m_dUint32Buffer_MaxPar1, sizeof(uint32_t), MAX_PARTICLE_COUNT + 1)
+		&& ShaderUtils::CreateStagingBuffer(device, result, &m_dUint32Buffer_12, sizeof(uint32_t), 12);
+
+	return result;
+}
+
 HRESULT CsSharedBuffer::InitMortonCodeShaderParameters(ID3D11Device* device)
 {
 	HRESULT result;
@@ -160,12 +175,7 @@ bool CsSharedBuffer::InitShaderParameters()
 	if (device == nullptr)
 		return false;
 
-	HRESULT result;
-
-	//Debug buffer
-	ShaderUtils::CreateStagingBuffer(device, result, &m_outputBuffer, sizeof(uint32_t), 1024);
-	ShaderUtils::CreateResourceBuffer(device, result, &m_debugBuffer, sizeof(uint32_t), 1024);
-	ShaderUtils::CreateUAVBuffer(device, result, m_debugBuffer, &m_uavDebugBuffer, 1024);
+	HRESULT result = InitDebugShaderParameters (device);
 
 	if (FAILED(result))
 		return false;
@@ -218,6 +228,12 @@ bool CsSharedBuffer::InitShaderParameters()
 
 void CsSharedBuffer::ReleaseShaderParameters()
 {
+	ShaderUtils::SafeRelease(&m_debugBuffer);
+	ShaderUtils::SafeRelease(&m_dUint32Buffer_MaxCap);
+	ShaderUtils::SafeRelease(&m_dUint32Buffer_MaxPar);
+	ShaderUtils::SafeRelease(&m_dUint32Buffer_MaxPar1);
+	ShaderUtils::SafeRelease(&m_dUint32Buffer_12);
+
 	ShaderUtils::SafeRelease(&m_outputBuffer);
 	ShaderUtils::SafeRelease(&m_settingsBuffer);
 
@@ -357,4 +373,16 @@ void CsSharedBuffer::SwapParticleBuffer()
 	m_deviceContext->CopyResource(m_inPositionBuffer, m_outPositionBuffer);
 	m_deviceContext->CopyResource(m_inMassBuffer, m_outMassBuffer);
 	m_deviceContext->CopyResource(m_inNewToOldIndexBuffer, m_outNewToOldIndexBuffer);
+}
+
+void CsSharedBuffer::RecordBufferSnapshot()
+{
+	RecordBufferSnapshot <uint32_t> (m_dUint32Buffer_MaxPar1, m_outKBuffer, "K", MAX_PARTICLE_COUNT + 1);
+	RecordBufferSnapshot <uint32_t> (m_dUint32Buffer_MaxPar, m_nBuffer, "N", MAX_PARTICLE_COUNT);
+	RecordBufferSnapshot <uint32_t> (m_dUint32Buffer_MaxPar1, m_o2Buffer, "O", MAX_PARTICLE_COUNT + 1);
+	RecordBufferSnapshot <uint32_t> (m_dUint32Buffer_MaxCap, m_outNkBuffer, "NK", MAX_CAPACITY);
+	RecordBufferSnapshot <uint32_t> (m_dUint32Buffer_12, m_loBuffer, "LO", 12);
+	RecordBufferSnapshot <uint32_t> (m_dUint32Buffer_MaxCap, m_coBuffer, "CO", MAX_CAPACITY);
+	RecordBufferSnapshot <uint32_t> (m_stagingCounterBuffer, m_counterBuffer, "n", 2);
+	SessionLoggerManager::Me()->m_gpuMemDump.WriteLine("");
 }

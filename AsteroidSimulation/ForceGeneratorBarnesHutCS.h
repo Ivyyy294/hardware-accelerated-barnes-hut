@@ -58,6 +58,7 @@ private:
 	CsBarnesHut_CF m_csBarnesHut_CF;
 
 	float m_maxCoord = 0.f;
+	bool m_dumpMemmory = false;
 
 //Methods
 public:
@@ -65,6 +66,7 @@ public:
 
 	void Start() override;
 	void Exit() override;
+	void Update() override;
 	void ApplyForceForObject(PhysicObject* physicObj) const override;
 	void Dispatch();
 

@@ -11,6 +11,7 @@ public:
 	SessionFile m_variables;
 	SessionFile m_position;
 	SessionFile m_force;
+	SessionFile m_gpuMemDump;
 
 private:
 	static SessionLoggerManager* m_me;

@@ -126,6 +126,12 @@ void ForceGeneratorBarnesHutCS::Exit()
 	m_csCornerStone_F.ShutdownShader();
 }
 
+void ForceGeneratorBarnesHutCS::Update()
+{
+	if (Input::KeyDown(Key::KEY_P))
+		m_dumpMemmory = true;
+}
+
 void ForceGeneratorBarnesHutCS::ApplyForceForObject(PhysicObject* physicObj) const
 {
 	auto it = std::find(m_objects.begin(), m_objects.end(), physicObj);
@@ -157,6 +163,12 @@ void ForceGeneratorBarnesHutCS::Dispatch()
 
 	CopyForceData();
 	CopyTestData();
+
+	if (m_dumpMemmory)
+	{
+		m_buffer.RecordBufferSnapshot();
+		m_dumpMemmory = false;
+	}
 }
 
 void ForceGeneratorBarnesHutCS::CallculateMortonKeys(uint32_t elementCount)

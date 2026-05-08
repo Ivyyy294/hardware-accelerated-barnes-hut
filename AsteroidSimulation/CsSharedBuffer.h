@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CSSettings.h"
+#include "SessionLoggerManager.h"
 
 struct BhSettings
 {
@@ -22,6 +23,11 @@ public:
 	ID3D11Buffer* m_outputBuffer{ nullptr };
 	ID3D11Buffer* m_debugBuffer{ nullptr };
 	ID3D11UnorderedAccessView* m_uavDebugBuffer = nullptr;
+
+	ID3D11Buffer* m_dUint32Buffer_MaxCap{ nullptr };
+	ID3D11Buffer* m_dUint32Buffer_MaxPar{ nullptr };
+	ID3D11Buffer* m_dUint32Buffer_MaxPar1{ nullptr };
+	ID3D11Buffer* m_dUint32Buffer_12{ nullptr };
 
 	//Settings buffer
 	ID3D11Buffer* m_settingsBuffer{ nullptr };
@@ -89,6 +95,7 @@ public:
 
 	ID3D11Buffer* m_inNkBuffer{ nullptr };
 	ID3D11Buffer* m_outNkBuffer{ nullptr };
+	ID3D11Buffer* m_stagingNkBuffer{ nullptr };
 	ID3D11UnorderedAccessView* m_uavNkBuffer = nullptr;
 	ID3D11ShaderResourceView* m_srvNkBuffer = nullptr;
 
@@ -134,7 +141,10 @@ public:
 	void ClearUavBuffer();
 	void SwapParticleBuffer ();
 
+	void RecordBufferSnapshot();
+
 private:
+	HRESULT InitDebugShaderParameters(ID3D11Device* device);
 	HRESULT InitMortonCodeShaderParameters(ID3D11Device* device);
 	HRESULT InitPositionShaderParameters(ID3D11Device* device);
 	HRESULT InitIndexMappingShaderParameters (ID3D11Device* device);
@@ -143,5 +153,30 @@ private:
 	HRESULT InitCornerStoneShaderParameters(ID3D11Device* device);
 	HRESULT InitBarnesHutShaderParameters(ID3D11Device* device);
 
+	template <typename T>
+	void RecordBufferSnapshot (ID3D11Buffer* dest, ID3D11Buffer* source, const string name, const size_t count);
 };
 
+template<typename T>
+inline void CsSharedBuffer::RecordBufferSnapshot(ID3D11Buffer* dest, ID3D11Buffer* source, const string name, const size_t count)
+{
+	m_deviceContext->CopyResource (dest, source);
+
+	D3D11_MAPPED_SUBRESOURCE mappedResource;
+	HRESULT hr = m_deviceContext->Map(dest, 0, D3D11_MAP_READ, 0, &mappedResource);
+
+	if (SUCCEEDED(hr))
+	{
+		T* data = (T*)mappedResource.pData;
+
+		string memDump = name + ";";
+		memDump.reserve (sizeof(T) * count);
+
+		for (size_t i = 0; i < count; ++i)
+			memDump += std::to_string(data[i]) + ";";
+
+		SessionLoggerManager::Me()->m_gpuMemDump.WriteLine (memDump);
+
+		m_deviceContext->Unmap(dest, 0);
+	}
+}
