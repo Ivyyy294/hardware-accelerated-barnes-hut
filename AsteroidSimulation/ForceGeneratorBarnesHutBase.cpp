@@ -7,6 +7,9 @@ void ForceGeneratorBarnesHutBase::FixedUpdate()
 	string posData;
 	string forceData;
 
+	posData.reserve (m_objects.size());
+	forceData.reserve (m_objects.size());
+
 	for (size_t i = 0; i < m_objects.size(); ++i)
 	{
 		Vector3 pos = m_objects[i]->GetTransform()->GetPosition();

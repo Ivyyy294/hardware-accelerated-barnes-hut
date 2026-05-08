@@ -24,10 +24,7 @@ public:
 	ID3D11Buffer* m_debugBuffer{ nullptr };
 	ID3D11UnorderedAccessView* m_uavDebugBuffer = nullptr;
 
-	ID3D11Buffer* m_dUint32Buffer_MaxCap{ nullptr };
-	ID3D11Buffer* m_dUint32Buffer_MaxPar{ nullptr };
-	ID3D11Buffer* m_dUint32Buffer_MaxPar1{ nullptr };
-	ID3D11Buffer* m_dUint32Buffer_12{ nullptr };
+	ID3D11Buffer* m_dUint32Buffer{ nullptr };
 
 	//Settings buffer
 	ID3D11Buffer* m_settingsBuffer{ nullptr };
@@ -160,7 +157,8 @@ private:
 template<typename T>
 inline void CsSharedBuffer::RecordBufferSnapshot(ID3D11Buffer* dest, ID3D11Buffer* source, const string name, const size_t count)
 {
-	m_deviceContext->CopyResource (dest, source);
+	//m_deviceContext->CopyResource (dest, source);
+	m_deviceContext->CopySubresourceRegion (dest, 0, 0,0,0, source, 0, nullptr);
 
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
 	HRESULT hr = m_deviceContext->Map(dest, 0, D3D11_MAP_READ, 0, &mappedResource);
