@@ -19,6 +19,26 @@ uint BinarySearch(uint key, StructuredBuffer<uint> buffer, uint bufferSize)
     return low;
 }
 
+uint BinarySearchRange(uint key, StructuredBuffer<uint> buffer, uint start, uint end)
+{
+    uint low = start;
+    uint high = end;
+    
+    while (low < high)
+    {
+        //easy uint division by 2
+        uint mid = (low + high) >> 1;
+        uint mid_val = buffer[mid];
+        
+        if (mid_val < key)
+            low = mid + 1;
+        else
+            high = mid;
+    }
+    
+    return low;
+}
+
 uint Clz30 (uint val)
 {
     return 29 - firstbithigh(val);

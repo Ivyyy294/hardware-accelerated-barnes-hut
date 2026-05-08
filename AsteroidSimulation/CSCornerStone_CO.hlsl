@@ -10,6 +10,47 @@ StructuredBuffer<uint> loBuffer : register(t2);
 RWStructuredBuffer<uint> coBuffer : register(u0);
 RWStructuredBuffer<uint> debugBuffer : register(u1);
 
+
+uint GetChildIndex1(const uint nkVal, const uint n)
+{
+    const uint leafLevel = GetTreeLevelFromWs(nkVal);
+    const uint leafLevelSize = 1 << 3 * leafLevel;
+    const uint leafLevelChild = min(leafLevel + 1, L);
+    const uint nextLeafLevelChild = min(leafLevelChild + 1, L);
+    
+    const uint childLeafLevelOffset = loBuffer[leafLevelChild];
+    const uint childIndexLimit = loBuffer[nextLeafLevelChild];
+    
+    const uint nodeIndexOffset = (nkVal - leafLevelSize) * 8;
+
+    uint firstChildIndex = childLeafLevelOffset + nodeIndexOffset;
+    
+    if (firstChildIndex >= childIndexLimit)
+        firstChildIndex = 0;
+    
+    return firstChildIndex;
+}
+
+uint GetChildIndex2(const uint nkVal, const uint n)
+{
+    const uint firstChildValue = nkVal << 3;
+    
+    const uint leafLevel = GetTreeLevelFromWs(nkVal);
+    const uint leafLevelSize = 1 << 3 * leafLevel;
+    const uint leafLevelChild = min(leafLevel + 1, L);
+    const uint nextLeafLevelChild = min(leafLevelChild + 1, L);
+    
+    const uint childLeafLevelOffset = loBuffer[leafLevelChild];
+    const uint childIndexLimit = loBuffer[nextLeafLevelChild];
+    
+    uint firstChildIndex = BinarySearchRange(firstChildValue, nkBuffer, childLeafLevelOffset, childIndexLimit);
+    
+    if (nkBuffer[firstChildIndex] != firstChildValue)
+        firstChildIndex = 0;
+    
+    return firstChildIndex;
+}
+
 [numthreads(NUM_THREADS, 1, 1)]
 void main(uint3 GTid : SV_GroupThreadID,
           uint3 Gid : SV_GroupID)
@@ -31,26 +72,17 @@ void main(uint3 GTid : SV_GroupThreadID,
     debugBuffer[index] = nkBuffer[index];
     
     const uint nkVal = nkBuffer[index];
-    const uint leafLevel = GetTreeLevelFromWs(nkVal);
-    const uint leafLevelSize = 1 << 3 * leafLevel;
-    const uint leafLevelChild = min(leafLevel + 1, L);
-    const uint nextLeafLevelChild = min(leafLevelChild + 1, L);
     
-    const uint childLeafLevelOffset = loBuffer[leafLevelChild];
-    const uint childIndexLimit = loBuffer[nextLeafLevelChild];
+    //uint firstChildIndex = GetChildIndex1(nkVal);
+    uint firstChildIndex = GetChildIndex2(nkVal, n);
     
-    const uint nodeIndexOffset = (nkVal - leafLevelSize) * 8;
-    
-    uint firstChildIndex = childLeafLevelOffset + nodeIndexOffset;
-    
-    if (firstChildIndex >= childIndexLimit)
-        firstChildIndex = 0;
+    debugBuffer[index] = GetChildIndex2(nkVal, n);
     
     coBuffer[index] = firstChildIndex;
     //debugBuffer[index] = nodeIndexOffset;
     //debugBuffer[index] = childLeafLevelOffset;
     //debugBuffer[index] = leafLevel;
-    debugBuffer[index] = coBuffer[index];
+    //debugBuffer[index] = coBuffer[index];
     //debugBuffer[index] = ni;
     //debugBuffer[index] = leafLevelSize;
 }
