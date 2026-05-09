@@ -4,7 +4,18 @@
 
 struct SessionVariables
 {
-	string method;
+//Defines
+public:
+	enum ForceGeneratorMethod
+	{
+		DIRECT,
+		BARNES_HUT_CPU,
+		BARNES_HUT_GPU
+	};
+
+//Variables
+public:
+	ForceGeneratorMethod method;
 	int numAsteroids;
 	float ugc;
 	float fixedDeltaTime;
