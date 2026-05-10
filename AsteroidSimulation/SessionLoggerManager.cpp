@@ -28,6 +28,7 @@ SessionLoggerManager::SessionLoggerManager()
 	, m_position ("positions.csv")
 	, m_force ("force.csv")
 	, m_gpuMemDump ("gpuMemDump.csv")
+	, m_shaderTime ("shader.csv")
 {
 }
 

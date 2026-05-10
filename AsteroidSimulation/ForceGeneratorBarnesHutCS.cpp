@@ -59,6 +59,8 @@ void ForceGeneratorBarnesHutCS::Start()
 
 	m_csBarnesHut_CF.Initialize();
 	m_csBarnesHut_CF.m_sharedBuffer = &m_buffer;
+
+	SessionLoggerManager::Me()->m_shaderTime.WriteLine("CSMortonCodes;CSCornerStone_F;CSCornerStone_G1;CSCornerStone_G2;CSCornerStone_G3;CSCornerStone_NK;CSCornerStone_LO;CSCornerStone_CO;CSBarnesHut_MP;CSBarnesHut_CF");
 }
 
 
@@ -163,6 +165,8 @@ void ForceGeneratorBarnesHutCS::Dispatch()
 
 	CopyForceData();
 	CopyTestData();
+
+	RecordExecutionTime();
 
 	if (m_dumpMemmory)
 	{
@@ -306,5 +310,21 @@ void ForceGeneratorBarnesHutCS::CopyForceData()
 		memcpy(m_forceBuffer, dataPtr, sizeof(XMFLOAT3) * (MAX_PARTICLE_COUNT));
 		m_deviceContext->Unmap(m_buffer.m_outForceBuffer, 0);
 	}
+}
+
+void ForceGeneratorBarnesHutCS::RecordExecutionTime()
+{
+	string val = std::to_string(m_csMortonCodes.GetExecutionTimeMs())
+		+ ";" + std::to_string(m_csCornerStone_F.GetExecutionTimeMs())
+		+ ";" + std::to_string(m_csCornerStone_G1.GetExecutionTimeMs())
+		+ ";" + std::to_string(m_csCornerStone_G2.GetExecutionTimeMs())
+		+ ";" + std::to_string(m_csCornerStone_G3.GetExecutionTimeMs())
+		+ ";" + std::to_string(m_csCornerStone_NK.GetExecutionTimeMs())
+		+ ";" + std::to_string(m_csCornerStone_LO.GetExecutionTimeMs())
+		+ ";" + std::to_string(m_csCornerStone_CO.GetExecutionTimeMs())
+		+ ";" + std::to_string(m_csBarnesHut_MP.GetExecutionTimeMs())
+		+ ";" + std::to_string(m_csBarnesHut_CF.GetExecutionTimeMs());
+
+	SessionLoggerManager::Me()->m_shaderTime.WriteLine(val);
 }
 

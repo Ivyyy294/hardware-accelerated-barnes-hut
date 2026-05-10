@@ -30,8 +30,8 @@ class ForceGeneratorBarnesHutCS :
 {
 //Variables
 private:
-	const uint32_t m_nCrit {16};
-	XMFLOAT3 m_forceBuffer[MAX_PARTICLE_COUNT];
+	const uint32_t m_nCrit {64};
+	XMFLOAT3 m_forceBuffer[MAX_PARTICLE_COUNT]{};
 
 	ID3D11DeviceContext* m_deviceContext {nullptr};
 	
@@ -80,5 +80,7 @@ private:
 
 	void CopyTestData();
 	void CopyForceData();
+
+	void RecordExecutionTime();
 };
 
