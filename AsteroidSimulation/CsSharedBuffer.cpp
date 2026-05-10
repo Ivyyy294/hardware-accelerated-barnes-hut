@@ -379,5 +379,26 @@ void CsSharedBuffer::RecordBufferSnapshot()
 	RecordBufferSnapshot <uint32_t> (m_dUint32Buffer, m_loBuffer, "LO", 12);
 	RecordBufferSnapshot <uint32_t> (m_dUint32Buffer, m_coBuffer, "CO", MAX_CAPACITY);
 	RecordBufferSnapshot <uint32_t> (m_dUint32Buffer, m_counterBuffer, "n", 2);
+
+	//m_deviceContext->CopyResource (dest, source);
+
+	D3D11_MAPPED_SUBRESOURCE mappedResource;
+	HRESULT hr = m_deviceContext->Map(m_bhSettingsBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+
+	if (SUCCEEDED(hr))
+	{
+		BhSettings* data = (BhSettings*)mappedResource.pData;
+
+		string memDump = "CBUFFER;";
+		memDump += std::to_string(data->pCount) + ";";
+		memDump += std::to_string(data->globalCellWidth) + ";";
+		memDump += std::to_string(data->ugc) + ";";
+		memDump += std::to_string(data->theta) + ";";
+
+		SessionLoggerManager::Me()->m_gpuMemDump.WriteLine(memDump);
+
+		m_deviceContext->Unmap(m_bhSettingsBuffer, 0);
+	}
+
 	SessionLoggerManager::Me()->m_gpuMemDump.WriteLine("");
 }
