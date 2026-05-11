@@ -177,9 +177,9 @@ void ForceGeneratorBarnesHutCS::Dispatch()
 
 void ForceGeneratorBarnesHutCS::CallculateMortonKeys(uint32_t elementCount)
 {
-	//ToDo: reduce dispatch count!!!
-	m_buffer.SetSettingParameter(elementCount, elementCount);
-	m_csMortonCodes.Dispatch(elementCount, 1, 1);
+	uint32_t groupCount = 40;
+	m_buffer.SetSettingParameter(elementCount, groupCount);
+	m_csMortonCodes.Dispatch(groupCount, 1, 1);
 
 	m_deviceContext->CopyResource(m_buffer.m_inMortonCodeBuffer, m_buffer.m_outMortonCodeBuffer);
 }

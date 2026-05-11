@@ -1,3 +1,6 @@
+#define NUM_THREADS 256
+#define ITEM_PER_THREAD 8
+
 //Globals
 cbuffer SettingsBuffer : register(b0)
 {
@@ -51,14 +54,26 @@ uint GetMortonKey(float3 pos)
     return xx ^ (yy << 1) ^ (zz << 2);
 }
 
-[numthreads(1, 1, 1)]
-void main( uint3 DTid : SV_DispatchThreadID )
+[numthreads(NUM_THREADS, 1, 1)]
+void main(uint3 GTid : SV_GroupThreadID,
+          uint3 Gid : SV_GroupID)
 {
-    uint index = DTid.x;
+    const uint tileSize = ITEM_PER_THREAD * NUM_THREADS;
+    const uint groupId = Gid.x;
+    const uint threadId = GTid.x;
     
-    if (index >= elementCount)
-        return;
+    for (uint tileIndex = groupId; tileIndex * tileSize < elementCount; tileIndex += dispatchGroupCount)
+    {
+        const uint baseIndex = tileIndex * tileSize;
 
-    mortonCodes[index] = GetMortonKey(positions[index]);
+        for (uint i = 0; i < ITEM_PER_THREAD; ++i)
+        {
+            uint index = baseIndex + threadId + i * NUM_THREADS;
+            
+            if (index < elementCount)
+                mortonCodes[index] = GetMortonKey(positions[index]);
+        }
+    }
+
     //debugBuffer[index] = positions[index];
 }
