@@ -2,6 +2,7 @@
 
 #define NUM_THREADS 256
 #define L 10
+#define STACK_SIZE 512
 
 cbuffer SettingsBuffer : register(b0)
 {
@@ -95,8 +96,11 @@ void main(uint3 GTid : SV_GroupThreadID,
     const uint pDestIndex = newToOldIndexBuffer[index];
     float3 pForce = {0.f, 0.f, 0.f};
     
-    uint stack[2048];
-    int current = 0;
+    uint currentStack[STACK_SIZE];
+    uint nextStack[STACK_SIZE];
+    
+    int currentStackIndex = 0;
+    int nextStackIndex = 0;
     
     //pForce = ApplyCloseRangeForces(pMass, pPos, 0);
     //forceBuffer[pDestIndex] = pForce;
@@ -111,41 +115,54 @@ void main(uint3 GTid : SV_GroupThreadID,
     
     //debugBuffer[index] = nkBuffer[index];
     
-    stack[0] = 0;
-
-    while (current >= 0)
+    nextStack[0] = 0;
+    
+    [loop]
+    while (nextStackIndex >= 0)
     {
-        const uint nodeIndex = stack[current--];
-        const uint nk = nkBuffer[nodeIndex];
-        const uint level = GetTreeLevelFromWs(nk);
-        const uint firstChild = coBuffer[nodeIndex];
-        const bool isInternalNode = firstChild > 0;
+        currentStack = nextStack;
+        currentStackIndex = nextStackIndex;
+        nextStackIndex = -1;
         
-        const float cellWidth = globallCellWidth / (1 << level);
-        
-        const float3 nodeCoM = centerOfMass[nodeIndex];
-        const float nodeMass = combinedMass[nodeIndex];
-        
-        float3 direction = nodeCoM - pPos;
-        float sqrDistance = dot(direction, direction);
-        
-        float criterium = sqrDistance > 0.f ? (cellWidth * cellWidth) / sqrDistance : theta;
-        
-        //apply node
-        if (criterium < theta)
-            pForce += ApplyForceFromNode(pMass, nodeMass, direction, sqrDistance);
-        //push childen
-        else if (isInternalNode)
+        [loop]
+        while (currentStackIndex >= 0)
         {
-            const uint count = 8;
+            if (currentStackIndex >= STACK_SIZE)
+                return;
             
-            for (uint i = 0; i < count; ++i)
-                stack[++current] = firstChild + i;
+            const uint nodeIndex = currentStack[currentStackIndex--];
+            const uint nk = nkBuffer[nodeIndex];
+            const uint level = GetTreeLevelFromWs(nk);
+            const uint firstChild = coBuffer[nodeIndex];
+            const bool isInternalNode = firstChild > 0;
+        
+            const float cellWidth = globallCellWidth / (1 << level);
+        
+            const float3 nodeCoM = centerOfMass[nodeIndex];
+            const float nodeMass = combinedMass[nodeIndex];
+        
+            float3 direction = nodeCoM - pPos;
+            float sqrDistance = dot(direction, direction);
+        
+            float criterium = sqrDistance > 0.f ? (cellWidth * cellWidth) / sqrDistance : theta;
+        
+            //apply node
+            if (criterium < theta)
+                pForce += ApplyForceFromNode(pMass, nodeMass, direction, sqrDistance);
+            //push childen
+            else if (isInternalNode)
+            {
+                const uint count = 8;
+            
+                for (uint i = 0; i < count; ++i)
+                    nextStack[++nextStackIndex] = firstChild + i;
+            }
+            //apply leafs
+            else
+                pForce += ApplyCloseRangeForces(pMass, pPos, nodeIndex);
         }
-        //apply leafs
-        else
-            pForce += ApplyCloseRangeForces(pMass, pPos, nodeIndex);
     }
+
     
     forceBuffer[pDestIndex] = pForce;
     //debugBuffer[index] = combinedMass[index];
