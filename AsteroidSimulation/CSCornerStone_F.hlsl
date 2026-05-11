@@ -1,5 +1,7 @@
 #include "CSUtils.hlsli"
 
+#define NUM_THREADS 256
+
 cbuffer SettingsBuffer : register(b0)
 {
     uint pSize;
@@ -12,10 +14,11 @@ StructuredBuffer<uint> counterBuffer : register(t2);
 RWStructuredBuffer<uint> nBuffer : register(u0);
 RWStructuredBuffer<uint> debugBuffer : register(u1);
 
-[numthreads(256, 1, 1)]
-void main( uint3 DTid : SV_DispatchThreadID )
+[numthreads(NUM_THREADS, 1, 1)]
+void main(uint3 GTid : SV_GroupThreadID,
+          uint3 Gid : SV_GroupID)
 {
-    uint intervalIndex = DTid.x;
+    uint intervalIndex = Gid.x * NUM_THREADS + GTid.x;
     
     uint kSize = counterBuffer[0];
  
