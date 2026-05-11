@@ -15,8 +15,8 @@ void SceneBarnesHutCS::AdjustFixedUpdateLoop()
 {
 	MainLoop& mainLoop = IvyyyEngine::Me()->GetMainLoop();
 	MainLoopNode node = mainLoop.GetNode();
-	auto mainLoopNodes = node.GetChildren()[3];
-	auto physicNode = mainLoopNodes->GetChildren()[1];
+	auto mainLoopNodes = node.GetChildren()[5];
+	auto physicNode = mainLoopNodes->GetChildren()[0];
 
 	auto fixedUpdateNodes = physicNode->GetChildren();
 	fixedUpdateNodes.emplace(fixedUpdateNodes.begin() + 2,std::make_shared <MainLoopNode>("BarnesHutCSForceGenerator", Event().Bind<ForceGeneratorBarnesHutCS, &ForceGeneratorBarnesHutCS::Dispatch>(m_forceGenerator)));

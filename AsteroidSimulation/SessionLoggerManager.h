@@ -13,6 +13,7 @@ public:
 	SessionFile m_force;
 	SessionFile m_gpuMemDump;
 	SessionFile m_shaderTime;
+	SessionFile m_frameTime;
 
 private:
 	static SessionLoggerManager* m_me;
