@@ -14,6 +14,5 @@ private:
 private:
 	void Init() override;
 	void OnOrbitalBodySpawned(GameObject* orbitalBody) override;
-	void AdjustFixedUpdateLoop();
 };
 

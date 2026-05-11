@@ -13,7 +13,6 @@ private:
 //Methods
 private:
 	void Init() override;
-	void AdjustFixedUpdateLoop();
 	void OnOrbitalBodySpawned(GameObject* orbitalBody) override;
 };
 

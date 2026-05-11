@@ -8,19 +8,7 @@ void SceneBarnesHutCS::Init()
 	m_forceGenerator = AddGameObject()->AddComponent<ForceGeneratorBarnesHutCS>().get();
 	SceneAsteroidBase::Init();
 
-	AdjustFixedUpdateLoop();
-}
-
-void SceneBarnesHutCS::AdjustFixedUpdateLoop()
-{
-	MainLoop& mainLoop = IvyyyEngine::Me()->GetMainLoop();
-	MainLoopNode node = mainLoop.GetNode();
-	auto mainLoopNodes = node.GetChildren()[5];
-	auto physicNode = mainLoopNodes->GetChildren()[0];
-
-	auto fixedUpdateNodes = physicNode->GetChildren();
-	fixedUpdateNodes.emplace(fixedUpdateNodes.begin() + 2,std::make_shared <MainLoopNode>("BarnesHutCSForceGenerator", Event().Bind<ForceGeneratorBarnesHutCS, &ForceGeneratorBarnesHutCS::Dispatch>(m_forceGenerator)));
-	physicNode->SetChildren(fixedUpdateNodes);
+	AdjustFixedUpdateLoop (m_forceGenerator);
 }
 
 void SceneBarnesHutCS::OnOrbitalBodySpawned(GameObject* orbitalBody)

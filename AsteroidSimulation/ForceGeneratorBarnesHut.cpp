@@ -6,11 +6,23 @@ void ForceGeneratorBarnesHut::OnDrawGizmo()
 	m_octTree.DrawGizmo();
 }
 
-void ForceGeneratorBarnesHut::ApplyForceForObject(PhysicObject* physicObj) const
+void ForceGeneratorBarnesHut::PreCalculateForcesInternal()
+{
+	BuildTree();
+
+	for (size_t i = 0; i < m_objects.size(); ++i)
+	{
+		Vector3 force = CalculateForces(m_objects[i]);
+		m_forceBuffer[i] = XMFLOAT3 (force.x, force.y, force.z);
+	}
+}
+
+Vector3 ForceGeneratorBarnesHut::CalculateForces(PhysicObject* physicObj)
 {
 	std::queue<const SpatialOctree*> queue;
 
 	Vector3 pos = physicObj->GetTransform()->GetPosition();
+	Vector3 forceSum = Vector3::Zero;
 
 	queue.push(&m_octTree);
 
@@ -25,7 +37,7 @@ void ForceGeneratorBarnesHut::ApplyForceForObject(PhysicObject* physicObj) const
 		if (result < m_theta)
 		{
 			if (physicObj->IsStatic())
-				return;
+				Vector3::Zero;
 
 			Vector3 diff = current->CenterOfMass() - physicObj->GetTransform()->GetPosition();
 			Vector3 direction = diff.Normalized();
@@ -36,8 +48,7 @@ void ForceGeneratorBarnesHut::ApplyForceForObject(PhysicObject* physicObj) const
 				float force = (Ivyyy::IvyyyPhysic::GravitationalConstant() * current->Mass() * physicObj->GetMass()) / (distance * distance);
 
 				Vector3 forceVec = direction * force;
-
-				physicObj->ApplyForce(forceVec);
+				forceSum += forceVec;
 			}
 		}
 		else
@@ -46,6 +57,8 @@ void ForceGeneratorBarnesHut::ApplyForceForObject(PhysicObject* physicObj) const
 				queue.push(current->Children()[i]);
 		}
 	}
+
+	return forceSum;
 }
 
 void ForceGeneratorBarnesHut::BuildTree()

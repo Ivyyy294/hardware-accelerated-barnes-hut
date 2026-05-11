@@ -15,9 +15,9 @@ private:
 public:
 	void OnDrawGizmo() override;
 
-	// Inherited via ForceGenerator
-	void ApplyForceForObject(PhysicObject* physicObj) const override;
-
+private:
+	void PreCalculateForcesInternal() override;
 	void BuildTree();
+	Vector3 CalculateForces(PhysicObject* physicObj);
 };
 

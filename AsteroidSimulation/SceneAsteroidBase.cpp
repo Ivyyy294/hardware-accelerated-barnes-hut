@@ -129,3 +129,14 @@ void SceneAsteroidBase::AdjustMainLoop()
 	node.SetChildren(mainLoopNodes);
 }
 
+void SceneAsteroidBase::AdjustFixedUpdateLoop(ForceGeneratorBarnesHutBase* forceGenerator)
+{
+	MainLoop& mainLoop = IvyyyEngine::Me()->GetMainLoop();
+	MainLoopNode node = mainLoop.GetNode();
+	auto mainLoopNodes = node.GetChildren()[5];
+	auto physicNode = mainLoopNodes->GetChildren()[0];
+
+	auto fixedUpdateNodes = physicNode->GetChildren();
+	fixedUpdateNodes.emplace(fixedUpdateNodes.begin() + 2, std::make_shared <MainLoopNode>("BarnesHutCSForceGenerator", Event().Bind<ForceGeneratorBarnesHutBase, &ForceGeneratorBarnesHutBase::PreCalculateForces>(forceGenerator)));
+	physicNode->SetChildren(fixedUpdateNodes);
+}

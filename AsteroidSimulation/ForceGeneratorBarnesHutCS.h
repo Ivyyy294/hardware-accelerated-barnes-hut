@@ -31,7 +31,6 @@ class ForceGeneratorBarnesHutCS :
 //Variables
 private:
 	const uint32_t m_nCrit {64};
-	XMFLOAT3 m_forceBuffer[MAX_PARTICLE_COUNT]{};
 
 	ID3D11DeviceContext* m_deviceContext {nullptr};
 	
@@ -67,10 +66,9 @@ public:
 	void Start() override;
 	void Exit() override;
 	void Update() override;
-	void ApplyForceForObject(PhysicObject* physicObj) const override;
-	void Dispatch();
 
 private:
+	void PreCalculateForcesInternal() override;
 	void SetShaderParameter();
 
 	void CallculateMortonKeys (uint32_t elementCount);

@@ -1,6 +1,7 @@
 #pragma once
 
 #define NUM_ASTEROIDS 32
+#define MAX_PARTICLE_COUNT NUM_ASTEROIDS + 1
 
 #include <string>
 #include <algorithm>
@@ -11,6 +12,7 @@
 #include <map>
 #include <iostream>
 #include <fstream>
+#include <chrono>
 
 #include <DirectXMath.h>
 

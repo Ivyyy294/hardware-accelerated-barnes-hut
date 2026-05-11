@@ -1,6 +1,5 @@
 #pragma once
 
-#define MAX_PARTICLE_COUNT NUM_ASTEROIDS + 1
 #define MAX_CAPACITY MAX_PARTICLE_COUNT + MAX_PARTICLE_COUNT
 
 class ShaderUtils

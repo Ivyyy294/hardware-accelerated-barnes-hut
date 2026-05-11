@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "ForceGeneratorBarnesHutBase.h"
 #include "SessionLoggerManager.h"
+#include "FrameTimeRecorder.h"
 
 void ForceGeneratorBarnesHutBase::FixedUpdate()
 {
@@ -22,6 +23,24 @@ void ForceGeneratorBarnesHutBase::FixedUpdate()
 	SessionLoggerManager::Me()->m_force.WriteLine(forceData);
 }
 
+void ForceGeneratorBarnesHutBase::ApplyForceForObject(PhysicObject* physicObj) const
+{
+	auto it = std::find(m_objects.begin(), m_objects.end(), physicObj);
+
+	if (it != m_objects.end())
+	{
+		size_t index = std::distance(m_objects.begin(), it);
+		//XMFLOAT3 force = m_forceBuffer[index];
+		Vector3 force = Vector3(m_forceBuffer[index].x, m_forceBuffer[index].y, m_forceBuffer[index].z);
+		physicObj->ApplyForce(force);
+
+		if (force.SquareMagnitude() == 0.f)
+			return;
+	}
+	else
+		return;
+}
+
 float ForceGeneratorBarnesHutBase::GetMaxCoordinate()
 {
 	float coord;
@@ -34,4 +53,14 @@ float ForceGeneratorBarnesHutBase::GetMaxCoordinate()
 	}
 
 	return coord;
+}
+
+void ForceGeneratorBarnesHutBase::PreCalculateForces()
+{
+	clock_t startTime = clock();
+	PreCalculateForcesInternal();
+
+	clock_t endTime = clock();
+	float diff = (float)(endTime - startTime);
+	FrameTimeRecorder::Me()->m_forceCalcTime = diff;
 }

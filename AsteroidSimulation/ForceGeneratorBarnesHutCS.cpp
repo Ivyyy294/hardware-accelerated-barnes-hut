@@ -134,25 +134,7 @@ void ForceGeneratorBarnesHutCS::Update()
 		m_dumpMemmory = true;
 }
 
-void ForceGeneratorBarnesHutCS::ApplyForceForObject(PhysicObject* physicObj) const
-{
-	auto it = std::find(m_objects.begin(), m_objects.end(), physicObj);
-
-	if (it != m_objects.end())
-	{
-		size_t index = std::distance(m_objects.begin(), it);
-		//XMFLOAT3 force = m_forceBuffer[index];
-		Vector3 force = Vector3 (m_forceBuffer[index].x, m_forceBuffer[index].y, m_forceBuffer[index].z);
-		physicObj->ApplyForce (force);
-
-		if (force.SquareMagnitude() == 0.f)
-			return;
-	}
-	else
-		return;
-}
-
-void ForceGeneratorBarnesHutCS::Dispatch()
+void ForceGeneratorBarnesHutCS::PreCalculateForcesInternal()
 {
 	SetShaderParameter();
 	//SetTestShaderParameter();
