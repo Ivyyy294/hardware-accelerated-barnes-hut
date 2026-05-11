@@ -245,22 +245,23 @@ void ForceGeneratorBarnesHutCS::BuildOctree(uint32_t elementCount)
 		memcpy(&data[0], mappedResource.pData, sizeof(uint32_t) * size);
 		m_deviceContext->Unmap(m_buffer.m_stagingCounterBuffer, 0);
 
-		//ToDo: why is ni aka data[1], 1 bigger than expected?
-		elementCount = data[0] + data [1];
+		m_nl = data[0];
+		m_ni = data[1];
+		m_n = m_nl + m_ni;
 	}
 
-	m_buffer.SetSettingParameter(elementCount, 40);
+	m_buffer.SetSettingParameter(m_n, 40);
 	m_csRadixSort_1.m_srvKeyBuffer = m_buffer.m_srvNkBuffer;
 	m_csRadixSort_1.Dispatch(40, 1, 1);
 
-	m_buffer.SetSettingParameter(elementCount, 4);
+	m_buffer.SetSettingParameter(m_n, 4);
 	m_csRadixSort_2.Dispatch(4, 1, 1);
 
-	groupCount = (elementCount + 255) / 256;
+	groupCount = (m_n + 255) / 256;
 
 	for (uint32_t i = 0; i < 4; ++i)
 	{
-		m_buffer.SetSettingParameter(elementCount, groupCount, i);
+		m_buffer.SetSettingParameter(m_n, groupCount, i);
 		m_csRadixSort_4.Dispatch(groupCount, 1, 1);
 		m_deviceContext->CopyResource(m_buffer.m_inNkBuffer, m_buffer.m_outNkBuffer);
 	}

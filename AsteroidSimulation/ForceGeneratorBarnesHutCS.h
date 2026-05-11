@@ -60,6 +60,10 @@ private:
 	float m_maxCoord = 0.f;
 	bool m_dumpMemmory = false;
 
+	uint32_t m_ni = 0;
+	uint32_t m_nl = 0;
+	uint32_t m_n = 0;
+
 //Methods
 public:
 	ForceGeneratorBarnesHutCS();
