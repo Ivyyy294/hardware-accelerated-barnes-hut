@@ -25,6 +25,9 @@ void ForceGeneratorBarnesHutBase::FixedUpdate()
 
 void ForceGeneratorBarnesHutBase::ApplyForceForObject(PhysicObject* physicObj) const
 {
+	if (physicObj->IsStatic())
+		return;
+
 	auto it = std::find(m_objects.begin(), m_objects.end(), physicObj);
 
 	if (it != m_objects.end())

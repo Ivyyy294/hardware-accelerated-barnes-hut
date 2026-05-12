@@ -92,7 +92,7 @@ HRESULT CsSharedBuffer::InitCornerStoneShaderParameters(ID3D11Device* device)
 
 	HRESULT result;
 
-	uint32_t k [MAX_PARTICLE_COUNT + 1] = {0, 1 << 3 * 10};
+	uint32_t k [MAX_CAPACITY] = {0, 1 << 3 * 10};
 	D3D11_SUBRESOURCE_DATA initalK = {};
 	initalK.pSysMem = k;
 
@@ -372,9 +372,10 @@ void CsSharedBuffer::SwapParticleBuffer()
 void CsSharedBuffer::RecordBufferSnapshot()
 {
 	RecordBufferSnapshot <uint32_t> (m_dUint32Buffer, m_outMortonCodeBuffer, "M", MAX_PARTICLE_COUNT);
-	RecordBufferSnapshot <uint32_t> (m_dUint32Buffer, m_outKBuffer, "K", MAX_PARTICLE_COUNT + 1);
-	RecordBufferSnapshot <uint32_t> (m_dUint32Buffer, m_nBuffer, "N", MAX_PARTICLE_COUNT);
-	RecordBufferSnapshot <uint32_t> (m_dUint32Buffer, m_o2Buffer, "O", MAX_PARTICLE_COUNT + 1);
+	RecordBufferSnapshot <uint32_t> (m_dUint32Buffer, m_outKBuffer, "K", MAX_CAPACITY);
+	RecordBufferSnapshot <uint32_t> (m_dUint32Buffer, m_nBuffer, "N", MAX_CAPACITY);
+	RecordBufferSnapshot <uint32_t> (m_dUint32Buffer, m_o1Buffer, "O1", MAX_CAPACITY);
+	RecordBufferSnapshot <uint32_t> (m_dUint32Buffer, m_o2Buffer, "O2", MAX_CAPACITY);
 	RecordBufferSnapshot <uint32_t> (m_dUint32Buffer, m_outNkBuffer, "NK", MAX_CAPACITY);
 	RecordBufferSnapshot <uint32_t> (m_dUint32Buffer, m_loBuffer, "LO", 12);
 	RecordBufferSnapshot <uint32_t> (m_dUint32Buffer, m_coBuffer, "CO", MAX_CAPACITY);

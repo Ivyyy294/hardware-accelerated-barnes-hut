@@ -30,7 +30,7 @@ void main( uint3 DTid : SV_DispatchThreadID )
     uint indexFirstSibling = index - indexJ;
     uint indexLastSibling = indexFirstSibling + 8;
     
-    bool split = nVal >= nCrit;
+    bool split = nVal > nCrit;
     bool firstOctant = kVal % iDelta == 0;
     bool consecutive = indexLastSibling < kSize && kBuffer[indexFirstSibling] + iDelta == kBuffer[indexLastSibling];
     

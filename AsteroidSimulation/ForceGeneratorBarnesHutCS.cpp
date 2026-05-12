@@ -150,6 +150,8 @@ void ForceGeneratorBarnesHutCS::PreCalculateForcesInternal()
 
 	RecordExecutionTime();
 
+	m_dumpMemmory = true;
+
 	if (m_dumpMemmory)
 	{
 		m_buffer.RecordBufferSnapshot();
