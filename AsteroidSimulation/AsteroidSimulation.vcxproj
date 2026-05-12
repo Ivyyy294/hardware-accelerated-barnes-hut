@@ -170,6 +170,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="Planet.cpp" />
+    <ClCompile Include="SessionDurationController.cpp" />
     <ClCompile Include="SessionFile.cpp" />
     <ClCompile Include="SessionLogger.cpp" />
     <ClCompile Include="SessionLoggerManager.cpp" />
@@ -211,6 +212,7 @@
     <ClInclude Include="ForceGeneratorBarnesHutBase.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="Planet.h" />
+    <ClInclude Include="SessionDurationController.h" />
     <ClInclude Include="SessionFile.h" />
     <ClInclude Include="SessionLogger.h" />
     <ClInclude Include="SessionLoggerManager.h" />

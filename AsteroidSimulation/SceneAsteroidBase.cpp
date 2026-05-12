@@ -11,6 +11,7 @@
 #include "Planet.h"
 #include "SessionLoggerManager.h"
 #include "FrameTimeRecorder.h"
+#include "SessionDurationController.h"
 
 SceneAsteroidBase::SceneAsteroidBase()
 {
@@ -20,7 +21,7 @@ SceneAsteroidBase::SceneAsteroidBase()
 	m_sVar.distRange = { 10.f, 15.f };
 	m_sVar.eRange = { 0.f, 0.25f };
 	m_sVar.iRange = { -10.f, 10.f };
-
+	m_sVar.maxFixedFrames = 1000;
 }
 
 void SceneAsteroidBase::Init()
@@ -33,9 +34,17 @@ void SceneAsteroidBase::Init()
 	light->SetColor(Color(1.f, 1.f, 1.f, 1.0f));
 
 	//Add Camera movement
-	Camera::MainCamera()->GetGameObject()->AddComponent<CameraMovement>();
-	Camera::MainCamera()->GetGameObject()->AddComponent<SessionLoggerManager>();
-	Camera::MainCamera()->GetGameObject()->AddComponent<FrameTimeRecorder>();
+	GameObject* camera = Camera::MainCamera()->GetGameObject();
+	camera->AddComponent<CameraMovement>();
+	
+	//Add Recording
+	camera->AddComponent<SessionLoggerManager>();
+	camera->AddComponent<FrameTimeRecorder>();
+
+	//Add duration controller
+	SessionDurationController* sdc = camera->AddComponent<SessionDurationController>().get();
+	sdc->m_maxDurationSec = m_sVar.maxDurationSec;
+	sdc->m_maxFixedFrames = m_sVar.maxFixedFrames;
 
 	//Add Debug UI
 	AddGameObject<DebugInfoUi>();
@@ -109,13 +118,15 @@ void SceneAsteroidBase::SpawnAsteroids(int num, Vector2 dist, Vector2 e, Vector2
 void SceneAsteroidBase::LogSessionVariables()
 {
 	SessionLoggerManager* slm = SessionLoggerManager::Me();
-	slm->m_variables.WriteLine("method;" + m_sVar.method);
+	slm->m_variables.WriteLine("method;" + std::to_string(m_sVar.method));
 	slm->m_variables.WriteLine("numAsteroids;" + std::to_string(m_sVar.numAsteroids));
 	slm->m_variables.WriteLine("ugc;" + std::to_string(m_sVar.ugc));
 	slm->m_variables.WriteLine("fixedDeltaTime;" + std::to_string(m_sVar.fixedDeltaTime));
 	slm->m_variables.WriteLine("distRange;" + std::to_string(m_sVar.distRange.x) + ";" + std::to_string(m_sVar.distRange.y));
 	slm->m_variables.WriteLine("eRange;" + std::to_string(m_sVar.eRange.x) + ";" + std::to_string(m_sVar.eRange.y));
 	slm->m_variables.WriteLine("iRange;" + std::to_string(m_sVar.iRange.x) + ";" + std::to_string(m_sVar.iRange.y));
+	slm->m_variables.WriteLine("maxFixedFrames;" + std::to_string(m_sVar.maxFixedFrames));
+	slm->m_variables.WriteLine("maxDurationSec;" + std::to_string(m_sVar.maxDurationSec));
 }
 
 void SceneAsteroidBase::AdjustMainLoop()

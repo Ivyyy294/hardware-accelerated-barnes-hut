@@ -30,7 +30,7 @@ class ForceGeneratorBarnesHutCS :
 {
 //Variables
 private:
-	const uint32_t m_nCrit {64};
+	const uint32_t m_nCrit {1};
 
 	ID3D11DeviceContext* m_deviceContext {nullptr};
 	
