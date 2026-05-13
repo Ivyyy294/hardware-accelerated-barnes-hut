@@ -153,7 +153,7 @@ void ForceGeneratorBarnesHutCS::PreCalculateForcesInternal()
 
 	RecordExecutionTime();
 
-	m_dumpMemmory = true;
+	//m_dumpMemmory = true;
 
 	if (m_dumpMemmory)
 	{
@@ -198,10 +198,10 @@ void ForceGeneratorBarnesHutCS::BuildOctree(uint32_t elementCount)
 
 	uint32_t groupCount = (MAX_PARTICLE_COUNT + 1 + 255) / 256;
 
-	m_buffer.SetSettingParameter (elementCount, 0);
 
 	for (uint32_t i = 0; i < 10 && m_counterBuffer[2] > 0; ++i)
 	{
+		m_buffer.SetSettingParameter (elementCount, 0);
 		m_csCornerStone_F.Dispatch(groupCount,1,1);
 
 		m_buffer.SetSettingParameter(m_nCrit, 0);
@@ -215,28 +215,25 @@ void ForceGeneratorBarnesHutCS::BuildOctree(uint32_t elementCount)
 		CopyCounterBuffer();
 	}
 	
-	elementCount = m_counterBuffer[0] + m_counterBuffer[1];
 
 	m_csCornerStone_NK.Dispatch(groupCount, 1, 1);
 
 	m_deviceContext->CopyResource(m_buffer.m_inNkBuffer, m_buffer.m_outNkBuffer);
 
 	//Sort NK
-
-	
-
-	m_buffer.SetSettingParameter(elementCount, 40);
+	uint32_t nCount = m_counterBuffer[0] + m_counterBuffer[1];
+	m_buffer.SetSettingParameter(nCount, 40);
 	m_csRadixSort_1.m_srvKeyBuffer = m_buffer.m_srvNkBuffer;
 	m_csRadixSort_1.Dispatch(40, 1, 1);
 
-	m_buffer.SetSettingParameter(elementCount, 4);
+	m_buffer.SetSettingParameter(nCount, 4);
 	m_csRadixSort_2.Dispatch(4, 1, 1);
 
-	groupCount = (elementCount + 255) / 256;
+	groupCount = (nCount + 1 + 255) / 256;
 
 	for (uint32_t i = 0; i < 4; ++i)
 	{
-		m_buffer.SetSettingParameter(elementCount, groupCount, i);
+		m_buffer.SetSettingParameter(nCount, groupCount, i);
 		m_csRadixSort_4.Dispatch(groupCount, 1, 1);
 		m_deviceContext->CopyResource(m_buffer.m_inNkBuffer, m_buffer.m_outNkBuffer);
 	}
