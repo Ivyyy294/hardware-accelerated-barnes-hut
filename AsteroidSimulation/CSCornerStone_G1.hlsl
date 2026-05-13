@@ -43,8 +43,8 @@ void main( uint3 DTid : SV_DispatchThreadID )
 
     if (split)
         oBuffer[index] = 8;
-    else if (combine)
-        oBuffer[index] = 0;
+    //else if (combine)
+    //    oBuffer[index] = 0;
     else
         oBuffer[index] = 1;
     
