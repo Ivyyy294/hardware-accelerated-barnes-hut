@@ -1,6 +1,6 @@
 #pragma once
 
-#define NUM_ASTEROIDS 1024
+#define NUM_ASTEROIDS 4096
 #define MAX_PARTICLE_COUNT NUM_ASTEROIDS + 1
 
 #include <string>

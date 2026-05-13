@@ -359,6 +359,7 @@ void CsSharedBuffer::ClearUavBuffer()
 	m_deviceContext->ClearUnorderedAccessViewUint(m_uavNewToOldIndexBuffer, clearValues);
 	m_deviceContext->ClearUnorderedAccessViewUint(m_uavLiBuffer, clearValues);
 	m_deviceContext->ClearUnorderedAccessViewUint(m_uavLcBuffer, clearValues);
+	m_deviceContext->ClearUnorderedAccessViewUint(m_uavDebugBuffer, clearValues);
 }
 
 void CsSharedBuffer::SwapParticleBuffer()

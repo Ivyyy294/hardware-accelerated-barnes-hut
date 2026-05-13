@@ -20,12 +20,14 @@ void main(uint3 GTid : SV_GroupThreadID,
 {
     uint intervalIndex = Gid.x * NUM_THREADS + GTid.x;
     
-    uint kSize = counterBuffer[0];
+    uint nl = counterBuffer[0];
  
+    //debugBuffer[intervalIndex] = counterBuffer[2];
     //debugBuffer[intervalIndex] = pBuffer[intervalIndex];
     //debugBuffer[intervalIndex] = kBuffer[intervalIndex];
     
-    if (intervalIndex >= kSize)
+    //Kuffer has a length of nl + 1
+    if (intervalIndex > nl)
         return;
  
     uint k0 = kBuffer[intervalIndex];

@@ -115,6 +115,9 @@ void ForceGeneratorBarnesHutCS::SetShaderParameter()
 
 	//Clear UAV
 	m_buffer.ClearUavBuffer();
+
+	//ensures that we run the rebalancing step once
+	m_counterBuffer[2] = 1;
 }
 
 void ForceGeneratorBarnesHutCS::Exit()
@@ -195,9 +198,10 @@ void ForceGeneratorBarnesHutCS::BuildOctree(uint32_t elementCount)
 
 	uint32_t groupCount = (MAX_PARTICLE_COUNT + 1 + 255) / 256;
 
+	m_buffer.SetSettingParameter (elementCount, 0);
+
 	for (uint32_t i = 0; i < 10 && m_counterBuffer[2] > 0; ++i)
 	{
-		m_buffer.SetSettingParameter (elementCount, 0);
 		m_csCornerStone_F.Dispatch(groupCount,1,1);
 
 		m_buffer.SetSettingParameter(m_nCrit, 0);

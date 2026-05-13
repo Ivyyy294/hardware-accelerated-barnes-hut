@@ -46,6 +46,7 @@ void main( uint3 DTid : SV_DispatchThreadID )
             InterlockedAdd(counterBuffer[0], oVal);
     }
     
-    //debugBuffer[index] = outKBuffer[index];
+    GroupMemoryBarrierWithGroupSync();
+    //debugBuffer[index] = kSize;
     //outKBuffer[0] = counterBuffer[0];
 }
