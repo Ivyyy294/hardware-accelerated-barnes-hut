@@ -69,14 +69,14 @@ void main(uint3 GTid : SV_GroupThreadID,
         //debugBuffer[index] = 0;
         return;
     }
-    debugBuffer[index] = nkBuffer[index];
+    //debugBuffer[index] = nkBuffer[index];
     
     const uint nkVal = nkBuffer[index];
     
     //uint firstChildIndex = GetChildIndex1(nkVal);
     uint firstChildIndex = GetChildIndex2(nkVal, n);
     
-    debugBuffer[index] = GetChildIndex2(nkVal, n);
+    //debugBuffer[index] = GetChildIndex2(nkVal, n);
     
     coBuffer[index] = firstChildIndex;
     //debugBuffer[index] = nodeIndexOffset;
