@@ -1,10 +1,10 @@
 #pragma once
 
-#include "ForceGeneratorBarnesHutBase.h"
+#include "ForceGeneratorBase.h"
 #include "SpatialOctree.h"
 
 class ForceGeneratorBarnesHut
-	: public ForceGeneratorBarnesHutBase
+	: public ForceGeneratorBase
 {
 //Variables
 private:

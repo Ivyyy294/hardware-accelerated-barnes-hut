@@ -39,7 +39,7 @@ float3 ApplyForceFromNode(float pMass, float p2Mass, float3 direction, float sqr
     if (sqrDistance < 0.001f)
         return float3(0, 0, 0);
     
-    float forceMag = (ugc * p2Mass * pMass) / sqrDistance;
+    float forceMag = ugc * ((p2Mass * pMass) / sqrDistance);
     
     const float3 forceDirection = normalize(direction);
     
@@ -57,7 +57,7 @@ float3 GetForceFromParticle(const float pMass, const float3 pPos, uint p2Index)
         return float3(0, 0, 0);
     
     forceDirection = normalize(forceDirection);
-    float forceMag = (ugc * p2Mass * pMass) / sqrDistance;
+    float forceMag = ugc * ((p2Mass * pMass) / sqrDistance);
     
     return forceDirection * forceMag;
 }

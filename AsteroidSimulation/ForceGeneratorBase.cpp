@@ -1,9 +1,9 @@
 #include "pch.h"
-#include "ForceGeneratorBarnesHutBase.h"
+#include "ForceGeneratorBase.h"
 #include "SessionLoggerManager.h"
 #include "FrameTimeRecorder.h"
 
-void ForceGeneratorBarnesHutBase::FixedUpdate()
+void ForceGeneratorBase::FixedUpdate()
 {
 	string posData;
 	string forceData;
@@ -23,7 +23,7 @@ void ForceGeneratorBarnesHutBase::FixedUpdate()
 	SessionLoggerManager::Me()->m_force.WriteLine(forceData);
 }
 
-void ForceGeneratorBarnesHutBase::ApplyForceForObject(PhysicObject* physicObj) const
+void ForceGeneratorBase::ApplyForceForObject(PhysicObject* physicObj) const
 {
 	if (physicObj->IsStatic())
 		return;
@@ -44,7 +44,7 @@ void ForceGeneratorBarnesHutBase::ApplyForceForObject(PhysicObject* physicObj) c
 		return;
 }
 
-float ForceGeneratorBarnesHutBase::GetMaxCoordinate()
+float ForceGeneratorBase::GetMaxCoordinate()
 {
 	float coord;
 
@@ -58,7 +58,7 @@ float ForceGeneratorBarnesHutBase::GetMaxCoordinate()
 	return coord;
 }
 
-void ForceGeneratorBarnesHutBase::PreCalculateForces()
+void ForceGeneratorBase::PreCalculateForces()
 {
 	clock_t startTime = clock();
 	PreCalculateForcesInternal();

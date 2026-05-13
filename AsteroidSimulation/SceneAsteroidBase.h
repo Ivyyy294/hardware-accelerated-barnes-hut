@@ -3,7 +3,7 @@
 #include <IvyyyScene.h>
 #include "Asteroid.h"
 #include "SessionVariables.h"
-#include "ForceGeneratorBarnesHutBase.h"
+#include "ForceGeneratorBase.h"
 
 class SceneAsteroidBase :
     public Scene
@@ -19,7 +19,7 @@ public:
 protected:
 	void Init() override;
 	virtual void OnOrbitalBodySpawned(GameObject* orbitalBody) = 0;
-	void AdjustFixedUpdateLoop (ForceGeneratorBarnesHutBase* forceGenerator);
+	void AdjustFixedUpdateLoop (ForceGeneratorBase* forceGenerator);
 
 private:
 	void SpawnAsteroids(int num, float dist, float speed);

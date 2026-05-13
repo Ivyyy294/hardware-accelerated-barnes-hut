@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ForceGeneratorBarnesHutBase.h"
+#include "ForceGeneratorBase.h"
 
 #include "CsSharedBuffer.h"
 #include "CsSettings.h"
@@ -26,7 +26,7 @@
 #include "ShaderUtils.h"
 
 class ForceGeneratorBarnesHutCS :
-    public ForceGeneratorBarnesHutBase
+    public ForceGeneratorBase
 {
 //Variables
 private:

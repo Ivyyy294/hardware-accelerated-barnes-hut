@@ -2,7 +2,7 @@
 
 #include <IvyyyForceGenerator.h>
 
-class ForceGeneratorBarnesHutBase :
+class ForceGeneratorBase :
     public ForceGenerator
 {
 //Variables

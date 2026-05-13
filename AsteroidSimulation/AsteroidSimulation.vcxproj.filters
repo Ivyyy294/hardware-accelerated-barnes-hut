@@ -69,7 +69,7 @@
     <ClCompile Include="SceneBarnesHutCS.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ForceGeneratorBarnesHutBase.cpp">
+    <ClCompile Include="ForceGeneratorBase.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="CsMortonCodes.cpp">
@@ -179,7 +179,7 @@
     <ClInclude Include="ForceGeneratorBarnesHutCS.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ForceGeneratorBarnesHutBase.h">
+    <ClInclude Include="ForceGeneratorBase.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="CsMortonCodes.h">

@@ -163,7 +163,7 @@
     <ClCompile Include="DebugInfo.cpp" />
     <ClCompile Include="DebugInfoUi.cpp" />
     <ClCompile Include="SceneDirectIntegration.cpp" />
-    <ClCompile Include="ForceGeneratorBarnesHutBase.cpp" />
+    <ClCompile Include="ForceGeneratorBase.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
@@ -209,7 +209,7 @@
     <ClInclude Include="DebugInfo.h" />
     <ClInclude Include="DebugInfoUi.h" />
     <ClInclude Include="SceneDirectIntegration.h" />
-    <ClInclude Include="ForceGeneratorBarnesHutBase.h" />
+    <ClInclude Include="ForceGeneratorBase.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="Planet.h" />
     <ClInclude Include="SessionDurationController.h" />
