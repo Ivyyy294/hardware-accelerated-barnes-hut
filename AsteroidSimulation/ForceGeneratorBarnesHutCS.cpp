@@ -153,7 +153,7 @@ void ForceGeneratorBarnesHutCS::PreCalculateForcesInternal()
 
 	RecordExecutionTime();
 
-	//m_dumpMemmory = true;
+	m_dumpMemmory = true;
 
 	if (m_dumpMemmory)
 	{
@@ -214,9 +214,9 @@ void ForceGeneratorBarnesHutCS::BuildOctree(uint32_t elementCount)
 		m_deviceContext->CopyResource(m_buffer.m_inKBuffer, m_buffer.m_outKBuffer);
 		CopyCounterBuffer();
 	}
-	
 
 	m_csCornerStone_NK.Dispatch(groupCount, 1, 1);
+	CopyCounterBuffer();
 
 	m_deviceContext->CopyResource(m_buffer.m_inNkBuffer, m_buffer.m_outNkBuffer);
 
@@ -244,10 +244,11 @@ void ForceGeneratorBarnesHutCS::BuildOctree(uint32_t elementCount)
 
 void ForceGeneratorBarnesHutCS::CallculateForces(uint32_t elementCount)
 {
+	uint32_t nCount = m_counterBuffer[0] + m_counterBuffer[1];
 	uint32_t groupCount = (elementCount + 255) / 256;
 	m_buffer.SetBhSettingsParameter (elementCount, m_maxCoord * 2.f, IvyyyPhysic::GravitationalConstant(), m_theta);
 	m_csBarnesHut_MP.Dispatch(groupCount, 1, 1);
-	m_csBarnesHut_CF.Dispatch(groupCount, 1, 1);
+	m_csBarnesHut_CF.Dispatch(nCount, 1, 1);
 }
 
 void ForceGeneratorBarnesHutCS::CopyTestData()

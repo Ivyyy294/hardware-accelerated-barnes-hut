@@ -30,5 +30,5 @@ open3d()
 axes3d()
 title3d(xlab="x", ylab = "y", zlab="z")
 
-PlotPosition ("GPU", "blue")
-PlotPosition ("CPU", "red")
+PlotPosition ("GPU", "red")
+PlotPosition ("Direct", "green")

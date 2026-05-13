@@ -78,75 +78,111 @@ float3 ApplyCloseRangeForces(const float pMass, const float3 pPos, const uint no
     return force;
 }
 
+groupshared uint stack[2048];
+groupshared int current = 0;
+groupshared int nodeIndex = 0;
+groupshared float criterium = 0.f;
+groupshared uint minSqrDistInt = 0;
+
 [numthreads(NUM_THREADS, 1, 1)]
 void main(uint3 GTid : SV_GroupThreadID,
           uint3 Gid : SV_GroupID)
 {
-    const uint index = Gid.x * NUM_THREADS + GTid.x;
-
-    if (index >= pCount)
+    const uint ni = counterBuffer[1];
+    const uint nl = counterBuffer[0];
+    const uint n = ni + nl;
+    const bool gIsInternalNode = coBuffer[Gid.x] > 0;
+    
+    //For every leaf node, therminate internal node groups
+    if (gIsInternalNode > 0)
         return;
     
-    const uint ni = counterBuffer[1];
-    const uint maxLevel = GetTreeLevelFromWs(nkBuffer[ni]);
-
-    const float3 pPos = posBuffer[index];
-    const float pMass = massBuffer[index];
-    const uint pDestIndex = newToOldIndexBuffer[index];
-    float3 pForce = {0.f, 0.f, 0.f};
+    const uint gPCount = lcBuffer[Gid.x];
+    const uint gFirstChild = liBuffer[Gid.x];
+    const uint index = gFirstChild + GTid.x;
     
-    uint stack[2048];
-    int current = 0;
+    float3 pPos = 0.f;
+    float pMass = 0.f;
+    uint pDestIndex = 0;
+    float3 pForce = 0.f;
+    const bool isParticle = GTid.x <= gPCount;
     
-    //pForce = ApplyCloseRangeForces(pMass, pPos, 0);
-    //forceBuffer[pDestIndex] = pForce;
-    //debugBuffer[index] = kBuffer[index];
-    //debugBuffer[index] = lcBuffer[index];
-    //debugBuffer[index] = coBuffer[index];
-    //debugBuffer[index] = loBuffer[index];
-    //debugBuffer[index] = liBuffer[index];
-    //return;
-    //debugBuffer[index] = combinedMass[index];
-    //return;
-    
-    //debugBuffer[index] = nkBuffer[index];
-    
-    stack[0] = 0;
-
-    while (current >= 0)
+    //For gPCount threads
+    if (isParticle)
     {
-        const uint nodeIndex = stack[current--];
+        pPos = posBuffer[index];
+        pMass = massBuffer[index];
+        pDestIndex = newToOldIndexBuffer[index];
+    }
+    
+    if (GTid.x == 0)
+    {
+        stack[0] = 0;
+        current = 0;
+    }
+    
+    while (true)
+    {
+        if (GTid.x == 0)
+        {
+            if (current < 0)
+                nodeIndex = -1;
+            else
+                nodeIndex = stack[current--];
+        }
+        
+        GroupMemoryBarrierWithGroupSync();
+        
+        if (nodeIndex < 0)
+            break;
+
         const uint nk = nkBuffer[nodeIndex];
         const uint level = GetTreeLevelFromWs(nk);
         const uint firstChild = coBuffer[nodeIndex];
         const bool isInternalNode = firstChild > 0;
-        
         const float cellWidth = globallCellWidth / (1 << level);
-        
         const float3 nodeCoM = centerOfMass[nodeIndex];
-        const float nodeMass = combinedMass[nodeIndex];
         
         float3 direction = nodeCoM - pPos;
         float sqrDistance = dot(direction, direction);
-        
-        float criterium = sqrDistance > 0.f ? (cellWidth * cellWidth) / sqrDistance : theta;
-        
+
+        if (isParticle)
+            InterlockedMin(minSqrDistInt, FloatToUint(sqrDistance));
+
+        GroupMemoryBarrierWithGroupSync();
+            
+        float minSqrDist = UintToFloat(minSqrDistInt);
+            
+        if (GTid.x == 0)
+            criterium = minSqrDist > 0.f ? (cellWidth * cellWidth) / minSqrDist : theta;
+            
+        GroupMemoryBarrierWithGroupSync();
+            
         //apply node
         if (criterium < theta)
-            pForce += ApplyForceFromNode(pMass, nodeMass, direction, sqrDistance);
+        {
+            const float nodeMass = combinedMass[nodeIndex];
+            pForce += ApplyForceFromNode(pMass, nodeMass, direction, minSqrDist);
+        }
         //push childen
         else if (isInternalNode)
         {
-            const uint count = 8;
+            if (GTid.x == 0)
+            {
+                const uint count = 8;
             
-            for (uint i = 0; i < count; ++i)
-                stack[++current] = firstChild + i;
+                for (uint i = 0; i < count; ++i)
+                    stack[++current] = firstChild + i;
+            }
+            //GroupMemoryBarrierWithGroupSync();
         }
         //apply leafs
         else
             pForce += ApplyCloseRangeForces(pMass, pPos, nodeIndex);
+        
+        GroupMemoryBarrierWithGroupSync();
     }
     
-    forceBuffer[pDestIndex] = pForce;
-    //debugBuffer[index] = combinedMass[index];
+    if (isParticle)
+        forceBuffer[pDestIndex] = pForce;
 }
