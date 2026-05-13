@@ -30,7 +30,7 @@ class ForceGeneratorBarnesHutCS :
 {
 //Variables
 private:
-	const uint32_t m_nCrit {64};
+	const uint32_t m_nCrit {32};
 
 	ID3D11DeviceContext* m_deviceContext {nullptr};
 	
@@ -58,6 +58,7 @@ private:
 
 	float m_maxCoord = 0.f;
 	bool m_dumpMemmory = false;
+	uint32_t m_counterBuffer[3];
 
 //Methods
 public:
@@ -78,7 +79,9 @@ private:
 
 	void CopyTestData();
 	void CopyForceData();
+	void CopyCounterBuffer();
 
 	void RecordExecutionTime();
+
 };
 

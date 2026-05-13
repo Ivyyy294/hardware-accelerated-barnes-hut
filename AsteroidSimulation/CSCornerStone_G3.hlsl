@@ -12,7 +12,10 @@ void main( uint3 DTid : SV_DispatchThreadID )
     uint kSize = counterBuffer[0];
     
     if (index == 0)
+    {
         counterBuffer[0] = 0;
+        counterBuffer[2] = 0;
+    }
     
     GroupMemoryBarrierWithGroupSync();
     
@@ -33,6 +36,9 @@ void main( uint3 DTid : SV_DispatchThreadID )
             for (int j = 0; j < 8; ++j)
                 outKBuffer[outKIndex + j] = kVal + j * iDelta;
         }
+        
+        if (oVal != 1)
+            InterlockedAdd(counterBuffer[2], 1);
     
         GroupMemoryBarrierWithGroupSync();
     

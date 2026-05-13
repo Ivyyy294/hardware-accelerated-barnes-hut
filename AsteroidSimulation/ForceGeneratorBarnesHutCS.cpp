@@ -195,7 +195,7 @@ void ForceGeneratorBarnesHutCS::BuildOctree(uint32_t elementCount)
 
 	uint32_t groupCount = (MAX_PARTICLE_COUNT + 1 + 255) / 256;
 
-	for (uint32_t i = 0; i < 10; ++i)
+	for (uint32_t i = 0; i < 10 && m_counterBuffer[2] > 0; ++i)
 	{
 		m_buffer.SetSettingParameter (elementCount, 0);
 		m_csCornerStone_F.Dispatch(groupCount,1,1);
@@ -208,30 +208,18 @@ void ForceGeneratorBarnesHutCS::BuildOctree(uint32_t elementCount)
 		m_csCornerStone_G3.Dispatch(groupCount, 1, 1);
 
 		m_deviceContext->CopyResource(m_buffer.m_inKBuffer, m_buffer.m_outKBuffer);
+		CopyCounterBuffer();
 	}
 	
+	elementCount = m_counterBuffer[0] + m_counterBuffer[1];
+
 	m_csCornerStone_NK.Dispatch(groupCount, 1, 1);
 
 	m_deviceContext->CopyResource(m_buffer.m_inNkBuffer, m_buffer.m_outNkBuffer);
 
 	//Sort NK
 
-	//Determine nk size 
-	m_deviceContext->CopyResource(m_buffer.m_stagingCounterBuffer, m_buffer.m_counterBuffer);
-	D3D11_MAPPED_SUBRESOURCE mappedResource;
-	HRESULT hr = m_deviceContext->Map(m_buffer.m_stagingCounterBuffer, 0, D3D11_MAP_READ, 0, &mappedResource);
-
-	if (SUCCEEDED(hr))
-	{
-		const uint32_t size = 2;
-		uint32_t data[size];
-
-		memcpy(&data[0], mappedResource.pData, sizeof(uint32_t) * size);
-		m_deviceContext->Unmap(m_buffer.m_stagingCounterBuffer, 0);
-
-		//ToDo: why is ni aka data[1], 1 bigger than expected?
-		elementCount = data[0] + data [1];
-	}
+	
 
 	m_buffer.SetSettingParameter(elementCount, 40);
 	m_csRadixSort_1.m_srvKeyBuffer = m_buffer.m_srvNkBuffer;
@@ -293,6 +281,20 @@ void ForceGeneratorBarnesHutCS::CopyForceData()
 		XMFLOAT3 test = dataPtr[MAX_PARTICLE_COUNT-1];
 		memcpy(m_forceBuffer, dataPtr, sizeof(XMFLOAT3) * (MAX_PARTICLE_COUNT));
 		m_deviceContext->Unmap(m_buffer.m_outForceBuffer, 0);
+	}
+}
+
+void ForceGeneratorBarnesHutCS::CopyCounterBuffer()
+{
+	//Determine nk size 
+	m_deviceContext->CopyResource(m_buffer.m_stagingCounterBuffer, m_buffer.m_counterBuffer);
+	D3D11_MAPPED_SUBRESOURCE mappedResource;
+	HRESULT hr = m_deviceContext->Map(m_buffer.m_stagingCounterBuffer, 0, D3D11_MAP_READ, 0, &mappedResource);
+
+	if (SUCCEEDED(hr))
+	{
+		memcpy(&m_counterBuffer[0], mappedResource.pData, sizeof(uint32_t) * 3);
+		m_deviceContext->Unmap(m_buffer.m_stagingCounterBuffer, 0);
 	}
 }
 
