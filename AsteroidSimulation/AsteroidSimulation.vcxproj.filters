@@ -141,6 +141,9 @@
     <ClCompile Include="SessionDurationController.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="ForceGeneratorDirect.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Asteroid.h">
@@ -264,6 +267,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="SessionDurationController.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ForceGeneratorDirect.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
