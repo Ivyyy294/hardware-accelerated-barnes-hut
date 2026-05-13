@@ -7,7 +7,7 @@ class FrameTimeRecorder :
 {
 //Variables
 public:
-	float m_forceCalcTime = 0.f;
+	long m_forceCalcTime = 0.f;
 private:
 	static FrameTimeRecorder* me;
 //Methods

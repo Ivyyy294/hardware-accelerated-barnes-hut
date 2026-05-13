@@ -21,13 +21,14 @@ void main(uint3 GTid : SV_GroupThreadID,
     uint intervalIndex = Gid.x * NUM_THREADS + GTid.x;
     
     uint nl = counterBuffer[0];
- 
-    //debugBuffer[intervalIndex] = counterBuffer[2];
+    
+    //debugBuffer[intervalIndex] = pSize;
     //debugBuffer[intervalIndex] = pBuffer[intervalIndex];
+
     //debugBuffer[intervalIndex] = kBuffer[intervalIndex];
     
     //Kuffer has a length of nl + 1
-    if (intervalIndex > nl)
+    if (intervalIndex >= nl)
         return;
  
     uint k0 = kBuffer[intervalIndex];
@@ -37,5 +38,4 @@ void main(uint3 GTid : SV_GroupThreadID,
     uint high = BinarySearch(k1, pBuffer, pSize);
     
     nBuffer[intervalIndex] = high >= low ? (high - low) : 0;
-    //debugBuffer[intervalIndex] = nBuffer[intervalIndex];
 }

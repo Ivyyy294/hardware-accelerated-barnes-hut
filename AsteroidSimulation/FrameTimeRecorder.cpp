@@ -19,6 +19,6 @@ void FrameTimeRecorder::OnEnable()
 
 void FrameTimeRecorder::LogFrameTime()
 {
-	SessionLoggerManager::Me()->m_frameTime.WriteLine(std::to_string(Time::UnscaledDeltaTime() * 1000.f) + ";" + std::to_string(m_forceCalcTime * 1000.f));
+	SessionLoggerManager::Me()->m_frameTime.WriteLine(std::to_string(Time::UnscaledDeltaTime() * 1000.f) + ";" + std::to_string(m_forceCalcTime));
 	m_forceCalcTime = 0.f;
 }

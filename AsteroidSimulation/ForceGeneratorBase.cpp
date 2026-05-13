@@ -64,6 +64,6 @@ void ForceGeneratorBase::PreCalculateForces()
 	PreCalculateForcesInternal();
 
 	clock_t endTime = clock();
-	float diff = (float)(endTime - startTime);
+	long diff = (long)(endTime - startTime);
 	FrameTimeRecorder::Me()->m_forceCalcTime = diff;
 }
