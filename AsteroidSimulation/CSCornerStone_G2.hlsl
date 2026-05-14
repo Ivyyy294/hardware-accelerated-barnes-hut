@@ -1,7 +1,8 @@
+#include "CSUtils.hlsli"
+
 StructuredBuffer<uint> inOBuffer : register(t0);
 StructuredBuffer<uint> counterBuffer : register(t1);
 RWStructuredBuffer<uint> outOBuffer : register(u0);
-RWStructuredBuffer<uint> debugBuffer : register(u1);
 
 [numthreads(256, 1, 1)]
 void main( uint3 DTid : SV_DispatchThreadID )

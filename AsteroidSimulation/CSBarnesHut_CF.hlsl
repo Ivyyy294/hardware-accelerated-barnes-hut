@@ -32,7 +32,6 @@ StructuredBuffer<uint> liBuffer : register(t11);
 StructuredBuffer<uint> lcBuffer : register(t12);
 
 RWStructuredBuffer<float3> forceBuffer : register(u0);
-RWStructuredBuffer<uint> debugBuffer : register(u7);
 
 float3 ApplyForceFromNode(float pMass, float p2Mass, float3 direction, float sqrDistance)
 {
@@ -74,12 +73,11 @@ float3 ApplyCloseRangeForces(const float pMass, const float3 pPos, const uint no
         const uint p2Index = indexBegin + i;
         force += GetForceFromParticle(pMass, pPos, p2Index);
     }
-    
     return force;
 }
 
-groupshared uint stack[2048];
-groupshared int current = 0;
+groupshared uint current[2048];
+groupshared int currentIndex = 0;
 groupshared int nodeIndex = 0;
 groupshared float criterium = 0.f;
 groupshared uint minSqrDistInt = 0;
@@ -117,18 +115,18 @@ void main(uint3 GTid : SV_GroupThreadID,
     
     if (GTid.x == 0)
     {
-        stack[0] = 0;
-        current = 0;
+        current[0] = 0;
+        currentIndex = 0;
     }
     
     while (true)
     {
         if (GTid.x == 0)
         {
-            if (current < 0)
+            if (currentIndex < 0)
                 nodeIndex = -1;
             else
-                nodeIndex = stack[current--];
+                nodeIndex = current[currentIndex--];
         }
         
         GroupMemoryBarrierWithGroupSync();
@@ -172,7 +170,7 @@ void main(uint3 GTid : SV_GroupThreadID,
                 const uint count = 8;
             
                 for (uint i = 0; i < count; ++i)
-                    stack[++current] = firstChild + i;
+                    current[++currentIndex] = firstChild + i;
             }
             //GroupMemoryBarrierWithGroupSync();
         }

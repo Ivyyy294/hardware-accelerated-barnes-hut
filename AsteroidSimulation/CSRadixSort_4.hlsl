@@ -1,3 +1,5 @@
+#include "CSUtils.hlsli"
+
 #define NUM_BINS 256
 #define NUM_THREADS 256
 
@@ -15,7 +17,6 @@ StructuredBuffer<uint> mortonCodeIn : register(t1);
 
 RWStructuredBuffer<uint> scatterCounters : register(u0);
 RWStructuredBuffer<uint> mortonCodeOut : register(u1);
-RWStructuredBuffer<uint> debugBuffer : register(u2);
 
 [numthreads(NUM_THREADS, 1, 1)]
 void main(uint3 DTid : SV_DispatchThreadID,

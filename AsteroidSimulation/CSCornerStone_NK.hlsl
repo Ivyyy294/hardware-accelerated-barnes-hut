@@ -6,7 +6,6 @@
 StructuredBuffer<uint> kBuffer : register(t0);
 RWStructuredBuffer<uint> nkBuffer : register(u0);
 RWStructuredBuffer<uint> counterBuffer : register(u1);
-RWStructuredBuffer<uint> debugBuffer : register(u2);
 
 static const int MU[8] = { 0, -1, -2, -3, 3, 2, 1, 0 };
 

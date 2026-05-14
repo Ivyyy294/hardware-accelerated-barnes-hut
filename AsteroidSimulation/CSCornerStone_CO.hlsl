@@ -8,8 +8,6 @@ StructuredBuffer<uint> nkBuffer : register(t1);
 StructuredBuffer<uint> loBuffer : register(t2);
 
 RWStructuredBuffer<uint> coBuffer : register(u0);
-RWStructuredBuffer<uint> debugBuffer : register(u1);
-
 
 uint GetChildIndex1(const uint nkVal, const uint n)
 {

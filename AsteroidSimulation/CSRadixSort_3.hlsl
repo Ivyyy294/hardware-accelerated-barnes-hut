@@ -196,6 +196,8 @@
 //    ChainedScan(tileId, GTid);
 //}
 
+#include "CSUtils.hlsli"
+
 #define NUM_BINS 256
 #define NUM_THREADS 256
 
@@ -218,7 +220,6 @@ RWStructuredBuffer<uint> mortonCodeOut : register(u1);
 RWStructuredBuffer<float3> positionOut : register(u2);
 RWStructuredBuffer<float> massOut : register(u3);
 RWStructuredBuffer<uint> newToOldIndexOut : register(u4);
-RWStructuredBuffer<uint> debugBuffer : register(u5);
 
 [numthreads(NUM_THREADS, 1, 1)]
 void main(uint3 DTid : SV_DispatchThreadID)

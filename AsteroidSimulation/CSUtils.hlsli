@@ -1,4 +1,6 @@
 
+RWStructuredBuffer<uint> debugBuffer : register(u7);
+
 uint BinarySearch(uint key, StructuredBuffer<uint> buffer, uint bufferSize)
 {
     uint low = 0;

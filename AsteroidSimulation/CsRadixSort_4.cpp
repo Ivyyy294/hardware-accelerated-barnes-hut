@@ -19,7 +19,7 @@ void CsRadixSort_4::BindShaderParameters(ID3D11DeviceContext* deviceContext)
 
 	deviceContext->CSSetUnorderedAccessViews(0, 1, &m_uavScatterCountersBuffer, nullptr);
 	deviceContext->CSSetUnorderedAccessViews(1, 1, &m_uavKeyBuffer, nullptr);
-	deviceContext->CSSetUnorderedAccessViews(2, 1, &m_sharedBuffer->m_uavDebugBuffer, nullptr);
+	deviceContext->CSSetUnorderedAccessViews(7, 1, &m_sharedBuffer->m_uavDebugBuffer, nullptr);
 }
 
 void CsRadixSort_4::UnbindShaderParameters(ID3D11DeviceContext* deviceContext)
@@ -35,7 +35,7 @@ void CsRadixSort_4::UnbindShaderParameters(ID3D11DeviceContext* deviceContext)
 
 	deviceContext->CSSetUnorderedAccessViews(0, 1, &nullUAV, nullptr);
 	deviceContext->CSSetUnorderedAccessViews(1, 1, &nullUAV, nullptr);
-	deviceContext->CSSetUnorderedAccessViews(2, 1, &nullUAV, nullptr);
+	deviceContext->CSSetUnorderedAccessViews(7, 1, &nullUAV, nullptr);
 }
 
 bool CsRadixSort_4::InitShaderParameters(ID3D11Device* device)

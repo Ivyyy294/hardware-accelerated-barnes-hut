@@ -28,8 +28,6 @@ RWStructuredBuffer<float> combinedMass : register(u1);
 RWStructuredBuffer<uint> liBuffer : register(u2);
 RWStructuredBuffer<uint> lcBuffer : register(u3);
 
-RWStructuredBuffer<uint> debugBuffer : register(u7);
-
 [numthreads(NUM_THREADS, 1, 1)]
 void main(uint3 GTid : SV_GroupThreadID,
           uint3 Gid : SV_GroupID)

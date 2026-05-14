@@ -1,3 +1,5 @@
+#include "CSUtils.hlsli"
+
 #define NUM_BINS 256
 #define NUM_DIGITS 4
 

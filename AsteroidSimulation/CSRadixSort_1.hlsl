@@ -1,3 +1,5 @@
+#include "CSUtils.hlsli"
+
 #define NUM_BINS 256
 #define NUM_DIGITS 4
 
@@ -14,7 +16,6 @@ cbuffer SettingsBuffer : register(b0)
 
 StructuredBuffer<uint> keyBuffer : register(t0);
 RWStructuredBuffer<uint> globalHistogram : register(u0);
-RWStructuredBuffer<uint> debugBuffer : register(u1);
 
 groupshared uint localHistogram[NUM_DIGITS * NUM_BINS];
 

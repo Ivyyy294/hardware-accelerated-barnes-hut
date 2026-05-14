@@ -7,7 +7,6 @@ StructuredBuffer<uint> counterBuffer : register(t0);
 StructuredBuffer<uint> nkBuffer : register(t1);
 
 RWStructuredBuffer<uint> loBuffer : register(u0);
-RWStructuredBuffer<uint> debugBuffer : register(u1);
 
 //ToDo: fix indexFirstNodeOnLevel for index > 10
 [numthreads(NUM_THREADS, 1, 1)]
