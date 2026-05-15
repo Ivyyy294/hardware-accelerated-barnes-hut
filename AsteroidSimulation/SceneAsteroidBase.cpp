@@ -18,7 +18,7 @@ SceneAsteroidBase::SceneAsteroidBase()
 	m_sVar.numAsteroids = NUM_ASTEROIDS;
 	m_sVar.ugc = 0.00005f;
 	m_sVar.fixedDeltaTime = Time::UnscaledFixedDeltaTime();
-	m_sVar.distRange = { 10.f, 15.f };
+	m_sVar.distRange = { 10.f, 1.f };
 	m_sVar.eRange = { 0.f, 0.25f };
 	m_sVar.iRange = { -10.f, 10.f };
 	m_sVar.maxFixedFrames = 1000;
@@ -54,7 +54,7 @@ void SceneAsteroidBase::Init()
 	OnOrbitalBodySpawned (planet);
 
 	//Add Asteroids
-	SpawnAsteroids (m_sVar.numAsteroids, m_sVar.distRange, m_sVar.eRange, m_sVar.iRange, planet);
+	SpawnAsteroids (m_sVar.numAsteroids, m_sVar.distRange, m_sVar.eRange, Vector2(1.f, 15.f), planet);
 
 	LogSessionVariables();
 	AdjustMainLoop();
@@ -91,7 +91,7 @@ void SceneAsteroidBase::SpawnAsteroids(int num, Vector2 dist, Vector2 e, Vector2
 		std::string str ("85245679");
 		std::seed_seq seed1(str.begin(), str.end());
 		std::mt19937 gen(seed1); // seed the generator
-		std::uniform_int_distribution<> smaRnd(dist.x, dist.y); // define the range
+		std::normal_distribution<float> smaRnd(dist.x, dist.y); // define the range
 		std::uniform_int_distribution<> eRnd(e.x, e.y); // define the range
 		std::uniform_int_distribution<> iRnd(i.x, i.y); // define the range
 		std::uniform_int_distribution<> oRnd(0, 360); // define the range
