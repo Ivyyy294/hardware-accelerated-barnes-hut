@@ -1,5 +1,7 @@
 #include "CSUtils.hlsli"
 
+#define NUM_THREADS 256
+
 cbuffer SettingsBuffer : register(b0)
 {
     uint nCrit;
@@ -11,13 +13,16 @@ StructuredBuffer<uint> nBuffer : register(t1);
 StructuredBuffer<uint> counterBuffer : register(t2);
 RWStructuredBuffer<uint> oBuffer : register(u0);
 
-[numthreads(256, 1, 1)]
-void main( uint3 DTid : SV_DispatchThreadID )
+[numthreads(NUM_THREADS, 1, 1)]
+void main(uint3 GTid : SV_GroupThreadID,
+          uint3 Gid : SV_GroupID)
 {
-    uint index = DTid.x;
+    //Thread index
+    uint index = Gid.x * NUM_THREADS + GTid.x;
     
     uint kSize = counterBuffer[0];
  
+    //Early exit
     if (index > kSize)
         return;
 
@@ -25,33 +30,25 @@ void main( uint3 DTid : SV_DispatchThreadID )
     uint kVal = kBuffer[index];
     uint k1Val = kBuffer[index + 1];
     uint kDelta = k1Val - kVal;
-    uint iDelta = (8 * kDelta);
+    uint parentDelta = (8 * kDelta);
     
-    uint indexJ = (kVal % iDelta) / kDelta;
+    uint indexJ = (kVal % parentDelta) / kDelta;
     uint indexFirstSibling = index - indexJ;
-    uint indexLastSibling = indexFirstSibling + 8;
-    
-    bool split = nVal > nCrit;
-    bool firstOctant = kVal % iDelta == 0;
-    bool consecutive = indexLastSibling < kSize && kBuffer[indexFirstSibling] + iDelta == kBuffer[indexLastSibling];
     
     uint combinedParticleCount = 0;
     
-    for (uint i = indexFirstSibling; i <= indexLastSibling; ++i)
+    for (uint i = indexFirstSibling; i < indexFirstSibling + 8; ++i)
         combinedParticleCount += nBuffer[i];
     
+    bool split = nVal > nCrit;
+    bool firstOctant = kVal % parentDelta == 0;
+    bool consecutive = kBuffer[indexFirstSibling] + parentDelta == kBuffer[indexFirstSibling + 8];
     bool combine = !firstOctant && consecutive && combinedParticleCount < nCrit;
 
     if (split)
         oBuffer[index] = 8;
-    //else if (combine)
-    //    oBuffer[index] = 0;
+    else if (combine)
+        oBuffer[index] = 0;
     else
         oBuffer[index] = 1;
-    
-    //debugBuffer[index] = combinedParticleCount;
-    //debugBuffer[index] = consecutive;
-    //debugBuffer[index] = nVal;
-    //debugBuffer[index] = indexFirstSibling;
-    //debugBuffer[index] = oBuffer[index];
 }
