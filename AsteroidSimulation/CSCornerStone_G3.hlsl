@@ -1,5 +1,7 @@
 #include "CSUtils.hlsli"
 
+#define NUM_THREADS 256
+
 StructuredBuffer<uint> inKBuffer : register(t0);
 StructuredBuffer<uint> inOBuffer : register(t1);
 StructuredBuffer<uint> inO2Buffer : register(t2);
@@ -7,9 +9,11 @@ RWStructuredBuffer<uint> outKBuffer : register(u0);
 RWStructuredBuffer<uint> counterBuffer : register(u1);
 
 [numthreads(256, 1, 1)]
-void main( uint3 DTid : SV_DispatchThreadID )
+void main(uint3 GTid : SV_GroupThreadID,
+          uint3 Gid : SV_GroupID)
 {
-    uint index = DTid.x;
+    uint index = Gid.x * NUM_THREADS + GTid.x;
+    
     uint kSize = counterBuffer[0];
     
     if (index == 0)
