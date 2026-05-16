@@ -197,7 +197,10 @@ void ForceGeneratorBarnesHutCS::BuildOctree(uint32_t elementCount)
 	//Repeat max L times, L = 10
 
 	uint32_t groupCount = (elementCount + 255) / 256;
-
+	
+	//Assure we run rebalancing loop once
+	CopyCounterBuffer();
+	m_counterBuffer[2] = 1;
 
 	for (uint32_t i = 0; i < 10 && m_counterBuffer[2] > 0; ++i)
 	{
@@ -208,7 +211,6 @@ void ForceGeneratorBarnesHutCS::BuildOctree(uint32_t elementCount)
 		m_csCornerStone_G1.Dispatch(groupCount, 1, 1);
 
 		m_csCornerStone_G2.Dispatch(groupCount, 1, 1);
-
 		m_csCornerStone_G3.Dispatch(groupCount, 1, 1);
 
 		m_deviceContext->CopyResource(m_buffer.m_inKBuffer, m_buffer.m_outKBuffer);
