@@ -33,6 +33,46 @@ StructuredBuffer<uint> lcBuffer : register(t12);
 
 RWStructuredBuffer<float3> forceBuffer : register(u0);
 
+//Groupshared
+groupshared uint next[512];
+groupshared uint current[512];
+
+groupshared int currentIndex = 0;
+groupshared int nextIndex = 0;
+
+groupshared int nodeIndex = 0;
+groupshared float criterium = 0.f;
+groupshared uint minSqrDistInt = 0;
+
+struct ParticleData
+{
+    float3 pos;
+    float mass;
+    uint destIndex;
+    float3 force;
+    bool isParticle;
+};
+
+void GetParticleData (const uint index, bool isParticle, out ParticleData data)
+{
+    data.isParticle = isParticle;
+    
+    if (data.isParticle)
+    {
+        data.pos = posBuffer[index];
+        data.mass = massBuffer[index];
+        data.destIndex = newToOldIndexBuffer[index];
+        data.force = 0.f;
+    }
+    else
+    {
+        data.pos = 0.f;
+        data.mass = 0.f;
+        data.destIndex = 0;
+        data.force = 0.f;
+    }
+}
+
 float3 ApplyForceFromNode(float pMass, float p2Mass, float3 direction, float sqrDistance)
 {
     if (sqrDistance < 0.001f)
@@ -76,15 +116,7 @@ float3 ApplyCloseRangeForces(const float pMass, const float3 pPos, const uint no
     return force;
 }
 
-groupshared uint next[512];
-groupshared uint current[512];
 
-groupshared int currentIndex = 0;
-groupshared int nextIndex = 0;
-
-groupshared int nodeIndex = 0;
-groupshared float criterium = 0.f;
-groupshared uint minSqrDistInt = 0;
 
 [numthreads(NUM_THREADS, 1, 1)]
 void main(uint3 GTid : SV_GroupThreadID,
@@ -103,20 +135,10 @@ void main(uint3 GTid : SV_GroupThreadID,
     const uint gFirstChild = liBuffer[Gid.x];
     const uint index = gFirstChild + GTid.x;
     
-    float3 pPos = 0.f;
-    float pMass = 0.f;
-    uint pDestIndex = 0;
-    float3 pForce = 0.f;
-    const bool isParticle = GTid.x <= gPCount;
+    ParticleData pData;
     
-    //For gPCount threads
-    if (isParticle)
-    {
-        pPos = posBuffer[index];
-        pMass = massBuffer[index];
-        pDestIndex = newToOldIndexBuffer[index];
-    }
-    
+    GetParticleData(index, GTid.x <= gPCount, pData);
+
     if (GTid.x == 0)
     {
         current[0] = 0;
@@ -155,12 +177,12 @@ void main(uint3 GTid : SV_GroupThreadID,
         const float cellWidth = globallCellWidth / (1 << level);
         const float3 nodeCoM = centerOfMass[localNodeIndex];
         
-        float3 direction = nodeCoM - pPos;
+        float3 direction = nodeCoM - pData.pos;
         
         //Find smallest distance
         float sqrDistance = dot(direction, direction);
 
-        if (isParticle)
+        if (pData.isParticle)
             InterlockedMin(minSqrDistInt, FloatToUint(sqrDistance));
 
         GroupMemoryBarrierWithGroupSync();
@@ -178,7 +200,7 @@ void main(uint3 GTid : SV_GroupThreadID,
         if (localCriterium < theta)
         {
             const float nodeMass = combinedMass[localNodeIndex];
-            pForce += ApplyForceFromNode(pMass, nodeMass, direction, minSqrDist);
+            pData.force += ApplyForceFromNode(pData.mass, nodeMass, direction, minSqrDist);
         }
         //push childen
         else if (isInternalNode)
@@ -194,11 +216,11 @@ void main(uint3 GTid : SV_GroupThreadID,
         }
         //apply leafs
         else
-            pForce += ApplyCloseRangeForces(pMass, pPos, localNodeIndex);
+            pData.force += ApplyCloseRangeForces(pData.mass, pData.pos, localNodeIndex);
         
         GroupMemoryBarrierWithGroupSync();
     }
     
-    if (isParticle)
-        forceBuffer[pDestIndex] = pForce;
+    if (pData.isParticle)
+        forceBuffer[pData.destIndex] = pData.force;
 }
