@@ -131,15 +131,17 @@ void main(uint3 GTid : SV_GroupThreadID,
         
         GroupMemoryBarrierWithGroupSync();
         
-        if (nodeIndex < 0)
+        int localNodeIndex = nodeIndex;
+        
+        if (localNodeIndex < 0)
             break;
 
-        const uint nk = nkBuffer[nodeIndex];
+        const uint nk = nkBuffer[localNodeIndex];
         const uint level = GetTreeLevelFromWs(nk);
-        const uint firstChild = coBuffer[nodeIndex];
+        const uint firstChild = coBuffer[localNodeIndex];
         const bool isInternalNode = firstChild > 0;
         const float cellWidth = globallCellWidth / (1 << level);
-        const float3 nodeCoM = centerOfMass[nodeIndex];
+        const float3 nodeCoM = centerOfMass[localNodeIndex];
         
         float3 direction = nodeCoM - pPos;
         float sqrDistance = dot(direction, direction);
@@ -156,10 +158,12 @@ void main(uint3 GTid : SV_GroupThreadID,
             
         GroupMemoryBarrierWithGroupSync();
             
+        float localCriterium = criterium;
+        
         //apply node
-        if (criterium < theta)
+        if (localCriterium < theta)
         {
-            const float nodeMass = combinedMass[nodeIndex];
+            const float nodeMass = combinedMass[localNodeIndex];
             pForce += ApplyForceFromNode(pMass, nodeMass, direction, minSqrDist);
         }
         //push childen
@@ -176,7 +180,7 @@ void main(uint3 GTid : SV_GroupThreadID,
         }
         //apply leafs
         else
-            pForce += ApplyCloseRangeForces(pMass, pPos, nodeIndex);
+            pForce += ApplyCloseRangeForces(pMass, pPos, localNodeIndex);
         
         GroupMemoryBarrierWithGroupSync();
     }
