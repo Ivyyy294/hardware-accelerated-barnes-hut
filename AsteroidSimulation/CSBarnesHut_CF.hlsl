@@ -76,8 +76,12 @@ float3 ApplyCloseRangeForces(const float pMass, const float3 pPos, const uint no
     return force;
 }
 
-groupshared uint current[2048];
+groupshared uint next[512];
+groupshared uint current[512];
+
 groupshared int currentIndex = 0;
+groupshared int nextIndex = 0;
+
 groupshared int nodeIndex = 0;
 groupshared float criterium = 0.f;
 groupshared uint minSqrDistInt = 0;
@@ -119,12 +123,20 @@ void main(uint3 GTid : SV_GroupThreadID,
         currentIndex = 0;
     }
     
+    [loop]
     while (true)
     {
         if (GTid.x == 0)
         {
-            if (currentIndex < 0)
+            if (currentIndex < 0 && nextIndex < 0)
                 nodeIndex = -1;
+            else if (currentIndex < 0)
+            {
+                current = next;
+                currentIndex = nextIndex;
+                nextIndex = -1;
+                nodeIndex = current[currentIndex--];
+            }
             else
                 nodeIndex = current[currentIndex--];
         }
@@ -144,6 +156,8 @@ void main(uint3 GTid : SV_GroupThreadID,
         const float3 nodeCoM = centerOfMass[localNodeIndex];
         
         float3 direction = nodeCoM - pPos;
+        
+        //Find smallest distance
         float sqrDistance = dot(direction, direction);
 
         if (isParticle)
@@ -174,7 +188,7 @@ void main(uint3 GTid : SV_GroupThreadID,
                 const uint count = 8;
             
                 for (uint i = 0; i < count; ++i)
-                    current[++currentIndex] = firstChild + i;
+                    next[++nextIndex] = firstChild + i;
             }
             //GroupMemoryBarrierWithGroupSync();
         }
