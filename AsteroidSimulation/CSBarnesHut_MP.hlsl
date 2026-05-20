@@ -46,12 +46,11 @@ void main(uint3 GTid : SV_GroupThreadID,
     uint range = 3 * (L - level);
     
     uint begin = prefix << range;
-    uint end = (prefix + 1) << (range);
+    uint end = (prefix + 1) << range;
     
     uint indexBegin = BinarySearch(begin, keyBuffer, pCount);
     uint indexLast = BinarySearch(end, keyBuffer, pCount);
     uint count = indexLast - indexBegin;
-    //debugBuffer[index] = count;
     
     float mass = 0.f;
     float3 center = float3(0.f, 0.f, 0.f);
@@ -74,17 +73,4 @@ void main(uint3 GTid : SV_GroupThreadID,
             
     liBuffer[index] = indexBegin;
     lcBuffer[index] = count;
-    //GroupMemoryBarrierWithGroupSync();
-    
-    //CallculateInternalNodes(index, ni, n);
-    //debugBuffer[index] = combinedMass[index];
-    //debugBuffer[index] = pCount;
-    //debugBuffer[index] = kBuffer[index];
-    //debugBuffer[index] = loBuffer[index];
-    //debugBuffer[index] = coBuffer[index];
-    //debugBuffer[index] = nl;
-    //debugBuffer[index] = nkBuffer[index];
-    //debugBuffer[index] = liBuffer[ index];
-    //debugBuffer[index] = lcBuffer[index];
-    return;
 }
