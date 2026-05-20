@@ -116,6 +116,29 @@ float3 ApplyCloseRangeForces(const float pMass, const float3 pPos, const uint no
     return force;
 }
 
+bool IsTraversalDone(const uint3 GTid, out int localNodeIndex)
+{
+    if (GTid.x == 0)
+    {
+        if (currentIndex < 0 && nextIndex < 0)
+            nodeIndex = -1;
+        else if (currentIndex < 0)
+        {
+            current = next;
+            currentIndex = nextIndex;
+            nextIndex = -1;
+            nodeIndex = current[currentIndex--];
+        }
+        else
+            nodeIndex = current[currentIndex--];
+    }
+        
+    GroupMemoryBarrierWithGroupSync();
+        
+    localNodeIndex = nodeIndex;
+        
+    return localNodeIndex < 0;
+}
 
 
 [numthreads(NUM_THREADS, 1, 1)]
@@ -148,26 +171,9 @@ void main(uint3 GTid : SV_GroupThreadID,
     [loop]
     while (true)
     {
-        if (GTid.x == 0)
-        {
-            if (currentIndex < 0 && nextIndex < 0)
-                nodeIndex = -1;
-            else if (currentIndex < 0)
-            {
-                current = next;
-                currentIndex = nextIndex;
-                nextIndex = -1;
-                nodeIndex = current[currentIndex--];
-            }
-            else
-                nodeIndex = current[currentIndex--];
-        }
+        int localNodeIndex = -1;
         
-        GroupMemoryBarrierWithGroupSync();
-        
-        int localNodeIndex = nodeIndex;
-        
-        if (localNodeIndex < 0)
+        if (IsTraversalDone(GTid, localNodeIndex))
             break;
 
         const uint nk = nkBuffer[localNodeIndex];
@@ -200,7 +206,7 @@ void main(uint3 GTid : SV_GroupThreadID,
         if (localCriterium < theta)
         {
             const float nodeMass = combinedMass[localNodeIndex];
-            pData.force += ApplyForceFromNode(pData.mass, nodeMass, direction, minSqrDist);
+            pData.force += ApplyForceFromNode(pData.mass, nodeMass, direction, sqrDistance);
         }
         //push childen
         else if (isInternalNode)
