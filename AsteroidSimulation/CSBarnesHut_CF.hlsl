@@ -36,13 +36,17 @@ RWStructuredBuffer<float3> forceBuffer : register(u0);
 //Groupshared
 groupshared uint next[512];
 groupshared uint current[512];
-
 groupshared int currentIndex = 0;
 groupshared int nextIndex = 0;
 
 groupshared int nodeIndex = 0;
 groupshared float criterium = 0.f;
 groupshared uint minSqrDistInt = 0;
+
+groupshared uint nodeStack[256];
+groupshared uint particleStack[256];
+groupshared int particleStackIndex = 0;
+groupshared int nodeStackIndex = 0;
 
 struct ParticleData
 {
@@ -51,6 +55,17 @@ struct ParticleData
     uint destIndex;
     float3 force;
     bool isParticle;
+};
+
+struct NodeData
+{
+    uint firstChild;
+    bool isInternalNode;
+    float cellWidth;
+    float3 com;
+    float mass;
+    float3 direction;
+    float sqrDistance;
 };
 
 void GetParticleData (const uint index, bool isParticle, out ParticleData data)
@@ -71,6 +86,21 @@ void GetParticleData (const uint index, bool isParticle, out ParticleData data)
         data.destIndex = 0;
         data.force = 0.f;
     }
+}
+
+void GetNodeData(out NodeData data, in const uint nodeIndex, float3 pos)
+{
+    const uint nk = nkBuffer[nodeIndex];
+    const uint level = GetTreeLevelFromWs(nk);
+    data.firstChild = coBuffer[nodeIndex];
+    data.isInternalNode = data.firstChild > 0;
+    data.cellWidth = globallCellWidth / (1 << level);
+    data.com = centerOfMass[nodeIndex];
+    data.mass = combinedMass[nodeIndex];
+    data.direction = data.com - pos;
+        
+        //Find smallest distance
+    data.sqrDistance = dot(data.direction, data.direction);
 }
 
 float3 ApplyForceFromNode(float pMass, float p2Mass, float3 direction, float sqrDistance)
@@ -140,6 +170,24 @@ bool IsTraversalDone(const uint3 GTid, out int localNodeIndex)
     return localNodeIndex < 0;
 }
 
+//void ApplyNodeStack(inout ParticleData pData, in uint stack[256], const uint count)
+//{
+//    for (uint i = 0; i < count; ++i)
+//    {
+//        const float nodeMass = combinedMass[stack[i]];
+//        pData.force += ApplyForceFromNode(pData.mass, nodeMass, direction, sqrDistance);
+//    }
+    
+//    GroupMemoryBarrierWithGroupSync();
+//}
+
+//void ApplyParticleStack(inout ParticleData pData, in uint stack[256], const uint count)
+//{
+//    for (uint i = 0; i < count; ++i)
+//        pData.force += ApplyCloseRangeForces(pData.mass, pData.pos, stack[i]);
+    
+//    GroupMemoryBarrierWithGroupSync();
+//}
 
 [numthreads(NUM_THREADS, 1, 1)]
 void main(uint3 GTid : SV_GroupThreadID,
@@ -176,27 +224,19 @@ void main(uint3 GTid : SV_GroupThreadID,
         if (IsTraversalDone(GTid, localNodeIndex))
             break;
 
-        const uint nk = nkBuffer[localNodeIndex];
-        const uint level = GetTreeLevelFromWs(nk);
-        const uint firstChild = coBuffer[localNodeIndex];
-        const bool isInternalNode = firstChild > 0;
-        const float cellWidth = globallCellWidth / (1 << level);
-        const float3 nodeCoM = centerOfMass[localNodeIndex];
+        NodeData nData;
         
-        float3 direction = nodeCoM - pData.pos;
-        
-        //Find smallest distance
-        float sqrDistance = dot(direction, direction);
+        GetNodeData(nData, localNodeIndex, pData.pos);
 
         if (pData.isParticle)
-            InterlockedMin(minSqrDistInt, FloatToUint(sqrDistance));
+            InterlockedMin(minSqrDistInt, FloatToUint(nData.sqrDistance));
 
         GroupMemoryBarrierWithGroupSync();
             
         float minSqrDist = UintToFloat(minSqrDistInt);
             
         if (GTid.x == 0)
-            criterium = minSqrDist > 0.f ? (cellWidth * cellWidth) / minSqrDist : theta;
+            criterium = minSqrDist > 0.f ? (nData.cellWidth * nData.cellWidth) / minSqrDist : theta;
             
         GroupMemoryBarrierWithGroupSync();
             
@@ -206,17 +246,17 @@ void main(uint3 GTid : SV_GroupThreadID,
         if (localCriterium < theta)
         {
             const float nodeMass = combinedMass[localNodeIndex];
-            pData.force += ApplyForceFromNode(pData.mass, nodeMass, direction, sqrDistance);
+            pData.force += ApplyForceFromNode(pData.mass, nodeMass, nData.direction, nData.sqrDistance);
         }
         //push childen
-        else if (isInternalNode)
+        else if (nData.isInternalNode)
         {
             if (GTid.x == 0)
             {
                 const uint count = 8;
             
                 for (uint i = 0; i < count; ++i)
-                    next[++nextIndex] = firstChild + i;
+                    next[++nextIndex] = nData.firstChild + i;
             }
             //GroupMemoryBarrierWithGroupSync();
         }
