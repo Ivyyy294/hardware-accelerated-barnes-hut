@@ -330,5 +330,8 @@
     <None Include="CSUtils.hlsli">
       <Filter>Shader</Filter>
     </None>
+    <None Include="CSStack.hlsli">
+      <Filter>Shader</Filter>
+    </None>
   </ItemGroup>
 </Project>

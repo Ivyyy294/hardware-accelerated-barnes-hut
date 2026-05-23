@@ -1,4 +1,5 @@
 #include "CSUtils.hlsli"
+#include "CSStack.hlsli"
 
 #define NUM_THREADS 256
 #define L 10
@@ -34,14 +35,12 @@ StructuredBuffer<uint> lcBuffer : register(t12);
 RWStructuredBuffer<float3> forceBuffer : register(u0);
 
 //Groupshared
-groupshared uint next[512];
-groupshared uint current[512];
-groupshared int currentIndex = 0;
-groupshared int nextIndex = 0;
+groupshared CStack stack;
 
-groupshared int nodeIndex = 0;
+groupshared uint nodeIndex = 0;
 groupshared float criterium = 0.f;
 groupshared uint minSqrDistInt = 0;
+groupshared bool gDone = false;
 
 groupshared uint nodeStack[256];
 groupshared uint particleStack[256];
@@ -150,24 +149,17 @@ bool IsTraversalDone(const uint3 GTid, out int localNodeIndex)
 {
     if (GTid.x == 0)
     {
-        if (currentIndex < 0 && nextIndex < 0)
-            nodeIndex = -1;
-        else if (currentIndex < 0)
-        {
-            current = next;
-            currentIndex = nextIndex;
-            nextIndex = -1;
-            nodeIndex = current[currentIndex--];
-        }
-        else
-            nodeIndex = current[currentIndex--];
+        gDone = stack.IsEmpty();
+        
+        if (!gDone)
+            stack.Pop(nodeIndex);
     }
         
     GroupMemoryBarrierWithGroupSync();
-        
+    bool done = gDone;
     localNodeIndex = nodeIndex;
         
-    return localNodeIndex < 0;
+    return done;
 }
 
 //void ApplyNodeStack(inout ParticleData pData, in uint stack[256], const uint count)
@@ -212,8 +204,8 @@ void main(uint3 GTid : SV_GroupThreadID,
 
     if (GTid.x == 0)
     {
-        current[0] = 0;
-        currentIndex = 0;
+        stack.Initialize();
+        stack.Push(0);
     }
     
     [loop]
@@ -256,9 +248,8 @@ void main(uint3 GTid : SV_GroupThreadID,
                 const uint count = 8;
             
                 for (uint i = 0; i < count; ++i)
-                    next[++nextIndex] = nData.firstChild + i;
+                    stack.Push(nData.firstChild + i);
             }
-            //GroupMemoryBarrierWithGroupSync();
         }
         //apply leafs
         else
