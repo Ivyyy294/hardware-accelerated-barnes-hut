@@ -219,7 +219,12 @@ void main(uint3 GTid : SV_GroupThreadID,
         NodeData nData;
         
         GetNodeData(nData, localNodeIndex, pData.pos);
-
+        
+        if (GTid.x == 0)
+            minSqrDistInt = FloatToUint(nData.sqrDistance);
+        
+        GroupMemoryBarrierWithGroupSync();
+        
         if (pData.isParticle)
             InterlockedMin(minSqrDistInt, FloatToUint(nData.sqrDistance));
 
