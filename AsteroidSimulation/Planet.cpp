@@ -19,8 +19,8 @@ Planet::Planet()
 
 	//Physics
 	auto physic = AddComponent<PhysicObject>();
-	physic->SetMass (100000);
-	physic->SetStatic(true);
+	physic->SetMass (25000);
+	//physic->SetStatic(true);
 
 	//Collider
 	auto collider = AddComponent<CircleCollider>();
