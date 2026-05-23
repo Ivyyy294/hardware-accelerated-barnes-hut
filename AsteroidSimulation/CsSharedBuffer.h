@@ -25,6 +25,7 @@ public:
 	ID3D11UnorderedAccessView* m_uavDebugBuffer = nullptr;
 
 	ID3D11Buffer* m_dUint32Buffer{ nullptr };
+	ID3D11Buffer* m_dFloatBuffer{ nullptr };
 
 	//Settings buffer
 	ID3D11Buffer* m_settingsBuffer{ nullptr };
