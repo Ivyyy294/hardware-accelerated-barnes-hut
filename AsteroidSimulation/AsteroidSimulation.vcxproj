@@ -384,6 +384,7 @@
     <None Include="CSStack.hlsli" />
     <None Include="CSUtils.hlsli" />
     <None Include="CSDoubleBuffer.hlsli" />
+    <None Include="CSZOrder.hlsli" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
