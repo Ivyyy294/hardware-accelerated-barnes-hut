@@ -42,10 +42,9 @@ groupshared float criterium = 0.f;
 groupshared uint minSqrDistInt = 0;
 groupshared bool gDone = false;
 
-groupshared uint nodeStack[256];
-groupshared uint particleStack[256];
-groupshared int particleStackIndex = 0;
-groupshared int nodeStackIndex = 0;
+groupshared bool gIsInternalNode = false;
+groupshared uint gPCount = 0;
+groupshared uint gFirstChild = 0;
 
 struct ParticleData
 {
@@ -67,7 +66,7 @@ struct NodeData
     float sqrDistance;
 };
 
-void GetParticleData (const uint index, bool isParticle, out ParticleData data)
+void GetParticleData(const uint index, bool isParticle, out ParticleData data)
 {
     data.isParticle = isParticle;
     
@@ -185,17 +184,19 @@ bool IsTraversalDone(const uint3 GTid, out int localNodeIndex)
 void main(uint3 GTid : SV_GroupThreadID,
           uint3 Gid : SV_GroupID)
 {
-    const uint ni = counterBuffer[1];
-    const uint nl = counterBuffer[0];
-    const uint n = ni + nl;
-    const bool gIsInternalNode = coBuffer[Gid.x] > 0;
+    if (GTid.x == 0)
+    {
+        gIsInternalNode = coBuffer[Gid.x] > 0;
+        gPCount = lcBuffer[Gid.x];
+        gFirstChild = liBuffer[Gid.x];
+    }
+    
+    GroupMemoryBarrierWithGroupSync();
     
     //For every leaf node, therminate internal node groups
     if (gIsInternalNode > 0)
         return;
     
-    const uint gPCount = lcBuffer[Gid.x];
-    const uint gFirstChild = liBuffer[Gid.x];
     const uint index = gFirstChild + GTid.x;
     
     ParticleData pData;
@@ -259,8 +260,6 @@ void main(uint3 GTid : SV_GroupThreadID,
         //apply leafs
         else
             pData.force += ApplyCloseRangeForces(pData.mass, pData.pos, localNodeIndex);
-        
-        GroupMemoryBarrierWithGroupSync();
     }
     
     if (pData.isParticle)
