@@ -249,7 +249,7 @@ void ForceGeneratorBarnesHutCS::CallculateForces(uint32_t elementCount)
 	uint32_t nCount = m_counterBuffer[0] + m_counterBuffer[1];
 	uint32_t groupCount = (elementCount + 255) / 256;
 	m_buffer.SetBhSettingsParameter (elementCount, m_maxCoord * 2.f, IvyyyPhysic::GravitationalConstant(), m_theta);
-	m_csBarnesHut_MP.Dispatch(groupCount, 1, 1);
+	m_csBarnesHut_MP.Dispatch(nCount, 1, 1);
 	m_csBarnesHut_CF.Dispatch(nCount, 1, 1);
 }
 
