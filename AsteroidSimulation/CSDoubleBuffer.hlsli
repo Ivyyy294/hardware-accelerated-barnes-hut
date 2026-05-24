@@ -1,16 +1,18 @@
 
+#define DBUFFER_SIZE 256
+
 class CDoubleBuffer
 {
     uint m_fBaseIndex;
     uint m_bBaseIndex;
     uint m_fCount;
     uint m_bCount;
-    uint m_buffer[2][128];
+    uint m_buffer[DBUFFER_SIZE * 2];
     
     void Initialize()
     {
         m_fBaseIndex = 0;
-        m_bBaseIndex = 1;
+        m_bBaseIndex = DBUFFER_SIZE;
         m_fCount = 0;
         m_bCount = 0;
     }
@@ -28,10 +30,10 @@ class CDoubleBuffer
     
     bool Push(uint val)
     {
-        if (m_bCount >= 128)
+        if (m_bCount >= DBUFFER_SIZE)
             return false;
         
-        m_buffer[m_bBaseIndex][m_bCount++] = val;
+        m_buffer[m_bBaseIndex + m_bCount++] = val;
         return true;
     }
     
@@ -40,13 +42,13 @@ class CDoubleBuffer
         if (m_fCount <= 0)
             return false;
 
-        val = m_buffer[m_fBaseIndex][--m_fCount];
+        val = m_buffer[m_fBaseIndex + --m_fCount];
         return true;
     }
     
     bool IsFull()
     {
-        return m_bCount >= 128;
+        return m_bCount >= DBUFFER_SIZE;
     }
     
     bool IsFrontEmpty()

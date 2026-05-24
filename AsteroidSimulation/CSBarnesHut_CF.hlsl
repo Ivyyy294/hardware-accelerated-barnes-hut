@@ -1,5 +1,5 @@
 #include "CSUtils.hlsli"
-#include "CSStack.hlsli"
+#include "CSDoubleBuffer.hlsli"
 
 #define NUM_THREADS 256
 #define L 10
@@ -53,7 +53,7 @@ StructuredBuffer<uint> lcBuffer : register(t12);
 RWStructuredBuffer<float3> forceBuffer : register(u0);
 
 //Groupshared
-groupshared CStack stack;
+groupshared CDoubleBuffer stack;
 
 groupshared uint nodeIndex = 0;
 groupshared float criterium = 0.f;
@@ -144,10 +144,15 @@ bool IsTraversalDone(const uint3 GTid, out int localNodeIndex)
 {
     if (GTid.x == 0)
     {
-        gDone = stack.IsEmpty();
+        gDone = stack.IsFrontEmpty() && stack.IsBackEmpty();
         
         if (!gDone)
+        {
+            if (stack.IsFrontEmpty())
+                stack.Swap();
+                
             stack.Pop(nodeIndex);
+        }
     }
         
     GroupMemoryBarrierWithGroupSync();
