@@ -28,27 +28,25 @@ struct NodeData
     float cellWidth;
     float3 com;
     float mass;
+    float3 center;
 };
 
 //Particle data buffer
-StructuredBuffer<uint> keyBuffer : register(t0);
-StructuredBuffer<float3> posBuffer : register(t1);
-StructuredBuffer<float> massBuffer : register(t2);
-StructuredBuffer<uint> newToOldIndexBuffer : register(t3);
+StructuredBuffer<float3> posBuffer : register(t0);
+StructuredBuffer<float> massBuffer : register(t1);
+StructuredBuffer<uint> newToOldIndexBuffer : register(t2);
 
 //Tree data buffer
-StructuredBuffer<uint> kBuffer : register(t4);
-StructuredBuffer<uint> nkBuffer : register(t5);
-StructuredBuffer<uint> loBuffer : register(t6);
-StructuredBuffer<uint> coBuffer : register(t7);
-StructuredBuffer<uint> counterBuffer : register(t8);
+StructuredBuffer<uint> nkBuffer : register(t3);
+StructuredBuffer<uint> coBuffer : register(t4);
 
 //Multipole data
-StructuredBuffer<float3> centerOfMass : register(t9);
-StructuredBuffer<float> combinedMass : register(t10);
-
-StructuredBuffer<uint> liBuffer : register(t11);
-StructuredBuffer<uint> lcBuffer : register(t12);
+StructuredBuffer<float3> centerOfMass : register(t5);
+StructuredBuffer<float> combinedMass : register(t6);
+StructuredBuffer<uint> liBuffer : register(t7);
+StructuredBuffer<uint> lcBuffer : register(t8);
+StructuredBuffer<float> cellWidth : register(t9);
+StructuredBuffer<float3> cellCenter : register(t10);
 
 RWStructuredBuffer<float3> forceBuffer : register(u0);
 
@@ -92,9 +90,12 @@ void GetNodeData(out NodeData data, in const uint nodeIndex)
     const uint level = GetTreeLevelFromWs(nk);
     data.firstChild = coBuffer[nodeIndex];
     data.isInternalNode = data.firstChild > 0;
-    data.cellWidth = globallCellWidth / (1 << level);
+    data.cellWidth = cellWidth[ nodeIndex];
     data.com = centerOfMass[nodeIndex];
     data.mass = combinedMass[nodeIndex];
+    data.center = cellCenter[nodeIndex];
+    
+    debugBuffer[nodeIndex] = data.cellWidth;
 }
 
 float3 ApplyForceFromNode(float pMass, float p2Mass, float3 direction, float sqrDistance)

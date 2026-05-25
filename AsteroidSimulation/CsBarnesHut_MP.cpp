@@ -50,6 +50,8 @@ void CsBarnesHut_MP::UnbindShaderParameters(ID3D11DeviceContext* deviceContext)
 	deviceContext->CSSetUnorderedAccessViews(1, 1, &nullUAV, nullptr);
 	deviceContext->CSSetUnorderedAccessViews(2, 1, &nullUAV, nullptr);
 	deviceContext->CSSetUnorderedAccessViews(3, 1, &nullUAV, nullptr);
+	deviceContext->CSSetUnorderedAccessViews(4, 1, &nullUAV, nullptr);
+	deviceContext->CSSetUnorderedAccessViews(5, 1, &nullUAV, nullptr);
 	deviceContext->CSSetUnorderedAccessViews(7, 1, &nullUAV, nullptr);
 }
 
