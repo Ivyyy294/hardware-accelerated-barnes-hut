@@ -54,7 +54,7 @@ RWStructuredBuffer<float3> forceBuffer : register(u0);
 groupshared CDoubleBuffer stack;
 
 groupshared uint nodeIndex = 0;
-groupshared float criterium = 0.f;
+groupshared bool gCriterium = 0.f;
 groupshared uint minSqrDistInt = 0;
 groupshared bool gDone = false;
 
@@ -163,24 +163,21 @@ bool IsTraversalDone(const uint3 GTid, out int localNodeIndex)
     return done;
 }
 
-//void ApplyNodeStack(inout ParticleData pData, in uint stack[256], const uint count)
-//{
-//    for (uint i = 0; i < count; ++i)
-//    {
-//        const float nodeMass = combinedMass[stack[i]];
-//        pData.force += ApplyForceFromNode(pData.mass, nodeMass, direction, sqrDistance);
-//    }
+bool GetCriteriumForNode(const uint3 GTid, const NodeData nData, const float minSqrDist)
+{
+    if (GTid.x == 0)
+    {
+        float delta = distance(nData.com, nData.center);
+        float critVal = (nData.cellWidth / theta) + delta;
+        gCriterium = minSqrDist > (critVal * critVal);
+    }
     
-//    GroupMemoryBarrierWithGroupSync();
-//}
-
-//void ApplyParticleStack(inout ParticleData pData, in uint stack[256], const uint count)
-//{
-//    for (uint i = 0; i < count; ++i)
-//        pData.force += ApplyCloseRangeForces(pData.mass, pData.pos, stack[i]);
+    GroupMemoryBarrierWithGroupSync();
     
-//    GroupMemoryBarrierWithGroupSync();
-//}
+    bool val = gCriterium;
+    
+    return val;
+}
 
 [numthreads(NUM_THREADS, 1, 1)]
 void main(uint3 GTid : SV_GroupThreadID,
@@ -240,15 +237,10 @@ void main(uint3 GTid : SV_GroupThreadID,
             
         float minSqrDist = UintToFloat(minSqrDistInt);
             
-        if (GTid.x == 0)
-            criterium = minSqrDist > 0.f ? (nData.cellWidth * nData.cellWidth) / minSqrDist : theta;
-            
-        GroupMemoryBarrierWithGroupSync();
-            
-        float localCriterium = criterium;
-        
+        bool criterium = GetCriteriumForNode(GTid, nData, minSqrDist);
+       
         //apply node
-        if (localCriterium < theta)
+        if (criterium)
             pData.force += ApplyForceFromNode(pData.mass, nData.mass, direction, sqrDistance);
         //push childen
         else if (nData.isInternalNode)
