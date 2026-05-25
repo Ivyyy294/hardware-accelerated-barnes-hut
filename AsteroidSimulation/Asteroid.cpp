@@ -39,7 +39,7 @@ Asteroid::Asteroid()
 void Asteroid::SetOrbit(OrbitalElement oe, const PhysicObject* soi)
 {
 	OrbitalData orbitalData = KeplerOrbit::CallculateOrbitalData (oe, soi->GetMass());
-	Vector3 pos = KeplerOrbit::CalculateOrbitalPositionAtTime (oe, orbitalData, 0.f);
+	Vector3 pos = soi->GetTransform()->GetPosition() + KeplerOrbit::CalculateOrbitalPositionAtTime (oe, orbitalData, 0.f);
 	Vector3 vel = KeplerOrbit::CalculateOrbitalVelocityAtPosition (oe, orbitalData, pos) * -1.f;
 	transform.SetPosition (pos);
 	m_physicObject->SetVelocity(vel);
