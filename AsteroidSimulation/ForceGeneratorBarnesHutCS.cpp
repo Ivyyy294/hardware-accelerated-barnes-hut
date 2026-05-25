@@ -137,6 +137,18 @@ void ForceGeneratorBarnesHutCS::Update()
 		m_dumpMemmory = true;
 }
 
+void ForceGeneratorBarnesHutCS::OnDrawGizmo()
+{
+	uint32_t count = m_counterBuffer[0] + m_counterBuffer[1];
+
+	for (uint32_t i = 0; i < count; ++i)
+	{
+		Vector3 center (m_cellCenter[i].x, m_cellCenter[i].y, m_cellCenter[i].z);
+		Vector3 halfExtends (m_cellWidth[i] * 0.5f, m_cellWidth[i] * 0.5f, m_cellWidth[i] * 0.5f);
+		Gizmo::AddCube (center, halfExtends, Color::Green, Transform::Space::WORLD);
+	}
+}
+
 void ForceGeneratorBarnesHutCS::PreCalculateForcesInternal()
 {
 	SetShaderParameter();
@@ -149,6 +161,7 @@ void ForceGeneratorBarnesHutCS::PreCalculateForcesInternal()
 	CallculateForces (capacity);
 
 	CopyForceData();
+	CopyCellData();
 	CopyTestData();
 
 	RecordExecutionTime();
@@ -299,6 +312,35 @@ void ForceGeneratorBarnesHutCS::CopyCounterBuffer()
 	{
 		memcpy(&m_counterBuffer[0], mappedResource.pData, sizeof(uint32_t) * 3);
 		m_deviceContext->Unmap(m_buffer.m_stagingCounterBuffer, 0);
+	}
+}
+
+void ForceGeneratorBarnesHutCS::CopyCellData()
+{
+	//Copy cellWidth
+	m_deviceContext->CopyResource(m_buffer.m_dFloatBuffer, m_buffer.m_cellWidthBuffer);
+
+	D3D11_MAPPED_SUBRESOURCE mappedResource;
+	HRESULT hr = m_deviceContext->Map(m_buffer.m_dFloatBuffer, 0, D3D11_MAP_READ, 0, &mappedResource);
+
+	if (SUCCEEDED(hr))
+	{
+		float* dataPtr = (float*)mappedResource.pData;
+		memcpy(m_cellWidth, dataPtr, sizeof(float) * MAX_CAPACITY);
+		m_deviceContext->Unmap(m_buffer.m_dFloatBuffer, 0);
+	}
+
+	//Copy cell center
+	m_deviceContext->CopyResource(m_buffer.m_dFloat3Buffer, m_buffer.m_cellCenterBuffer);
+
+	mappedResource;
+	hr = m_deviceContext->Map(m_buffer.m_dFloat3Buffer, 0, D3D11_MAP_READ, 0, &mappedResource);
+
+	if (SUCCEEDED(hr))
+	{
+		XMFLOAT3* dataPtr = (XMFLOAT3*)mappedResource.pData;
+		memcpy(m_cellCenter, dataPtr, sizeof(XMFLOAT3) * MAX_CAPACITY);
+		m_deviceContext->Unmap(m_buffer.m_dFloat3Buffer, 0);
 	}
 }
 

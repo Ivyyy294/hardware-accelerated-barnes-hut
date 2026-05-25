@@ -4,6 +4,7 @@
 
 void SceneBarnesHutCS::Init()
 {
+	Gizmo::Draw = true;
 	m_sVar.method = SessionVariables::BARNES_HUT_GPU;
 	m_forceGenerator = AddGameObject()->AddComponent<ForceGeneratorBarnesHutCS>().get();
 	SceneAsteroidBase::Init();

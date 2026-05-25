@@ -1,4 +1,5 @@
 #include "CSUtils.hlsli"
+#include "CSZOrder.hlsli"
 
 #define L 10
 #define NUM_THREADS 256
@@ -27,6 +28,8 @@ RWStructuredBuffer<float3> centerOfMass : register(u0);
 RWStructuredBuffer<float> combinedMass : register(u1);
 RWStructuredBuffer<uint> liBuffer : register(u2);
 RWStructuredBuffer<uint> lcBuffer : register(u3);
+RWStructuredBuffer<float> cellWidthBuffer : register(u4);
+RWStructuredBuffer<float3> cellCenterBuffer : register(u5);
 
 [numthreads(NUM_THREADS, 1, 1)]
 void main(uint3 GTid : SV_GroupThreadID,
@@ -73,4 +76,14 @@ void main(uint3 GTid : SV_GroupThreadID,
             
     liBuffer[index] = indexBegin;
     lcBuffer[index] = count;
+    
+    //Callculate cell width
+    float cellWidth = globallCellWidth / (1 << level);
+    cellWidthBuffer[index] = cellWidth;
+    
+    float3 boundsMin = globallCellWidth * -0.5f;
+    float3 boundsMax = globallCellWidth * 0.5f;
+    
+    cellCenterBuffer[index] = DecodeWSKey(ws, level, boundsMin, boundsMax);
+    //callculte cell center
 }

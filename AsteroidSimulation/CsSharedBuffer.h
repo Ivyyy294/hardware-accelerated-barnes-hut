@@ -26,6 +26,7 @@ public:
 
 	ID3D11Buffer* m_dUint32Buffer{ nullptr };
 	ID3D11Buffer* m_dFloatBuffer{ nullptr };
+	ID3D11Buffer* m_dFloat3Buffer{ nullptr };
 
 	//Settings buffer
 	ID3D11Buffer* m_settingsBuffer{ nullptr };
@@ -128,6 +129,14 @@ public:
 	ID3D11Buffer* m_outForceBuffer{ nullptr };
 	ID3D11UnorderedAccessView* m_uavForceBuffer = nullptr;
 
+	ID3D11Buffer* m_cellWidthBuffer{ nullptr };
+	ID3D11UnorderedAccessView* m_uavCellWidthBuffer = nullptr;
+	ID3D11ShaderResourceView* m_srvCellWidthBuffer = nullptr;
+
+	ID3D11Buffer* m_cellCenterBuffer{ nullptr };
+	ID3D11UnorderedAccessView* m_uavCellCenterBuffer = nullptr;
+	ID3D11ShaderResourceView* m_srvCellCenterBuffer = nullptr;
+
 //Methods
 public:
 	CsSharedBuffer();
@@ -156,7 +165,7 @@ private:
 };
 
 template<typename T>
-inline void CsSharedBuffer::RecordBufferSnapshot(ID3D11Buffer* dest, ID3D11Buffer* source, const string name, const size_t count)
+void CsSharedBuffer::RecordBufferSnapshot(ID3D11Buffer* dest, ID3D11Buffer* source, const string name, const size_t count)
 {
 	//m_deviceContext->CopyResource (dest, source);
 	m_deviceContext->CopySubresourceRegion (dest, 0, 0,0,0, source, 0, nullptr);

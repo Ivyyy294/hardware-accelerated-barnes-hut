@@ -34,5 +34,25 @@ uint GetMortonKey(float3 pos, float3 boundsMin, float3 boundsMax)
     uint yy = Part1By2((uint) pos.y);
     uint zz = Part1By2((uint) pos.z);
     
-    return xx ^ (yy << 1) ^ (zz << 2);
+    return xx | (yy << 1) | (zz << 2);
+}
+
+float3 DecodeWSKey(uint key, uint level, float3 boundsMin, float3 boundsMax)
+{
+    uint mask = 1 << (3 * level);
+    uint prefix = mask ^ key;
+    
+    const float3 boundsDim = boundsMax - boundsMin;
+    
+    float cOffset = 1.f / (1 << (level + 1));
+    float3 lc = 0.f;
+    lc.x = Compact1By2(prefix);
+    lc.y = Compact1By2(prefix >> 1);
+    lc.z = Compact1By2(prefix >> 2);
+    
+    lc /= (1 << level);
+    lc += cOffset;
+    
+    float3 wc = boundsMin + (lc * boundsDim);
+    return wc;
 }

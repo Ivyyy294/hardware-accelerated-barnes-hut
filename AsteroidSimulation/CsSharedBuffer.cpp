@@ -16,7 +16,8 @@ HRESULT CsSharedBuffer::InitDebugShaderParameters(ID3D11Device* device)
 		&& ShaderUtils::CreateResourceBuffer(device, result, &m_debugBuffer, sizeof(uint32_t), 1024)
 		&& ShaderUtils::CreateUAVBuffer(device, result, m_debugBuffer, &m_uavDebugBuffer, 1024)
 		&& ShaderUtils::CreateStagingBuffer(device, result, &m_dUint32Buffer, sizeof(uint32_t), MAX_CAPACITY)
-		&& ShaderUtils::CreateStagingBuffer(device, result, &m_dFloatBuffer, sizeof(float), MAX_CAPACITY);
+		&& ShaderUtils::CreateStagingBuffer(device, result, &m_dFloatBuffer, sizeof(float), MAX_CAPACITY)
+		&& ShaderUtils::CreateStagingBuffer(device, result, &m_dFloat3Buffer, sizeof(XMFLOAT3), MAX_CAPACITY);
 
 	return result;
 }
@@ -152,15 +153,26 @@ HRESULT CsSharedBuffer::InitBarnesHutShaderParameters(ID3D11Device* device)
 	HRESULT result;
 
 	bool ok = ShaderUtils::CreateConstBuffer(device, result, &m_bhSettingsBuffer, sizeof(BhSettings))
+		//Center of Mass
 		&& ShaderUtils::CreateResourceBuffer(device, result, &m_centerMassBuffer, sizeof(XMFLOAT3), MAX_CAPACITY)
 		&& ShaderUtils::CreateResourceViewBuffer(device, result, m_centerMassBuffer, &m_srvCenterMassBuffer, MAX_CAPACITY)
 		&& ShaderUtils::CreateUAVBuffer(device, result, m_centerMassBuffer, &m_uavCenterMassBuffer, MAX_CAPACITY)
+		//Combined Mass
 		&& ShaderUtils::CreateResourceBuffer(device, result, &m_combinedMassBuffer, sizeof(float), MAX_CAPACITY)
 		&& ShaderUtils::CreateResourceViewBuffer(device, result, m_combinedMassBuffer, &m_srvCombinedMassBuffer, MAX_CAPACITY)
 		&& ShaderUtils::CreateUAVBuffer(device, result, m_combinedMassBuffer, &m_uavCombinedMassBuffer, MAX_CAPACITY)
+		//Force
 		&& ShaderUtils::CreateResourceBuffer(device, result, &m_forceBuffer, sizeof(XMFLOAT3), MAX_PARTICLE_COUNT)
 		&& ShaderUtils::CreateStagingBuffer(device, result, &m_outForceBuffer, sizeof(XMFLOAT3), MAX_PARTICLE_COUNT)
-		&& ShaderUtils::CreateUAVBuffer(device, result, m_forceBuffer, &m_uavForceBuffer, MAX_PARTICLE_COUNT);
+		&& ShaderUtils::CreateUAVBuffer(device, result, m_forceBuffer, &m_uavForceBuffer, MAX_PARTICLE_COUNT)
+		//Cell width
+		&& ShaderUtils::CreateResourceBuffer(device, result, &m_cellWidthBuffer, sizeof(float), MAX_CAPACITY)
+		&& ShaderUtils::CreateResourceViewBuffer(device, result, m_cellWidthBuffer, &m_srvCellWidthBuffer, MAX_CAPACITY)
+		&& ShaderUtils::CreateUAVBuffer(device, result, m_cellWidthBuffer, &m_uavCellWidthBuffer, MAX_CAPACITY)
+		//Cell center
+		&& ShaderUtils::CreateResourceBuffer(device, result, &m_cellCenterBuffer, sizeof(XMFLOAT3), MAX_CAPACITY)
+		&& ShaderUtils::CreateResourceViewBuffer(device, result, m_cellCenterBuffer, &m_srvCellCenterBuffer, MAX_CAPACITY)
+		&& ShaderUtils::CreateUAVBuffer(device, result, m_cellCenterBuffer, &m_uavCellCenterBuffer, MAX_CAPACITY);
 
 	return result;
 }
@@ -229,6 +241,7 @@ void CsSharedBuffer::ReleaseShaderParameters()
 	ShaderUtils::SafeRelease(&m_debugBuffer);
 	ShaderUtils::SafeRelease(&m_dUint32Buffer);
 	ShaderUtils::SafeRelease(&m_dFloatBuffer);
+	ShaderUtils::SafeRelease(&m_dFloat3Buffer);
 
 	ShaderUtils::SafeRelease(&m_outputBuffer);
 	ShaderUtils::SafeRelease(&m_settingsBuffer);
@@ -294,6 +307,14 @@ void CsSharedBuffer::ReleaseShaderParameters()
 	ShaderUtils::SafeRelease(&m_combinedMassBuffer);
 	ShaderUtils::SafeRelease(&m_uavCombinedMassBuffer);
 	ShaderUtils::SafeRelease(&m_srvCombinedMassBuffer);
+
+	ShaderUtils::SafeRelease(&m_cellWidthBuffer);
+	ShaderUtils::SafeRelease(&m_uavCellWidthBuffer);
+	ShaderUtils::SafeRelease(&m_srvCellWidthBuffer);
+
+	ShaderUtils::SafeRelease(&m_cellCenterBuffer);
+	ShaderUtils::SafeRelease(&m_uavCellCenterBuffer);
+	ShaderUtils::SafeRelease(&m_srvCellCenterBuffer);
 
 	ShaderUtils::SafeRelease(&m_liBuffer);
 	ShaderUtils::SafeRelease(&m_uavLiBuffer);
@@ -362,6 +383,8 @@ void CsSharedBuffer::ClearUavBuffer()
 	m_deviceContext->ClearUnorderedAccessViewUint(m_uavLiBuffer, clearValues);
 	m_deviceContext->ClearUnorderedAccessViewUint(m_uavLcBuffer, clearValues);
 	m_deviceContext->ClearUnorderedAccessViewUint(m_uavDebugBuffer, clearValues);
+	m_deviceContext->ClearUnorderedAccessViewUint(m_uavCellWidthBuffer, clearValues);
+	m_deviceContext->ClearUnorderedAccessViewUint(m_uavCellCenterBuffer, clearValues);
 }
 
 void CsSharedBuffer::SwapParticleBuffer()
@@ -382,6 +405,8 @@ void CsSharedBuffer::RecordBufferSnapshot()
 	RecordBufferSnapshot <uint32_t> (m_dUint32Buffer, m_outNkBuffer, "NK", MAX_CAPACITY);
 	RecordBufferSnapshot <uint32_t> (m_dUint32Buffer, m_loBuffer, "LO", 12);
 	RecordBufferSnapshot <uint32_t> (m_dUint32Buffer, m_coBuffer, "CO", MAX_CAPACITY);
+	RecordBufferSnapshot <uint32_t> (m_dUint32Buffer, m_liBuffer, "LI", MAX_CAPACITY);
+	RecordBufferSnapshot <uint32_t> (m_dUint32Buffer, m_lcBuffer, "LC", MAX_CAPACITY);
 	RecordBufferSnapshot <float> (m_dFloatBuffer, m_combinedMassBuffer, "CM", MAX_CAPACITY);
 	RecordBufferSnapshot <uint32_t> (m_dUint32Buffer, m_counterBuffer, "n", 2);
 
