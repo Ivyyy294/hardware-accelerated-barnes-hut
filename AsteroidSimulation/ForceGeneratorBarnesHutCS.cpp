@@ -111,7 +111,7 @@ void ForceGeneratorBarnesHutCS::SetShaderParameter()
 	m_deviceContext->CopyResource(m_buffer.m_inMassBuffer, m_buffer.m_upMassBuffer);
 
 	m_maxCoord = std::ceilf(m_maxCoord);
-	m_csMortonCodes.SetShaderParameter({-m_maxCoord, -m_maxCoord, -m_maxCoord}, { m_maxCoord, m_maxCoord, m_maxCoord });
+	m_csMortonCodes.SetShaderParameter({ m_maxCoord, m_maxCoord, m_maxCoord });
 
 	//Clear UAV
 	m_buffer.ClearUavBuffer();
@@ -143,9 +143,19 @@ void ForceGeneratorBarnesHutCS::OnDrawGizmo()
 
 	for (uint32_t i = 0; i < count; ++i)
 	{
-		Vector3 center (m_cellCenter[i].x, m_cellCenter[i].y, m_cellCenter[i].z);
-		Vector3 halfExtends (m_cellWidth[i] * 0.5f, m_cellWidth[i] * 0.5f, m_cellWidth[i] * 0.5f);
-		Gizmo::AddCube (center, halfExtends, Color::Green, Transform::Space::WORLD);
+		if (m_cellCo[i] == 0 && m_cellLc[i] > 0)
+		{
+			Vector3 center (m_cellCenter[i].x, m_cellCenter[i].y, m_cellCenter[i].z);
+
+			Vector3 halfExtends (m_cellWidth[i] * 0.5f, m_cellWidth[i] * 0.5f, m_cellWidth[i] * 0.5f);
+			Gizmo::AddCube (center, halfExtends, Color::Green, Transform::Space::WORLD);
+
+			Vector3 com (m_cellCom[i].x, m_cellCom[i].y, m_cellCom[i].z);
+			Gizmo::AddCube (com, Vector3(0.1f, 0.1f, 0.1f), Color::Red, Transform::Space::WORLD);
+
+			Gizmo::AddLine (center, com, Color::Red, Transform::Space::WORLD);
+		}
+
 	}
 }
 
@@ -341,6 +351,45 @@ void ForceGeneratorBarnesHutCS::CopyCellData()
 		XMFLOAT3* dataPtr = (XMFLOAT3*)mappedResource.pData;
 		memcpy(m_cellCenter, dataPtr, sizeof(XMFLOAT3) * MAX_CAPACITY);
 		m_deviceContext->Unmap(m_buffer.m_dFloat3Buffer, 0);
+	}
+
+	//Copy cell com
+	m_deviceContext->CopyResource(m_buffer.m_dFloat3Buffer, m_buffer.m_centerMassBuffer);
+
+	mappedResource;
+	hr = m_deviceContext->Map(m_buffer.m_dFloat3Buffer, 0, D3D11_MAP_READ, 0, &mappedResource);
+
+	if (SUCCEEDED(hr))
+	{
+		XMFLOAT3* dataPtr = (XMFLOAT3*)mappedResource.pData;
+		memcpy(m_cellCom, dataPtr, sizeof(XMFLOAT3) * MAX_CAPACITY);
+		m_deviceContext->Unmap(m_buffer.m_dFloat3Buffer, 0);
+	}
+
+	//Copy cell co
+	m_deviceContext->CopyResource(m_buffer.m_dUint32Buffer, m_buffer.m_coBuffer);
+
+	mappedResource;
+	hr = m_deviceContext->Map(m_buffer.m_dUint32Buffer, 0, D3D11_MAP_READ, 0, &mappedResource);
+
+	if (SUCCEEDED(hr))
+	{
+		uint32_t* dataPtr = (uint32_t*)mappedResource.pData;
+		memcpy(m_cellCo, dataPtr, sizeof(uint32_t) * MAX_CAPACITY);
+		m_deviceContext->Unmap(m_buffer.m_dUint32Buffer, 0);
+	}
+
+	//Copy cell lc
+	m_deviceContext->CopyResource(m_buffer.m_dUint32Buffer, m_buffer.m_lcBuffer);
+
+	mappedResource;
+	hr = m_deviceContext->Map(m_buffer.m_dUint32Buffer, 0, D3D11_MAP_READ, 0, &mappedResource);
+
+	if (SUCCEEDED(hr))
+	{
+		uint32_t* dataPtr = (uint32_t*)mappedResource.pData;
+		memcpy(m_cellLc, dataPtr, sizeof(uint32_t) * MAX_CAPACITY);
+		m_deviceContext->Unmap(m_buffer.m_dUint32Buffer, 0);
 	}
 }
 

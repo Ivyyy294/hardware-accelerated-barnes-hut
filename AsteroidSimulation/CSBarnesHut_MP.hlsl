@@ -85,5 +85,4 @@ void main(uint3 GTid : SV_GroupThreadID,
     float3 boundsMax = globallCellWidth * 0.5f;
     
     cellCenterBuffer[index] = DecodeWSKey(ws, level, boundsMin, boundsMax);
-    //callculte cell center
 }

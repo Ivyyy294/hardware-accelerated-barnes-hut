@@ -30,7 +30,7 @@ class ForceGeneratorBarnesHutCS :
 {
 //Variables
 private:
-	const uint32_t m_nCrit {16};
+	const uint32_t m_nCrit {64};
 
 	ID3D11DeviceContext* m_deviceContext {nullptr};
 	
@@ -62,6 +62,9 @@ private:
 
 	float m_cellWidth [MAX_CAPACITY];
 	XMFLOAT3 m_cellCenter [MAX_CAPACITY];
+	XMFLOAT3 m_cellCom [MAX_CAPACITY];
+	uint32_t m_cellCo [MAX_CAPACITY];
+	uint32_t m_cellLc [MAX_CAPACITY];
 
 //Methods
 public:
