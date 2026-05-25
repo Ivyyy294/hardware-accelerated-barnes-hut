@@ -22,11 +22,6 @@ cbuffer UnitCube : register(b1)
 StructuredBuffer<float3> positions : register(t0);
 RWStructuredBuffer<uint> mortonCodes : register(u0);
 
-    value.y = (value.y - boundsMin.y) / (boundsMax.y - boundsMin.y);
-    value.z = (value.z - boundsMin.z) / (boundsMax.z - boundsMin.z);
-    return value;
-}
-
 [numthreads(NUM_THREADS, 1, 1)]
 void main(uint3 GTid : SV_GroupThreadID,
           uint3 Gid : SV_GroupID)
@@ -44,9 +39,7 @@ void main(uint3 GTid : SV_GroupThreadID,
             uint index = baseIndex + threadId + i * NUM_THREADS;
             
             if (index < elementCount)
-                mortonCodes[index] = GetMortonKey(positions[index], boundsMin, boundsMax);
+                mortonCodes[index] = GetMortonKey(positions[index], -boundsMax, boundsMax);
         }
     }
-
-    //debugBuffer[index] = positions[index];
 }
