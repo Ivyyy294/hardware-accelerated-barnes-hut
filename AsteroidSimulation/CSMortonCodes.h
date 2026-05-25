@@ -26,7 +26,7 @@ private:
 public:
 	CsMortonCodes();
 
-	void SetShaderParameter (XMFLOAT3 boundsMin, XMFLOAT3 boundsMax);
+	void SetShaderParameter (XMFLOAT3 boundsHalf);
 
 private:
 	void BindShaderParameters(ID3D11DeviceContext* deviceContext) override;

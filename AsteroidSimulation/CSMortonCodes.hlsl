@@ -22,11 +22,6 @@ cbuffer UnitCube : register(b1)
 StructuredBuffer<float3> positions : register(t0);
 RWStructuredBuffer<uint> mortonCodes : register(u0);
 
-
-
-float3 MapToUnitCube(float3 value)
-{
-    value.x = (value.x - boundsMin.x) / (boundsMax.x - boundsMin.x);
     value.y = (value.y - boundsMin.y) / (boundsMax.y - boundsMin.y);
     value.z = (value.z - boundsMin.z) / (boundsMax.z - boundsMin.z);
     return value;
