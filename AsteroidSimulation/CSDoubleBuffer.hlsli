@@ -1,5 +1,5 @@
 
-#define DBUFFER_SIZE 128
+#define DBUFFER_SIZE 256
 
 class CDoubleBuffer
 {
