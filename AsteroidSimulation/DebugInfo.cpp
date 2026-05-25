@@ -16,6 +16,9 @@ void DebugInfo::Update ()
 		fontmesh->SetText ( L"FPS: " + std::to_wstring (fps) + L"\nDeltaTIme: " + std::to_wstring (deltatime));
 	//else
 	//	Debug::Log("FPS: " + std::to_string(fps) + ", DeltaTIme: " + std::to_string(deltatime));
+
+	if (Input::KeyDown(Key::KEY_G))
+		Gizmo::Draw = !Gizmo::Draw;
 }
 
 void DebugInfo::UpdateFps()

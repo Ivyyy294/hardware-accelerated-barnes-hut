@@ -171,12 +171,11 @@ void ForceGeneratorBarnesHutCS::PreCalculateForcesInternal()
 	CallculateForces (capacity);
 
 	CopyForceData();
-	CopyCellData();
-	CopyTestData();
+
+	if (Gizmo::Draw)
+		CopyCellData();
 
 	RecordExecutionTime();
-
-	m_dumpMemmory = true;
 
 	if (m_dumpMemmory)
 	{
