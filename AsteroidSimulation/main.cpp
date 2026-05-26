@@ -23,7 +23,7 @@ int WINAPI WinMain (_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance,
 
 	if (!SessionVariablesLoadFromFile (variables, "variables.csv"))
 	{
-		variables.numAsteroids = NUM_ASTEROIDS;
+		variables.numAsteroids = 1024;
 		variables.ugc = 0.00005f;
 		variables.fixedDeltaTime = Time::UnscaledFixedDeltaTime();
 		variables.distRange = { 10.f, 1.f };

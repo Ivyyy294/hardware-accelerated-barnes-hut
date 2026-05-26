@@ -14,10 +14,10 @@ private:
 //Methods
 public:
 	void OnDrawGizmo() override;
-
 private:
 	void PreCalculateForcesInternal() override;
 	void BuildTree();
 	Vector3 CalculateForces(PhysicObject* physicObj);
+	void PreCalculateForcesChunked (const size_t startIndex, const size_t stride);
 };
 

@@ -1,7 +1,7 @@
 method;2
 theta;0.8
 nCrit;128
-numAsteroids;10240
+numAsteroids;1024
 ugc;0.000050
 fixedDeltaTime;0.020000
 distRange;10.000000;1.000000

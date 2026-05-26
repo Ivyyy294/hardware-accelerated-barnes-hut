@@ -59,17 +59,18 @@ private:
 	float m_maxCoord = 0.f;
 	uint32_t m_counterBuffer[3] = {1,0,1};
 
-	float m_cellWidth [MAX_CAPACITY];
-	XMFLOAT3 m_cellCenter [MAX_CAPACITY];
-	XMFLOAT3 m_cellCom [MAX_CAPACITY];
-	uint32_t m_cellCo [MAX_CAPACITY];
-	uint32_t m_cellLc [MAX_CAPACITY];
+	float* m_cellWidth = nullptr;
+	XMFLOAT3* m_cellCenter = nullptr;
+	XMFLOAT3* m_cellCom = nullptr;
+	uint32_t* m_cellCo = nullptr;
+	uint32_t* m_cellLc = nullptr;
 
 	float m_sortTimeKeyMs = 0.f;
 
 //Methods
 public:
 	ForceGeneratorBarnesHutCS();
+	~ForceGeneratorBarnesHutCS();
 
 	void Start() override;
 	void Exit() override;

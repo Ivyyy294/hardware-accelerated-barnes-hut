@@ -3,7 +3,21 @@
 
 void ForceGeneratorDirect::PreCalculateForcesInternal()
 {
-	for (size_t i = 0; i < m_objects.size(); ++i)
+	const size_t size = 4;
+	std::future<void>* tList = new std::future<void>[size];
+
+	for (size_t i = 0; i < size; ++i)
+		tList[i] = std::async(std::launch::async, &ForceGeneratorDirect::PreCalculateForcesChunked, this, i, size);
+
+	for (int i = 0; i < (int)size; ++i)
+		tList[i].wait();
+
+	delete[] tList;
+}
+
+void ForceGeneratorDirect::PreCalculateForcesChunked(const size_t startIndex, const size_t stride)
+{
+	for (size_t i = startIndex; i < m_objects.size(); i += stride)
 	{
 		PhysicObject* m_rb = m_objects[i];
 		Vector3 pPos = m_rb->GetTransform()->GetPosition();
@@ -34,6 +48,6 @@ void ForceGeneratorDirect::PreCalculateForcesInternal()
 			pForce += forceVec;
 		}
 
-		m_forceBuffer[i] = {pForce.x, pForce.y, pForce.z};
+		m_forceBuffer[i] = { pForce.x, pForce.y, pForce.z };
 	}
 }

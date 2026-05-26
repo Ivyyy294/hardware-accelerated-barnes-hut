@@ -3,8 +3,10 @@
 #include "ShaderUtils.h"
 
 
-CsSharedBuffer::CsSharedBuffer()
+CsSharedBuffer::CsSharedBuffer(uint32_t maxParticleCount)
 	: m_deviceContext (D3D::Instance().GetDeviceContext())
+	, m_maxParticleCount (maxParticleCount)
+	, m_maxCapacity (maxParticleCount+ maxParticleCount)
 {
 }
 
@@ -15,9 +17,9 @@ HRESULT CsSharedBuffer::InitDebugShaderParameters(ID3D11Device* device)
 	bool ok = ShaderUtils::CreateStagingBuffer(device, result, &m_outputBuffer, sizeof(uint32_t), 1024)
 		&& ShaderUtils::CreateResourceBuffer(device, result, &m_debugBuffer, sizeof(uint32_t), 1024)
 		&& ShaderUtils::CreateUAVBuffer(device, result, m_debugBuffer, &m_uavDebugBuffer, 1024)
-		&& ShaderUtils::CreateStagingBuffer(device, result, &m_dUint32Buffer, sizeof(uint32_t), MAX_CAPACITY)
-		&& ShaderUtils::CreateStagingBuffer(device, result, &m_dFloatBuffer, sizeof(float), MAX_CAPACITY)
-		&& ShaderUtils::CreateStagingBuffer(device, result, &m_dFloat3Buffer, sizeof(XMFLOAT3), MAX_CAPACITY);
+		&& ShaderUtils::CreateStagingBuffer(device, result, &m_dUint32Buffer, sizeof(uint32_t), m_maxCapacity)
+		&& ShaderUtils::CreateStagingBuffer(device, result, &m_dFloatBuffer, sizeof(float), m_maxCapacity)
+		&& ShaderUtils::CreateStagingBuffer(device, result, &m_dFloat3Buffer, sizeof(XMFLOAT3), m_maxCapacity);
 
 	return result;
 }
@@ -26,11 +28,11 @@ HRESULT CsSharedBuffer::InitMortonCodeShaderParameters(ID3D11Device* device)
 {
 	HRESULT result;
 
-	bool ok = ShaderUtils::CreateDynamicBuffer(device, result, &m_upMortonCodeBuffer, sizeof(uint32_t), MAX_PARTICLE_COUNT)
-		&& ShaderUtils::CreateResourceBuffer(device, result, &m_inMortonCodeBuffer, sizeof(uint32_t), MAX_PARTICLE_COUNT)
-		&& ShaderUtils::CreateResourceBuffer(device, result, &m_outMortonCodeBuffer, sizeof(uint32_t), MAX_PARTICLE_COUNT)
-		&& ShaderUtils::CreateUAVBuffer(device, result, m_outMortonCodeBuffer, &m_uavMortonCodeBuffer, MAX_PARTICLE_COUNT)
-		&& ShaderUtils::CreateResourceViewBuffer(device, result, m_inMortonCodeBuffer, &m_srvMortonCodeBuffer, MAX_PARTICLE_COUNT);
+	bool ok = ShaderUtils::CreateDynamicBuffer(device, result, &m_upMortonCodeBuffer, sizeof(uint32_t), m_maxParticleCount)
+		&& ShaderUtils::CreateResourceBuffer(device, result, &m_inMortonCodeBuffer, sizeof(uint32_t), m_maxParticleCount)
+		&& ShaderUtils::CreateResourceBuffer(device, result, &m_outMortonCodeBuffer, sizeof(uint32_t), m_maxParticleCount)
+		&& ShaderUtils::CreateUAVBuffer(device, result, m_outMortonCodeBuffer, &m_uavMortonCodeBuffer, m_maxParticleCount)
+		&& ShaderUtils::CreateResourceViewBuffer(device, result, m_inMortonCodeBuffer, &m_srvMortonCodeBuffer, m_maxParticleCount);
 
 	return result;
 }
@@ -39,11 +41,11 @@ HRESULT CsSharedBuffer::InitPositionShaderParameters(ID3D11Device* device)
 {
 	HRESULT result;
 
-	bool ok = ShaderUtils::CreateDynamicBuffer(device, result, &m_upPositionBuffer, sizeof(XMFLOAT3), MAX_PARTICLE_COUNT)
-		&& ShaderUtils::CreateResourceBuffer(device, result, &m_outPositionBuffer, sizeof(XMFLOAT3), MAX_PARTICLE_COUNT)
-		&& ShaderUtils::CreateResourceBuffer(device, result, &m_inPositionBuffer, sizeof(XMFLOAT3), MAX_PARTICLE_COUNT)
-		&& ShaderUtils::CreateUAVBuffer(device, result, m_outPositionBuffer, &m_uavPositionBuffer, MAX_PARTICLE_COUNT)
-		&& ShaderUtils::CreateResourceViewBuffer(device, result, m_inPositionBuffer, &m_srvPositionBuffer, MAX_PARTICLE_COUNT);
+	bool ok = ShaderUtils::CreateDynamicBuffer(device, result, &m_upPositionBuffer, sizeof(XMFLOAT3), m_maxParticleCount)
+		&& ShaderUtils::CreateResourceBuffer(device, result, &m_outPositionBuffer, sizeof(XMFLOAT3), m_maxParticleCount)
+		&& ShaderUtils::CreateResourceBuffer(device, result, &m_inPositionBuffer, sizeof(XMFLOAT3), m_maxParticleCount)
+		&& ShaderUtils::CreateUAVBuffer(device, result, m_outPositionBuffer, &m_uavPositionBuffer, m_maxParticleCount)
+		&& ShaderUtils::CreateResourceViewBuffer(device, result, m_inPositionBuffer, &m_srvPositionBuffer, m_maxParticleCount);
 
 	return result;
 }
@@ -52,10 +54,10 @@ HRESULT CsSharedBuffer::InitIndexMappingShaderParameters(ID3D11Device* device)
 {
 	HRESULT result;
 
-	bool ok = ShaderUtils::CreateResourceBuffer(device, result, &m_inNewToOldIndexBuffer, sizeof(uint32_t), MAX_PARTICLE_COUNT)
-		&& ShaderUtils::CreateResourceBuffer(device, result, &m_outNewToOldIndexBuffer, sizeof(uint32_t), MAX_PARTICLE_COUNT)
-		&& ShaderUtils::CreateUAVBuffer(device, result, m_outNewToOldIndexBuffer, &m_uavNewToOldIndexBuffer, MAX_PARTICLE_COUNT)
-		&& ShaderUtils::CreateResourceViewBuffer(device, result, m_inNewToOldIndexBuffer, &m_srvNewToOldIndexBuffer, MAX_PARTICLE_COUNT);
+	bool ok = ShaderUtils::CreateResourceBuffer(device, result, &m_inNewToOldIndexBuffer, sizeof(uint32_t), m_maxParticleCount)
+		&& ShaderUtils::CreateResourceBuffer(device, result, &m_outNewToOldIndexBuffer, sizeof(uint32_t), m_maxParticleCount)
+		&& ShaderUtils::CreateUAVBuffer(device, result, m_outNewToOldIndexBuffer, &m_uavNewToOldIndexBuffer, m_maxParticleCount)
+		&& ShaderUtils::CreateResourceViewBuffer(device, result, m_inNewToOldIndexBuffer, &m_srvNewToOldIndexBuffer, m_maxParticleCount);
 
 	return result;
 }
@@ -64,11 +66,11 @@ HRESULT CsSharedBuffer::InitMassShaderParameters(ID3D11Device* device)
 {
 	HRESULT result;
 
-	bool ok = ShaderUtils::CreateDynamicBuffer(device, result, &m_upMassBuffer, sizeof(float), MAX_PARTICLE_COUNT)
-		&& ShaderUtils::CreateResourceBuffer(device, result, &m_outMassBuffer, sizeof(float), MAX_PARTICLE_COUNT)
-		&& ShaderUtils::CreateResourceBuffer(device, result, &m_inMassBuffer, sizeof(float), MAX_PARTICLE_COUNT)
-		&& ShaderUtils::CreateUAVBuffer(device, result, m_outMassBuffer, &m_uavMassBuffer, MAX_PARTICLE_COUNT)
-		&& ShaderUtils::CreateResourceViewBuffer(device, result, m_inMassBuffer, &m_srvMassBuffer, MAX_PARTICLE_COUNT);
+	bool ok = ShaderUtils::CreateDynamicBuffer(device, result, &m_upMassBuffer, sizeof(float), m_maxParticleCount)
+		&& ShaderUtils::CreateResourceBuffer(device, result, &m_outMassBuffer, sizeof(float), m_maxParticleCount)
+		&& ShaderUtils::CreateResourceBuffer(device, result, &m_inMassBuffer, sizeof(float), m_maxParticleCount)
+		&& ShaderUtils::CreateUAVBuffer(device, result, m_outMassBuffer, &m_uavMassBuffer, m_maxParticleCount)
+		&& ShaderUtils::CreateResourceViewBuffer(device, result, m_inMassBuffer, &m_srvMassBuffer, m_maxParticleCount);
 
 	return result;
 }
@@ -90,11 +92,11 @@ HRESULT CsSharedBuffer::InitSortingShaderParameters(ID3D11Device* device)
 HRESULT CsSharedBuffer::InitCornerStoneShaderParameters(ID3D11Device* device)
 {
 	//L = 10
-	uint32_t maxK = MAX_CAPACITY;
+	uint32_t maxK = m_maxCapacity;
 
 	HRESULT result;
 
-	uint32_t k [MAX_CAPACITY] = {0, 1 << 3 * 10};
+	uint32_t* k = new uint32_t[m_maxCapacity]{0, 1 << 3 * 10};
 	D3D11_SUBRESOURCE_DATA initalK = {};
 	initalK.pSysMem = k;
 
@@ -108,9 +110,9 @@ HRESULT CsSharedBuffer::InitCornerStoneShaderParameters(ID3D11Device* device)
 		&& ShaderUtils::CreateResourceBuffer(device, result, &m_outKBuffer, sizeof(uint32_t), maxK)
 		&& ShaderUtils::CreateUAVBuffer(device, result, m_outKBuffer, &m_uavKBuffer, maxK)
 		// N Buffer
-		&& ShaderUtils::CreateResourceBuffer(device, result, &m_nBuffer, sizeof(uint32_t), MAX_PARTICLE_COUNT)
-		&& ShaderUtils::CreateResourceViewBuffer(device, result, m_nBuffer, &m_srvNBuffer, MAX_PARTICLE_COUNT)
-		&& ShaderUtils::CreateUAVBuffer(device, result, m_nBuffer, &m_uavNBuffer, MAX_PARTICLE_COUNT)
+		&& ShaderUtils::CreateResourceBuffer(device, result, &m_nBuffer, sizeof(uint32_t), m_maxParticleCount)
+		&& ShaderUtils::CreateResourceViewBuffer(device, result, m_nBuffer, &m_srvNBuffer, m_maxParticleCount)
+		&& ShaderUtils::CreateUAVBuffer(device, result, m_nBuffer, &m_uavNBuffer, m_maxParticleCount)
 		// O Buffer
 		&& ShaderUtils::CreateResourceBuffer(device, result, &m_o1Buffer, sizeof(uint32_t), maxK)
 		&& ShaderUtils::CreateResourceViewBuffer(device, result, m_o1Buffer, &m_srvO1Buffer, maxK)
@@ -124,26 +126,26 @@ HRESULT CsSharedBuffer::InitCornerStoneShaderParameters(ID3D11Device* device)
 		&& ShaderUtils::CreateResourceViewBuffer(device, result, m_counterBuffer, &m_srvCounterBuffer, 3)
 		&& ShaderUtils::CreateUAVBuffer(device, result, m_counterBuffer, &m_uavCounterBuffer, 3)
 		//NK Buffer
-		&& ShaderUtils::CreateResourceBuffer(device, result, &m_inNkBuffer, sizeof(uint32_t), MAX_CAPACITY)
-		&& ShaderUtils::CreateResourceBuffer(device, result, &m_outNkBuffer, sizeof(uint32_t), MAX_CAPACITY)
-		&& ShaderUtils::CreateResourceViewBuffer(device, result, m_inNkBuffer, &m_srvNkBuffer, MAX_CAPACITY)
-		&& ShaderUtils::CreateUAVBuffer(device, result, m_outNkBuffer, &m_uavNkBuffer, MAX_CAPACITY)
+		&& ShaderUtils::CreateResourceBuffer(device, result, &m_inNkBuffer, sizeof(uint32_t), m_maxCapacity)
+		&& ShaderUtils::CreateResourceBuffer(device, result, &m_outNkBuffer, sizeof(uint32_t), m_maxCapacity)
+		&& ShaderUtils::CreateResourceViewBuffer(device, result, m_inNkBuffer, &m_srvNkBuffer, m_maxCapacity)
+		&& ShaderUtils::CreateUAVBuffer(device, result, m_outNkBuffer, &m_uavNkBuffer, m_maxCapacity)
 		//LO Buffer
 		&& ShaderUtils::CreateResourceBuffer(device, result, &m_loBuffer, sizeof(uint32_t), 12)
 		&& ShaderUtils::CreateResourceViewBuffer(device, result, m_loBuffer, &m_srvLoBuffer, 12)
 		&& ShaderUtils::CreateUAVBuffer(device, result, m_loBuffer, &m_uavLoBuffer, 12)
 		//CO Buffer
-		&& ShaderUtils::CreateResourceBuffer(device, result, &m_coBuffer, sizeof(uint32_t), MAX_CAPACITY)
-		&& ShaderUtils::CreateResourceViewBuffer(device, result, m_coBuffer, &m_srvCoBuffer, MAX_CAPACITY)
-		&& ShaderUtils::CreateUAVBuffer(device, result, m_coBuffer, &m_uavCoBuffer, MAX_CAPACITY)
+		&& ShaderUtils::CreateResourceBuffer(device, result, &m_coBuffer, sizeof(uint32_t), m_maxCapacity)
+		&& ShaderUtils::CreateResourceViewBuffer(device, result, m_coBuffer, &m_srvCoBuffer, m_maxCapacity)
+		&& ShaderUtils::CreateUAVBuffer(device, result, m_coBuffer, &m_uavCoBuffer, m_maxCapacity)
 		//LI Buffer
-		&& ShaderUtils::CreateResourceBuffer(device, result, &m_liBuffer, sizeof(uint32_t), MAX_CAPACITY)
-		&& ShaderUtils::CreateResourceViewBuffer(device, result, m_liBuffer, &m_srvLiBuffer, MAX_CAPACITY)
-		&& ShaderUtils::CreateUAVBuffer(device, result, m_liBuffer, &m_uavLiBuffer, MAX_CAPACITY)
+		&& ShaderUtils::CreateResourceBuffer(device, result, &m_liBuffer, sizeof(uint32_t), m_maxCapacity)
+		&& ShaderUtils::CreateResourceViewBuffer(device, result, m_liBuffer, &m_srvLiBuffer, m_maxCapacity)
+		&& ShaderUtils::CreateUAVBuffer(device, result, m_liBuffer, &m_uavLiBuffer, m_maxCapacity)
 		//LC Buffer
-		&& ShaderUtils::CreateResourceBuffer(device, result, &m_lcBuffer, sizeof(uint32_t), MAX_CAPACITY)
-		&& ShaderUtils::CreateResourceViewBuffer(device, result, m_lcBuffer, &m_srvLcBuffer, MAX_CAPACITY)
-		&& ShaderUtils::CreateUAVBuffer(device, result, m_lcBuffer, &m_uavLcBuffer, MAX_CAPACITY);
+		&& ShaderUtils::CreateResourceBuffer(device, result, &m_lcBuffer, sizeof(uint32_t), m_maxCapacity)
+		&& ShaderUtils::CreateResourceViewBuffer(device, result, m_lcBuffer, &m_srvLcBuffer, m_maxCapacity)
+		&& ShaderUtils::CreateUAVBuffer(device, result, m_lcBuffer, &m_uavLcBuffer, m_maxCapacity);
 
 	return result;
 }
@@ -154,25 +156,25 @@ HRESULT CsSharedBuffer::InitBarnesHutShaderParameters(ID3D11Device* device)
 
 	bool ok = ShaderUtils::CreateConstBuffer(device, result, &m_bhSettingsBuffer, sizeof(BhSettings))
 		//Center of Mass
-		&& ShaderUtils::CreateResourceBuffer(device, result, &m_centerMassBuffer, sizeof(XMFLOAT3), MAX_CAPACITY)
-		&& ShaderUtils::CreateResourceViewBuffer(device, result, m_centerMassBuffer, &m_srvCenterMassBuffer, MAX_CAPACITY)
-		&& ShaderUtils::CreateUAVBuffer(device, result, m_centerMassBuffer, &m_uavCenterMassBuffer, MAX_CAPACITY)
+		&& ShaderUtils::CreateResourceBuffer(device, result, &m_centerMassBuffer, sizeof(XMFLOAT3), m_maxCapacity)
+		&& ShaderUtils::CreateResourceViewBuffer(device, result, m_centerMassBuffer, &m_srvCenterMassBuffer, m_maxCapacity)
+		&& ShaderUtils::CreateUAVBuffer(device, result, m_centerMassBuffer, &m_uavCenterMassBuffer, m_maxCapacity)
 		//Combined Mass
-		&& ShaderUtils::CreateResourceBuffer(device, result, &m_combinedMassBuffer, sizeof(float), MAX_CAPACITY)
-		&& ShaderUtils::CreateResourceViewBuffer(device, result, m_combinedMassBuffer, &m_srvCombinedMassBuffer, MAX_CAPACITY)
-		&& ShaderUtils::CreateUAVBuffer(device, result, m_combinedMassBuffer, &m_uavCombinedMassBuffer, MAX_CAPACITY)
+		&& ShaderUtils::CreateResourceBuffer(device, result, &m_combinedMassBuffer, sizeof(float), m_maxCapacity)
+		&& ShaderUtils::CreateResourceViewBuffer(device, result, m_combinedMassBuffer, &m_srvCombinedMassBuffer, m_maxCapacity)
+		&& ShaderUtils::CreateUAVBuffer(device, result, m_combinedMassBuffer, &m_uavCombinedMassBuffer, m_maxCapacity)
 		//Force
-		&& ShaderUtils::CreateResourceBuffer(device, result, &m_forceBuffer, sizeof(XMFLOAT3), MAX_PARTICLE_COUNT)
-		&& ShaderUtils::CreateStagingBuffer(device, result, &m_outForceBuffer, sizeof(XMFLOAT3), MAX_PARTICLE_COUNT)
-		&& ShaderUtils::CreateUAVBuffer(device, result, m_forceBuffer, &m_uavForceBuffer, MAX_PARTICLE_COUNT)
+		&& ShaderUtils::CreateResourceBuffer(device, result, &m_forceBuffer, sizeof(XMFLOAT3), m_maxParticleCount)
+		&& ShaderUtils::CreateStagingBuffer(device, result, &m_outForceBuffer, sizeof(XMFLOAT3), m_maxParticleCount)
+		&& ShaderUtils::CreateUAVBuffer(device, result, m_forceBuffer, &m_uavForceBuffer, m_maxParticleCount)
 		//Cell width
-		&& ShaderUtils::CreateResourceBuffer(device, result, &m_cellWidthBuffer, sizeof(float), MAX_CAPACITY)
-		&& ShaderUtils::CreateResourceViewBuffer(device, result, m_cellWidthBuffer, &m_srvCellWidthBuffer, MAX_CAPACITY)
-		&& ShaderUtils::CreateUAVBuffer(device, result, m_cellWidthBuffer, &m_uavCellWidthBuffer, MAX_CAPACITY)
+		&& ShaderUtils::CreateResourceBuffer(device, result, &m_cellWidthBuffer, sizeof(float), m_maxCapacity)
+		&& ShaderUtils::CreateResourceViewBuffer(device, result, m_cellWidthBuffer, &m_srvCellWidthBuffer, m_maxCapacity)
+		&& ShaderUtils::CreateUAVBuffer(device, result, m_cellWidthBuffer, &m_uavCellWidthBuffer, m_maxCapacity)
 		//Cell center
-		&& ShaderUtils::CreateResourceBuffer(device, result, &m_cellCenterBuffer, sizeof(XMFLOAT3), MAX_CAPACITY)
-		&& ShaderUtils::CreateResourceViewBuffer(device, result, m_cellCenterBuffer, &m_srvCellCenterBuffer, MAX_CAPACITY)
-		&& ShaderUtils::CreateUAVBuffer(device, result, m_cellCenterBuffer, &m_uavCellCenterBuffer, MAX_CAPACITY);
+		&& ShaderUtils::CreateResourceBuffer(device, result, &m_cellCenterBuffer, sizeof(XMFLOAT3), m_maxCapacity)
+		&& ShaderUtils::CreateResourceViewBuffer(device, result, m_cellCenterBuffer, &m_srvCellCenterBuffer, m_maxCapacity)
+		&& ShaderUtils::CreateUAVBuffer(device, result, m_cellCenterBuffer, &m_uavCellCenterBuffer, m_maxCapacity);
 
 	return result;
 }
@@ -397,17 +399,17 @@ void CsSharedBuffer::SwapParticleBuffer()
 
 void CsSharedBuffer::RecordBufferSnapshot()
 {
-	RecordBufferSnapshot <uint32_t> (m_dUint32Buffer, m_outMortonCodeBuffer, "M", MAX_PARTICLE_COUNT);
-	RecordBufferSnapshot <uint32_t> (m_dUint32Buffer, m_outKBuffer, "K", MAX_CAPACITY);
-	RecordBufferSnapshot <uint32_t> (m_dUint32Buffer, m_nBuffer, "N", MAX_CAPACITY);
-	RecordBufferSnapshot <uint32_t> (m_dUint32Buffer, m_o1Buffer, "O1", MAX_CAPACITY);
-	RecordBufferSnapshot <uint32_t> (m_dUint32Buffer, m_o2Buffer, "O2", MAX_CAPACITY);
-	RecordBufferSnapshot <uint32_t> (m_dUint32Buffer, m_outNkBuffer, "NK", MAX_CAPACITY);
+	RecordBufferSnapshot <uint32_t> (m_dUint32Buffer, m_outMortonCodeBuffer, "M", m_maxParticleCount);
+	RecordBufferSnapshot <uint32_t> (m_dUint32Buffer, m_outKBuffer, "K", m_maxCapacity);
+	RecordBufferSnapshot <uint32_t> (m_dUint32Buffer, m_nBuffer, "N", m_maxCapacity);
+	RecordBufferSnapshot <uint32_t> (m_dUint32Buffer, m_o1Buffer, "O1", m_maxCapacity);
+	RecordBufferSnapshot <uint32_t> (m_dUint32Buffer, m_o2Buffer, "O2", m_maxCapacity);
+	RecordBufferSnapshot <uint32_t> (m_dUint32Buffer, m_outNkBuffer, "NK", m_maxCapacity);
 	RecordBufferSnapshot <uint32_t> (m_dUint32Buffer, m_loBuffer, "LO", 12);
-	RecordBufferSnapshot <uint32_t> (m_dUint32Buffer, m_coBuffer, "CO", MAX_CAPACITY);
-	RecordBufferSnapshot <uint32_t> (m_dUint32Buffer, m_liBuffer, "LI", MAX_CAPACITY);
-	RecordBufferSnapshot <uint32_t> (m_dUint32Buffer, m_lcBuffer, "LC", MAX_CAPACITY);
-	RecordBufferSnapshot <float> (m_dFloatBuffer, m_combinedMassBuffer, "CM", MAX_CAPACITY);
+	RecordBufferSnapshot <uint32_t> (m_dUint32Buffer, m_coBuffer, "CO", m_maxCapacity);
+	RecordBufferSnapshot <uint32_t> (m_dUint32Buffer, m_liBuffer, "LI", m_maxCapacity);
+	RecordBufferSnapshot <uint32_t> (m_dUint32Buffer, m_lcBuffer, "LC", m_maxCapacity);
+	RecordBufferSnapshot <float> (m_dFloatBuffer, m_combinedMassBuffer, "CM", m_maxCapacity);
 	RecordBufferSnapshot <uint32_t> (m_dUint32Buffer, m_counterBuffer, "n", 2);
 
 	//m_deviceContext->CopyResource (dest, source);

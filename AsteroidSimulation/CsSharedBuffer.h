@@ -11,12 +11,13 @@ struct BhSettings
 	float theta;
 };
 
-
 class CsSharedBuffer
 {
 //Variables
 private:
 	ID3D11DeviceContext* m_deviceContext{ nullptr };
+	uint32_t m_maxParticleCount = 0;
+	uint32_t m_maxCapacity = 0;
 
 public:
 	//Debug buffer
@@ -139,7 +140,7 @@ public:
 
 //Methods
 public:
-	CsSharedBuffer();
+	CsSharedBuffer(uint32_t maxParticleCount);
 
 	bool InitShaderParameters();
 	void ReleaseShaderParameters();
@@ -149,6 +150,8 @@ public:
 	void SwapParticleBuffer ();
 
 	void RecordBufferSnapshot();
+
+	inline uint32_t MaxCapacity() const {return m_maxCapacity;}
 
 private:
 	HRESULT InitDebugShaderParameters(ID3D11Device* device);

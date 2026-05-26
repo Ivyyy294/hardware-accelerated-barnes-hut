@@ -2,9 +2,25 @@
 #include "ForceGeneratorBarnesHutCS.h"
 
 ForceGeneratorBarnesHutCS::ForceGeneratorBarnesHutCS()
-	: m_deviceContext (D3D::Instance().GetDeviceContext())
+	: ForceGeneratorBase()
+	, m_deviceContext (D3D::Instance().GetDeviceContext())
 	, m_nCrit (Session::Me().m_variables.nCrit)
+	, m_buffer (m_maxParticleCount)
 {
+	m_cellWidth = new float[m_maxParticleCount];
+	m_cellCenter = new XMFLOAT3 [m_maxParticleCount];
+	m_cellCom = new XMFLOAT3 [m_maxParticleCount];
+	m_cellCo = new uint32_t [m_maxParticleCount];
+	m_cellLc = new uint32_t [m_maxParticleCount];
+}
+
+ForceGeneratorBarnesHutCS::~ForceGeneratorBarnesHutCS()
+{
+	delete[] m_cellWidth;
+	delete[] m_cellCenter;
+	delete[] m_cellCom;
+	delete[] m_cellCo;
+	delete[] m_cellLc;
 }
 
 void ForceGeneratorBarnesHutCS::Start()
@@ -89,7 +105,7 @@ void ForceGeneratorBarnesHutCS::SetShaderParameter()
 
 	m_maxCoord = 0.f;
 
-	for (int i = 0; i < m_objects.size() && i < MAX_PARTICLE_COUNT; ++i)
+	for (int i = 0; i < m_objects.size(); ++i)
 	{
 		Vector3 pos = m_objects[i]->GetTransform()->GetPosition();
 		positionPtr[i].x = pos.x;
@@ -170,10 +186,11 @@ void ForceGeneratorBarnesHutCS::PreCalculateForcesInternal()
 	if (Gizmo::Draw)
 		CopyCellData();
 
-	RecordExecutionTime();
-
 	if (Session::Me().m_logDebugInfo)
+	{
+		RecordExecutionTime();
 		m_buffer.RecordBufferSnapshot();
+	}
 }
 
 void ForceGeneratorBarnesHutCS::CallculateMortonKeys(uint32_t elementCount)
@@ -237,9 +254,12 @@ void ForceGeneratorBarnesHutCS::BuildOctree(uint32_t elementCount)
 	m_deviceContext->CopyResource(m_buffer.m_inNkBuffer, m_buffer.m_outNkBuffer);
 
 	//record sort time before sorting nk
-	m_sortTimeKeyMs = m_csRadixSort_1.GetExecutionTimeMs()
-	+ m_csRadixSort_2.GetExecutionTimeMs()
-	+ m_csRadixSort_3.GetExecutionTimeMs();
+	if (Session::Me().m_logDebugInfo)
+	{
+		m_sortTimeKeyMs = m_csRadixSort_1.GetExecutionTimeMs()
+		+ m_csRadixSort_2.GetExecutionTimeMs()
+		+ m_csRadixSort_3.GetExecutionTimeMs();
+	}
 
 	//Sort NK
 	uint32_t nCount = m_counterBuffer[0] + m_counterBuffer[1];
@@ -301,8 +321,8 @@ void ForceGeneratorBarnesHutCS::CopyForceData()
 	if (SUCCEEDED(hr))
 	{
 		XMFLOAT3* dataPtr = (XMFLOAT3*)mappedResource.pData;
-		XMFLOAT3 test = dataPtr[MAX_PARTICLE_COUNT-1];
-		memcpy(m_forceBuffer, dataPtr, sizeof(XMFLOAT3) * (MAX_PARTICLE_COUNT));
+		XMFLOAT3 test = dataPtr[m_maxParticleCount-1];
+		memcpy(m_forceBuffer, dataPtr, sizeof(XMFLOAT3) * (m_maxParticleCount));
 		m_deviceContext->Unmap(m_buffer.m_outForceBuffer, 0);
 	}
 }
@@ -329,10 +349,12 @@ void ForceGeneratorBarnesHutCS::CopyCellData()
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
 	HRESULT hr = m_deviceContext->Map(m_buffer.m_dFloatBuffer, 0, D3D11_MAP_READ, 0, &mappedResource);
 
+	const uint32_t maxCapacity = m_buffer.MaxCapacity();
+
 	if (SUCCEEDED(hr))
 	{
 		float* dataPtr = (float*)mappedResource.pData;
-		memcpy(m_cellWidth, dataPtr, sizeof(float) * MAX_CAPACITY);
+		memcpy(m_cellWidth, dataPtr, sizeof(float) * maxCapacity);
 		m_deviceContext->Unmap(m_buffer.m_dFloatBuffer, 0);
 	}
 
@@ -345,7 +367,7 @@ void ForceGeneratorBarnesHutCS::CopyCellData()
 	if (SUCCEEDED(hr))
 	{
 		XMFLOAT3* dataPtr = (XMFLOAT3*)mappedResource.pData;
-		memcpy(m_cellCenter, dataPtr, sizeof(XMFLOAT3) * MAX_CAPACITY);
+		memcpy(m_cellCenter, dataPtr, sizeof(XMFLOAT3) * maxCapacity);
 		m_deviceContext->Unmap(m_buffer.m_dFloat3Buffer, 0);
 	}
 
@@ -358,7 +380,7 @@ void ForceGeneratorBarnesHutCS::CopyCellData()
 	if (SUCCEEDED(hr))
 	{
 		XMFLOAT3* dataPtr = (XMFLOAT3*)mappedResource.pData;
-		memcpy(m_cellCom, dataPtr, sizeof(XMFLOAT3) * MAX_CAPACITY);
+		memcpy(m_cellCom, dataPtr, sizeof(XMFLOAT3) * maxCapacity);
 		m_deviceContext->Unmap(m_buffer.m_dFloat3Buffer, 0);
 	}
 
@@ -371,7 +393,7 @@ void ForceGeneratorBarnesHutCS::CopyCellData()
 	if (SUCCEEDED(hr))
 	{
 		uint32_t* dataPtr = (uint32_t*)mappedResource.pData;
-		memcpy(m_cellCo, dataPtr, sizeof(uint32_t) * MAX_CAPACITY);
+		memcpy(m_cellCo, dataPtr, sizeof(uint32_t) * maxCapacity);
 		m_deviceContext->Unmap(m_buffer.m_dUint32Buffer, 0);
 	}
 
@@ -384,7 +406,7 @@ void ForceGeneratorBarnesHutCS::CopyCellData()
 	if (SUCCEEDED(hr))
 	{
 		uint32_t* dataPtr = (uint32_t*)mappedResource.pData;
-		memcpy(m_cellLc, dataPtr, sizeof(uint32_t) * MAX_CAPACITY);
+		memcpy(m_cellLc, dataPtr, sizeof(uint32_t) * maxCapacity);
 		m_deviceContext->Unmap(m_buffer.m_dUint32Buffer, 0);
 	}
 }

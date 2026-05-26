@@ -10,11 +10,16 @@ void ForceGeneratorBarnesHut::PreCalculateForcesInternal()
 {
 	BuildTree();
 
-	for (size_t i = 0; i < m_objects.size(); ++i)
-	{
-		Vector3 force = CalculateForces(m_objects[i]);
-		m_forceBuffer[i] = XMFLOAT3 (force.x, force.y, force.z);
-	}
+	const size_t size = 4;
+	std::future<void>* tList = new std::future<void>[size];
+
+	for (size_t i = 0; i < size; ++i)
+		tList[i] = std::async(std::launch::async, &ForceGeneratorBarnesHut::PreCalculateForcesChunked, this, i, size);
+
+	for (int i = 0; i < (int)size; ++i)
+		tList[i].wait();
+
+	delete[] tList;
 }
 
 Vector3 ForceGeneratorBarnesHut::CalculateForces(PhysicObject* physicObj)
@@ -59,6 +64,15 @@ Vector3 ForceGeneratorBarnesHut::CalculateForces(PhysicObject* physicObj)
 	}
 
 	return forceSum;
+}
+
+void ForceGeneratorBarnesHut::PreCalculateForcesChunked(const size_t startIndex, const size_t stride)
+{
+	for (size_t i = startIndex; i < m_objects.size(); i +=stride)
+	{
+		Vector3 force = CalculateForces(m_objects[i]);
+		m_forceBuffer[i] = XMFLOAT3(force.x, force.y, force.z);
+	}
 }
 
 void ForceGeneratorBarnesHut::BuildTree()
