@@ -15,6 +15,8 @@ public:
 	SessionFile m_shaderTimeFile;
 	SessionFile m_frameTimeFile;
 
+	bool m_logDebugInfo = false;
+
 //Methods
 private:
 	Session();

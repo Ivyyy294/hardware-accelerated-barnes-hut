@@ -57,7 +57,6 @@ private:
 	CsBarnesHut_CF m_csBarnesHut_CF;
 
 	float m_maxCoord = 0.f;
-	bool m_dumpMemmory = false;
 	uint32_t m_counterBuffer[3] = {1,0,1};
 
 	float m_cellWidth [MAX_CAPACITY];
@@ -72,7 +71,6 @@ public:
 
 	void Start() override;
 	void Exit() override;
-	void Update() override;
 
 	void OnDrawGizmo() override;
 

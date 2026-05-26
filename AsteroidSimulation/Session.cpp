@@ -9,6 +9,9 @@ Session::Session()
 	, m_shaderTimeFile("shader.csv")
 	, m_frameTimeFile("frameTime.csv")
 {
+#ifdef DEBUG
+	m_logDebugInfo = true;
+#endif
 }
 
 Session& Session::Me()

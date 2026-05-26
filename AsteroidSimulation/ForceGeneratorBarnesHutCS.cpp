@@ -131,12 +131,6 @@ void ForceGeneratorBarnesHutCS::Exit()
 	m_csCornerStone_F.ShutdownShader();
 }
 
-void ForceGeneratorBarnesHutCS::Update()
-{
-	if (Input::KeyDown(Key::KEY_P))
-		m_dumpMemmory = true;
-}
-
 void ForceGeneratorBarnesHutCS::OnDrawGizmo()
 {
 	uint32_t count = m_counterBuffer[0] + m_counterBuffer[1];
@@ -155,7 +149,6 @@ void ForceGeneratorBarnesHutCS::OnDrawGizmo()
 
 			Gizmo::AddLine (center, com, Color::Red, Transform::Space::WORLD);
 		}
-
 	}
 }
 
@@ -177,11 +170,8 @@ void ForceGeneratorBarnesHutCS::PreCalculateForcesInternal()
 
 	RecordExecutionTime();
 
-	if (m_dumpMemmory)
-	{
+	if (Session::Me().m_logDebugInfo)
 		m_buffer.RecordBufferSnapshot();
-		m_dumpMemmory = false;
-	}
 }
 
 void ForceGeneratorBarnesHutCS::CallculateMortonKeys(uint32_t elementCount)

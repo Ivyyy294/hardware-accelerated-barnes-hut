@@ -5,6 +5,9 @@
 
 void ForceGeneratorBase::FixedUpdate()
 {
+	if (!Session::Me().m_logDebugInfo)
+		return;
+
 	string posData;
 	string forceData;
 

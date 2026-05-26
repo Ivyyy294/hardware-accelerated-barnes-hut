@@ -3,6 +3,7 @@
 #include <IvyyyTime.h>
 #include "IvyyyDebug.h"
 #include <IvyyyEngine.h>
+#include "Session.h"
 
 void DebugInfo::Start ()
 {
@@ -23,6 +24,9 @@ void DebugInfo::Update ()
 
 	if (Input::KeyDown(Key::KEY_ESC))
 		IvyyyEngine::Me()->Exit();
+
+	if (Input::KeyDown(Key::KEY_P))
+		Session::Me().m_logDebugInfo = true;
 }
 
 void DebugInfo::UpdateFps()
