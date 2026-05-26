@@ -16,6 +16,8 @@ public:
 //Variables
 public:
 	ForceGeneratorMethod method;
+	float theta = 0.8f;
+	int nCrit = 64;
 	int numAsteroids;
 	float ugc;
 	float fixedDeltaTime;

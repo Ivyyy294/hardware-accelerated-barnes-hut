@@ -65,6 +65,8 @@ private:
 	uint32_t m_cellCo [MAX_CAPACITY];
 	uint32_t m_cellLc [MAX_CAPACITY];
 
+	float m_sortTimeKeyMs = 0.f;
+
 //Methods
 public:
 	ForceGeneratorBarnesHutCS();

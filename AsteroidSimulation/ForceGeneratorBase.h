@@ -13,6 +13,8 @@ protected:
 
 //Methods
 public:
+	ForceGeneratorBase();
+
 	inline void AddForceSource(PhysicObject* obj) { m_objects.push_back(obj); };
 	void ApplyForceForObject(PhysicObject* physicObj) const override final;
 	void FixedUpdate() override;

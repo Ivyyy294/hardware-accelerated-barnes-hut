@@ -3,6 +3,7 @@
 
 ForceGeneratorBarnesHutCS::ForceGeneratorBarnesHutCS()
 	: m_deviceContext (D3D::Instance().GetDeviceContext())
+	, m_nCrit (Session::Me().m_variables.nCrit)
 {
 }
 
@@ -161,6 +162,7 @@ void ForceGeneratorBarnesHutCS::PreCalculateForcesInternal()
 	CallculateMortonKeys(capacity);
 	DispatchRadixSort (capacity);
 	BuildOctree (capacity);
+
 	CallculateForces (capacity);
 
 	CopyForceData();

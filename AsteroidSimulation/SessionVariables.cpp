@@ -41,6 +41,22 @@ bool SessionVariablesLoadFromFile(SessionVariables& variables, const std::string
 		if (std::getline(file, buffer))
 		{
 			GetValueFromString(buffer, valBuffer1);
+			variables.theta = stof(valBuffer1);
+		}
+		else
+			return false;
+
+		if (std::getline(file, buffer))
+		{
+			GetValueFromString(buffer, valBuffer1);
+			variables.nCrit = stoi(valBuffer1);
+		}
+		else
+			return false;
+
+		if (std::getline(file, buffer))
+		{
+			GetValueFromString(buffer, valBuffer1);
 			variables.numAsteroids = stoi(valBuffer1);
 		}
 		else
@@ -114,6 +130,8 @@ bool SessionVariablesLoadFromFile(SessionVariables& variables, const std::string
 void SessionVariables::Log()
 {
 	Session::Me().m_variablesFile.WriteLine("method;" + std::to_string(method));
+	Session::Me().m_variablesFile.WriteLine("theta;" + std::to_string(theta));
+	Session::Me().m_variablesFile.WriteLine("nCrit;" + std::to_string(nCrit));
 	Session::Me().m_variablesFile.WriteLine("numAsteroids;" + std::to_string(numAsteroids));
 	Session::Me().m_variablesFile.WriteLine("ugc;" + std::to_string(ugc));
 	Session::Me().m_variablesFile.WriteLine("fixedDeltaTime;" + std::to_string(fixedDeltaTime));

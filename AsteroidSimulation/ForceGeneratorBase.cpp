@@ -26,6 +26,11 @@ void ForceGeneratorBase::FixedUpdate()
 	Session::Me().m_forceFile.WriteLine(forceData);
 }
 
+ForceGeneratorBase::ForceGeneratorBase()
+	: m_theta (Session::Me().m_variables.theta)
+{
+}
+
 void ForceGeneratorBase::ApplyForceForObject(PhysicObject* physicObj) const
 {
 	if (physicObj->IsStatic())
