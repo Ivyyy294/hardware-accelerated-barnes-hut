@@ -372,6 +372,7 @@
     <None Include="CSUtils.hlsli" />
     <None Include="CSDoubleBuffer.hlsli" />
     <None Include="CSZOrder.hlsli" />
+    <None Include="variables.csv" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

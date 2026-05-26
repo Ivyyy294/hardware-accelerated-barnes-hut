@@ -24,6 +24,9 @@
     <Filter Include="04_HLSL">
       <UniqueIdentifier>{91090326-f5e5-4ee7-81ca-97e77c56a93f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="06_Variables">
+      <UniqueIdentifier>{086fd245-ec9e-480c-8d48-3f232ec4b26f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -337,6 +340,9 @@
     </None>
     <None Include="CSZOrder.hlsli">
       <Filter>04_HLSL</Filter>
+    </None>
+    <None Include="variables.csv">
+      <Filter>06_Variables</Filter>
     </None>
   </ItemGroup>
 </Project>

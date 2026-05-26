@@ -50,13 +50,14 @@ float3 DecodeMortonKey(uint key, uint level, float3 boundsMin, float3 boundsMax)
     
     const float3 boundsDim = boundsMax - boundsMin;
     
-    float cOffset = 1.f / (1 << (level + 1));
     float3 lc = 0.f;
     lc.x = Compact1By2(prefix);
     lc.y = Compact1By2(prefix >> 1);
     lc.z = Compact1By2(prefix >> 2);
     
     lc /= (1 << level);
+    
+    float cOffset = 1.f / (1 << (level + 1));
     lc += cOffset;
     
     float3 wc = boundsMin + (lc * boundsDim);
