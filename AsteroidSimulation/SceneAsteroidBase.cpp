@@ -48,7 +48,7 @@ void SceneAsteroidBase::Init()
 	OnOrbitalBodySpawned (planet);
 
 	//Add Asteroids
-	SpawnAsteroids (m_sVar.numAsteroids, m_sVar.distRange, m_sVar.eRange, Vector2(1.f, 15.f), planet);
+	SpawnAsteroids (m_sVar.numAsteroids, m_sVar.distRange, m_sVar.eRange, m_sVar.iRange, planet);
 
 	Session::Me().m_variables.Log();
 	AdjustMainLoop();
