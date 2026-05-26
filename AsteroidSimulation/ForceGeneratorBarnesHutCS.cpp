@@ -7,11 +7,12 @@ ForceGeneratorBarnesHutCS::ForceGeneratorBarnesHutCS()
 	, m_nCrit (Session::Me().m_variables.nCrit)
 	, m_buffer (m_maxParticleCount)
 {
-	m_cellWidth = new float[m_maxParticleCount];
-	m_cellCenter = new XMFLOAT3 [m_maxParticleCount];
-	m_cellCom = new XMFLOAT3 [m_maxParticleCount];
-	m_cellCo = new uint32_t [m_maxParticleCount];
-	m_cellLc = new uint32_t [m_maxParticleCount];
+	const uint32_t maxCapacity = m_buffer.MaxCapacity();
+	m_cellWidth = new float[maxCapacity];
+	m_cellCenter = new XMFLOAT3 [maxCapacity];
+	m_cellCom = new XMFLOAT3 [maxCapacity];
+	m_cellCo = new uint32_t [maxCapacity];
+	m_cellLc = new uint32_t [maxCapacity];
 }
 
 ForceGeneratorBarnesHutCS::~ForceGeneratorBarnesHutCS()
