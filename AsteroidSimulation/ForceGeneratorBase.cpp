@@ -1,6 +1,6 @@
 #include "pch.h"
 #include "ForceGeneratorBase.h"
-#include "SessionLoggerManager.h"
+#include "Session.h"
 #include "FrameTimeRecorder.h"
 
 void ForceGeneratorBase::FixedUpdate()
@@ -19,8 +19,8 @@ void ForceGeneratorBase::FixedUpdate()
 		forceData += std::to_string(force.x) + ";" + std::to_string(force.y) + ";" + std::to_string(force.z) + ";";
 	}
 
-	SessionLoggerManager::Me()->m_position.WriteLine(posData);
-	SessionLoggerManager::Me()->m_force.WriteLine(forceData);
+	Session::Me().m_positionFile.WriteLine(posData);
+	Session::Me().m_forceFile.WriteLine(forceData);
 }
 
 void ForceGeneratorBase::ApplyForceForObject(PhysicObject* physicObj) const

@@ -425,10 +425,10 @@ void CsSharedBuffer::RecordBufferSnapshot()
 		memDump += std::to_string(data->ugc) + ";";
 		memDump += std::to_string(data->theta) + ";";
 
-		SessionLoggerManager::Me()->m_gpuMemDump.WriteLine(memDump);
+		Session::Me().m_gpuMemDumpFile.WriteLine(memDump);
 
 		m_deviceContext->Unmap(m_bhSettingsBuffer, 0);
 	}
 
-	SessionLoggerManager::Me()->m_gpuMemDump.WriteLine("");
+	Session::Me().m_gpuMemDumpFile.WriteLine("");
 }

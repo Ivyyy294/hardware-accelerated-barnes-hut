@@ -1,12 +1,12 @@
 #include "pch.h"
 #include "FrameTimeRecorder.h"
-#include "SessionLoggerManager.h"
+#include "Session.h"
 
 FrameTimeRecorder* FrameTimeRecorder::me = nullptr;
 
 void FrameTimeRecorder::Start()
 {
-	SessionLoggerManager::Me()->m_frameTime.WriteLine("frameTime;forceCalcTime");
+	Session::Me().m_frameTimeFile.WriteLine("frameTime;forceCalcTime");
 }
 
 void FrameTimeRecorder::OnEnable()
@@ -19,6 +19,6 @@ void FrameTimeRecorder::OnEnable()
 
 void FrameTimeRecorder::LogFrameTime()
 {
-	SessionLoggerManager::Me()->m_frameTime.WriteLine(std::to_string(Time::UnscaledDeltaTime() * 1000.f) + ";" + std::to_string(m_forceCalcTime));
+	Session::Me().m_frameTimeFile.WriteLine(std::to_string(Time::UnscaledDeltaTime() * 1000.f) + ";" + std::to_string(m_forceCalcTime));
 	m_forceCalcTime = 0.f;
 }

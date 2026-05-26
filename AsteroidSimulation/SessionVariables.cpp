@@ -1,6 +1,6 @@
 #include "pch.h"
 #include "SessionVariables.h"
-#include "SessionLoggerManager.h"
+#include "Session.h"
 
 bool SessionVariablesLoadFromFile(SessionVariables& variables, const std::string filePath)
 {
@@ -113,14 +113,13 @@ bool SessionVariablesLoadFromFile(SessionVariables& variables, const std::string
 
 void SessionVariables::Log()
 {
-	SessionLoggerManager* slm = SessionLoggerManager::Me();
-	slm->m_variables.WriteLine("method;" + std::to_string(method));
-	slm->m_variables.WriteLine("numAsteroids;" + std::to_string(numAsteroids));
-	slm->m_variables.WriteLine("ugc;" + std::to_string(ugc));
-	slm->m_variables.WriteLine("fixedDeltaTime;" + std::to_string(fixedDeltaTime));
-	slm->m_variables.WriteLine("distRange;" + std::to_string(distRange.x) + ";" + std::to_string(distRange.y));
-	slm->m_variables.WriteLine("eRange;" + std::to_string(eRange.x) + ";" + std::to_string(eRange.y));
-	slm->m_variables.WriteLine("iRange;" + std::to_string(iRange.x) + ";" + std::to_string(iRange.y));
-	slm->m_variables.WriteLine("maxFixedFrames;" + std::to_string(maxFixedFrames));
-	slm->m_variables.WriteLine("maxDurationSec;" + std::to_string(maxDurationSec));
+	Session::Me().m_variablesFile.WriteLine("method;" + std::to_string(method));
+	Session::Me().m_variablesFile.WriteLine("numAsteroids;" + std::to_string(numAsteroids));
+	Session::Me().m_variablesFile.WriteLine("ugc;" + std::to_string(ugc));
+	Session::Me().m_variablesFile.WriteLine("fixedDeltaTime;" + std::to_string(fixedDeltaTime));
+	Session::Me().m_variablesFile.WriteLine("distRange;" + std::to_string(distRange.x) + ";" + std::to_string(distRange.y));
+	Session::Me().m_variablesFile.WriteLine("eRange;" + std::to_string(eRange.x) + ";" + std::to_string(eRange.y));
+	Session::Me().m_variablesFile.WriteLine("iRange;" + std::to_string(iRange.x) + ";" + std::to_string(iRange.y));
+	Session::Me().m_variablesFile.WriteLine("maxFixedFrames;" + std::to_string(maxFixedFrames));
+	Session::Me().m_variablesFile.WriteLine("maxDurationSec;" + std::to_string(maxDurationSec));
 }

@@ -10,7 +10,7 @@
 #include "CameraMovement.h"
 #include "Planet.h"
 #include "SessionDurationController.h"
-#include "SessionLoggerManager.h"
+#include "Session.h"
 #include "FrameTimeRecorder.h"
 #include "Session.h"
 
@@ -33,7 +33,6 @@ void SceneAsteroidBase::Init()
 	camera->AddComponent<CameraMovement>();
 	
 	//Add Recording
-	camera->AddComponent<SessionLoggerManager>();
 	camera->AddComponent<FrameTimeRecorder>();
 
 	//Add duration controller

@@ -60,7 +60,7 @@ void ForceGeneratorBarnesHutCS::Start()
 	m_csBarnesHut_CF.Initialize();
 	m_csBarnesHut_CF.m_sharedBuffer = &m_buffer;
 
-	SessionLoggerManager::Me()->m_shaderTime.WriteLine("CSMortonCodes;CSCornerStone_F;CSCornerStone_G1;CSCornerStone_G2;CSCornerStone_G3;CSCornerStone_NK;CSCornerStone_LO;CSCornerStone_CO;CSBarnesHut_MP;CSBarnesHut_CF");
+	Session::Me().m_shaderTimeFile.WriteLine("CSMortonCodes;CSCornerStone_F;CSCornerStone_G1;CSCornerStone_G2;CSCornerStone_G3;CSCornerStone_NK;CSCornerStone_LO;CSCornerStone_CO;CSBarnesHut_MP;CSBarnesHut_CF");
 }
 
 
@@ -405,6 +405,6 @@ void ForceGeneratorBarnesHutCS::RecordExecutionTime()
 		+ ";" + std::to_string(m_csBarnesHut_MP.GetExecutionTimeMs())
 		+ ";" + std::to_string(m_csBarnesHut_CF.GetExecutionTimeMs());
 
-	SessionLoggerManager::Me()->m_shaderTime.WriteLine(val);
+	Session::Me().m_shaderTimeFile.WriteLine(val);
 }
 

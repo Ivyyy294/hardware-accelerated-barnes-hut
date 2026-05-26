@@ -134,9 +134,6 @@
     <ClCompile Include="SessionFile.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="SessionLoggerManager.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="FrameTimeRecorder.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -260,9 +257,6 @@
       <Filter>01_GameObjects</Filter>
     </ClInclude>
     <ClInclude Include="SessionDurationController.h">
-      <Filter>02_Components</Filter>
-    </ClInclude>
-    <ClInclude Include="SessionLoggerManager.h">
       <Filter>02_Components</Filter>
     </ClInclude>
     <ClInclude Include="ForceGeneratorBarnesHut.h">

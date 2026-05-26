@@ -174,7 +174,6 @@
     <ClCompile Include="SessionDurationController.cpp" />
     <ClCompile Include="SessionFile.cpp" />
     <ClCompile Include="SessionLogger.cpp" />
-    <ClCompile Include="SessionLoggerManager.cpp" />
     <ClCompile Include="SessionVariables.cpp" />
     <ClCompile Include="ShaderUtils.cpp" />
     <ClCompile Include="SpatialOctree.cpp" />
@@ -218,7 +217,6 @@
     <ClInclude Include="SessionDurationController.h" />
     <ClInclude Include="SessionFile.h" />
     <ClInclude Include="SessionLogger.h" />
-    <ClInclude Include="SessionLoggerManager.h" />
     <ClInclude Include="SessionVariables.h" />
     <ClInclude Include="ShaderUtils.h" />
     <ClInclude Include="SpatialOctree.h" />

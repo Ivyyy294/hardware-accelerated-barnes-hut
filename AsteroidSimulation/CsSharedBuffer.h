@@ -1,7 +1,7 @@
 #pragma once
 
 #include "CSSettings.h"
-#include "SessionLoggerManager.h"
+#include "Session.h"
 
 struct BhSettings
 {
@@ -183,7 +183,7 @@ void CsSharedBuffer::RecordBufferSnapshot(ID3D11Buffer* dest, ID3D11Buffer* sour
 		for (size_t i = 0; i < count; ++i)
 			memDump += std::to_string(data[i]) + ";";
 
-		SessionLoggerManager::Me()->m_gpuMemDump.WriteLine (memDump);
+		Session::Me().m_gpuMemDumpFile.WriteLine (memDump);
 
 		m_deviceContext->Unmap(dest, 0);
 	}
