@@ -9,15 +9,20 @@
       <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
       <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
     </Filter>
-    <Filter Include="Resource Files">
-      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
-      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
-    </Filter>
-    <Filter Include="Shader">
-      <UniqueIdentifier>{91090326-f5e5-4ee7-81ca-97e77c56a93f}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Scenes">
+    <Filter Include="00_Scenes">
       <UniqueIdentifier>{d81f9371-13b9-4887-b9ab-b88e3416edcf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="01_GameObjects">
+      <UniqueIdentifier>{08539cf1-fd99-4e33-8968-e6bbe87e0c8c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="02_Components">
+      <UniqueIdentifier>{3aadf154-bd7a-498f-9954-12617795f9df}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="03_ComputeShader">
+      <UniqueIdentifier>{17c3c7d0-4a56-4bd4-9e2b-e3fa75dfdcd0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="04_HLSL">
+      <UniqueIdentifier>{91090326-f5e5-4ee7-81ca-97e77c56a93f}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -58,9 +63,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="SceneBarnesHut.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="BarnesHutCS.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ForceGeneratorBarnesHutCS.cpp">
@@ -144,60 +146,18 @@
     <ClCompile Include="ForceGeneratorDirect.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="SessionVariables.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Asteroid.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="pch.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ColorMaterial.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Planet.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="DebugInfo.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="DebugInfoUi.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="SpatialOctree.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ForceGeneratorBarnesHut.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="CameraMovement.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="SceneAsteroidBase.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="BarnesHutCS.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ForceGeneratorBarnesHutCS.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ForceGeneratorBase.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="CsMortonCodes.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="CsRadixSort_1.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="CsSettings.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="CsRadixSort_2.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="CsRadixSort_3.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ShaderUtils.h">
@@ -209,47 +169,14 @@
     <ClInclude Include="KeplerOrbit.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="CsCornerStone_F.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="CsSharedBuffer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="CsCornerStone_G1.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="CsCornerStone_G2.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="CsCornerStone_G3.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="CsCornerStone_NK.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="CsRadixSort_4.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="CsCornerStone_LO.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="CsCornerStone_CO.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="CsBarnesHut_MP.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="CsBarnesHut_CF.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="SceneDirectIntegration.h">
-      <Filter>Scenes</Filter>
+      <Filter>00_Scenes</Filter>
     </ClInclude>
     <ClInclude Include="SceneBarnesHutCS.h">
-      <Filter>Scenes</Filter>
+      <Filter>00_Scenes</Filter>
     </ClInclude>
     <ClInclude Include="SceneBarnesHut.h">
-      <Filter>Scenes</Filter>
+      <Filter>00_Scenes</Filter>
     </ClInclude>
     <ClInclude Include="SessionLogger.h">
       <Filter>Header Files</Filter>
@@ -257,87 +184,159 @@
     <ClInclude Include="SessionFile.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="SessionLoggerManager.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="SessionVariables.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="SceneAsteroidBase.h">
+      <Filter>00_Scenes</Filter>
+    </ClInclude>
+    <ClInclude Include="CsBarnesHut_CF.h">
+      <Filter>03_ComputeShader</Filter>
+    </ClInclude>
+    <ClInclude Include="CsBarnesHut_MP.h">
+      <Filter>03_ComputeShader</Filter>
+    </ClInclude>
+    <ClInclude Include="CsCornerStone_CO.h">
+      <Filter>03_ComputeShader</Filter>
+    </ClInclude>
+    <ClInclude Include="CsCornerStone_F.h">
+      <Filter>03_ComputeShader</Filter>
+    </ClInclude>
+    <ClInclude Include="CsCornerStone_G1.h">
+      <Filter>03_ComputeShader</Filter>
+    </ClInclude>
+    <ClInclude Include="CsCornerStone_G2.h">
+      <Filter>03_ComputeShader</Filter>
+    </ClInclude>
+    <ClInclude Include="CsCornerStone_G3.h">
+      <Filter>03_ComputeShader</Filter>
+    </ClInclude>
+    <ClInclude Include="CsCornerStone_LO.h">
+      <Filter>03_ComputeShader</Filter>
+    </ClInclude>
+    <ClInclude Include="CsCornerStone_NK.h">
+      <Filter>03_ComputeShader</Filter>
+    </ClInclude>
+    <ClInclude Include="CsMortonCodes.h">
+      <Filter>03_ComputeShader</Filter>
+    </ClInclude>
+    <ClInclude Include="CsRadixSort_1.h">
+      <Filter>03_ComputeShader</Filter>
+    </ClInclude>
+    <ClInclude Include="CsRadixSort_2.h">
+      <Filter>03_ComputeShader</Filter>
+    </ClInclude>
+    <ClInclude Include="CsRadixSort_3.h">
+      <Filter>03_ComputeShader</Filter>
+    </ClInclude>
+    <ClInclude Include="CsRadixSort_4.h">
+      <Filter>03_ComputeShader</Filter>
+    </ClInclude>
+    <ClInclude Include="CsSettings.h">
+      <Filter>03_ComputeShader</Filter>
+    </ClInclude>
+    <ClInclude Include="CsSharedBuffer.h">
+      <Filter>03_ComputeShader</Filter>
+    </ClInclude>
+    <ClInclude Include="Asteroid.h">
+      <Filter>01_GameObjects</Filter>
+    </ClInclude>
+    <ClInclude Include="Planet.h">
+      <Filter>01_GameObjects</Filter>
+    </ClInclude>
     <ClInclude Include="FrameTimeRecorder.h">
-      <Filter>Header Files</Filter>
+      <Filter>02_Components</Filter>
+    </ClInclude>
+    <ClInclude Include="CameraMovement.h">
+      <Filter>02_Components</Filter>
+    </ClInclude>
+    <ClInclude Include="DebugInfo.h">
+      <Filter>02_Components</Filter>
+    </ClInclude>
+    <ClInclude Include="DebugInfoUi.h">
+      <Filter>01_GameObjects</Filter>
     </ClInclude>
     <ClInclude Include="SessionDurationController.h">
-      <Filter>Header Files</Filter>
+      <Filter>02_Components</Filter>
+    </ClInclude>
+    <ClInclude Include="SessionLoggerManager.h">
+      <Filter>02_Components</Filter>
+    </ClInclude>
+    <ClInclude Include="ForceGeneratorBarnesHut.h">
+      <Filter>02_Components</Filter>
+    </ClInclude>
+    <ClInclude Include="ForceGeneratorBarnesHutCS.h">
+      <Filter>02_Components</Filter>
+    </ClInclude>
+    <ClInclude Include="ForceGeneratorBase.h">
+      <Filter>02_Components</Filter>
     </ClInclude>
     <ClInclude Include="ForceGeneratorDirect.h">
-      <Filter>Header Files</Filter>
+      <Filter>02_Components</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="color.hlsl">
-      <Filter>Shader</Filter>
-    </FxCompile>
-    <FxCompile Include="BarnesHutCS.hlsl">
-      <Filter>Shader</Filter>
+      <Filter>04_HLSL</Filter>
     </FxCompile>
     <FxCompile Include="CSMortonCodes.hlsl">
-      <Filter>Shader</Filter>
+      <Filter>04_HLSL</Filter>
     </FxCompile>
     <FxCompile Include="CSRadixSort_1.hlsl">
-      <Filter>Shader</Filter>
+      <Filter>04_HLSL</Filter>
     </FxCompile>
     <FxCompile Include="CSRadixSort_2.hlsl">
-      <Filter>Shader</Filter>
+      <Filter>04_HLSL</Filter>
     </FxCompile>
     <FxCompile Include="CSRadixSort_3.hlsl">
-      <Filter>Shader</Filter>
+      <Filter>04_HLSL</Filter>
     </FxCompile>
     <FxCompile Include="CSCornerStone_F.hlsl">
-      <Filter>Shader</Filter>
+      <Filter>04_HLSL</Filter>
     </FxCompile>
     <FxCompile Include="CSCornerStone_G1.hlsl">
-      <Filter>Shader</Filter>
+      <Filter>04_HLSL</Filter>
     </FxCompile>
     <FxCompile Include="CSCornerStone_G2.hlsl">
-      <Filter>Shader</Filter>
+      <Filter>04_HLSL</Filter>
     </FxCompile>
     <FxCompile Include="CSCornerStone_G3.hlsl">
-      <Filter>Shader</Filter>
+      <Filter>04_HLSL</Filter>
     </FxCompile>
     <FxCompile Include="CSCornerStone_NK.hlsl">
-      <Filter>Shader</Filter>
+      <Filter>04_HLSL</Filter>
     </FxCompile>
     <FxCompile Include="CSRadixSort_4.hlsl">
-      <Filter>Shader</Filter>
+      <Filter>04_HLSL</Filter>
     </FxCompile>
     <FxCompile Include="CSCornerStone_LO.hlsl">
-      <Filter>Shader</Filter>
+      <Filter>04_HLSL</Filter>
     </FxCompile>
     <FxCompile Include="CSCornerStone_CO.hlsl">
-      <Filter>Shader</Filter>
+      <Filter>04_HLSL</Filter>
     </FxCompile>
     <FxCompile Include="CSBarnesHut_MP.hlsl">
-      <Filter>Shader</Filter>
+      <Filter>04_HLSL</Filter>
     </FxCompile>
     <FxCompile Include="CSBarnesHut_CF.hlsl">
-      <Filter>Shader</Filter>
+      <Filter>04_HLSL</Filter>
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="color.ps">
-      <Filter>Shader</Filter>
+      <Filter>04_HLSL</Filter>
     </None>
     <None Include="CSUtils.hlsli">
-      <Filter>Shader</Filter>
+      <Filter>04_HLSL</Filter>
     </None>
     <None Include="CSDoubleBuffer.hlsli">
-      <Filter>Shader</Filter>
+      <Filter>04_HLSL</Filter>
     </None>
     <None Include="CSStack.hlsli">
-      <Filter>Shader</Filter>
+      <Filter>04_HLSL</Filter>
     </None>
     <None Include="CSZOrder.hlsli">
-      <Filter>Shader</Filter>
+      <Filter>04_HLSL</Filter>
     </None>
   </ItemGroup>
 </Project>
