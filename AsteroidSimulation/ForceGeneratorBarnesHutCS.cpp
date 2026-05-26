@@ -60,7 +60,7 @@ void ForceGeneratorBarnesHutCS::Start()
 	m_csBarnesHut_CF.Initialize();
 	m_csBarnesHut_CF.m_sharedBuffer = &m_buffer;
 
-	Session::Me().m_shaderTimeFile.WriteLine("CSMortonCodes;CSCornerStone_F;CSCornerStone_G1;CSCornerStone_G2;CSCornerStone_G3;CSCornerStone_NK;CSCornerStone_LO;CSCornerStone_CO;CSBarnesHut_MP;CSBarnesHut_CF");
+	Session::Me().m_shaderTimeFile.WriteLine("CSMortonCodes;RadixSort_MKey;CSCornerStone_F;CSCornerStone_G1;CSCornerStone_G2;CSCornerStone_G3;CSCornerStone_NK;RadixSort_NK;CSCornerStone_LO;CSCornerStone_CO;CSBarnesHut_MP;CSBarnesHut_CF");
 }
 
 
@@ -234,6 +234,11 @@ void ForceGeneratorBarnesHutCS::BuildOctree(uint32_t elementCount)
 
 	m_deviceContext->CopyResource(m_buffer.m_inNkBuffer, m_buffer.m_outNkBuffer);
 
+	//record sort time before sorting nk
+	m_sortTimeKeyMs = m_csRadixSort_1.GetExecutionTimeMs()
+	+ m_csRadixSort_2.GetExecutionTimeMs()
+	+ m_csRadixSort_3.GetExecutionTimeMs();
+
 	//Sort NK
 	uint32_t nCount = m_counterBuffer[0] + m_counterBuffer[1];
 	m_buffer.SetSettingParameter(nCount, 40);
@@ -384,12 +389,18 @@ void ForceGeneratorBarnesHutCS::CopyCellData()
 
 void ForceGeneratorBarnesHutCS::RecordExecutionTime()
 {
+	float sortTimeKeyMs = m_csRadixSort_1.GetExecutionTimeMs()
+		+ m_csRadixSort_2.GetExecutionTimeMs()
+		+ m_csRadixSort_4.GetExecutionTimeMs();;
+
 	string val = std::to_string(m_csMortonCodes.GetExecutionTimeMs())
+		+ ";" + std::to_string(m_sortTimeKeyMs)
 		+ ";" + std::to_string(m_csCornerStone_F.GetExecutionTimeMs())
 		+ ";" + std::to_string(m_csCornerStone_G1.GetExecutionTimeMs())
 		+ ";" + std::to_string(m_csCornerStone_G2.GetExecutionTimeMs())
 		+ ";" + std::to_string(m_csCornerStone_G3.GetExecutionTimeMs())
 		+ ";" + std::to_string(m_csCornerStone_NK.GetExecutionTimeMs())
+		+ ";" + std::to_string(sortTimeKeyMs)
 		+ ";" + std::to_string(m_csCornerStone_LO.GetExecutionTimeMs())
 		+ ";" + std::to_string(m_csCornerStone_CO.GetExecutionTimeMs())
 		+ ";" + std::to_string(m_csBarnesHut_MP.GetExecutionTimeMs())
