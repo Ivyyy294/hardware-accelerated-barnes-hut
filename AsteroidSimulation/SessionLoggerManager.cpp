@@ -11,11 +11,6 @@ void SessionLoggerManager::OnEnable()
 	SessionLogger::Me().StartSession ("..//Out");
 }
 
-void SessionLoggerManager::Update()
-{
-
-}
-
 void SessionLoggerManager::OnDisable()
 {
 	m_me = nullptr;

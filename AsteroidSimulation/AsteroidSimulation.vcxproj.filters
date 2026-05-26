@@ -149,6 +149,9 @@
     <ClCompile Include="SessionVariables.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Session.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">
@@ -273,6 +276,9 @@
     </ClInclude>
     <ClInclude Include="ForceGeneratorDirect.h">
       <Filter>02_Components</Filter>
+    </ClInclude>
+    <ClInclude Include="Session.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

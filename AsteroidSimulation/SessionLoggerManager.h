@@ -24,7 +24,6 @@ public:
 	static SessionLoggerManager* Me();
 
 	void OnEnable() override;
-	void Update() override;
 	void OnDisable() override;
 };
 

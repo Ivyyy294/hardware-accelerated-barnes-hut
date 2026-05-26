@@ -24,4 +24,10 @@ public:
 	Ivyyy::Vector2 iRange;
 	int maxFixedFrames = 0;
 	int maxDurationSec = 0;
+
+//Methods
+public:
+	void Log ();
 };
+
+bool SessionVariablesLoadFromFile (SessionVariables& variables, const std::string filePath);

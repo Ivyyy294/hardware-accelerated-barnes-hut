@@ -9,19 +9,14 @@
 #include "DebugInfoUi.h"
 #include "CameraMovement.h"
 #include "Planet.h"
+#include "SessionDurationController.h"
 #include "SessionLoggerManager.h"
 #include "FrameTimeRecorder.h"
-#include "SessionDurationController.h"
+#include "Session.h"
 
 SceneAsteroidBase::SceneAsteroidBase()
 {
-	m_sVar.numAsteroids = NUM_ASTEROIDS;
-	m_sVar.ugc = 0.00005f;
-	m_sVar.fixedDeltaTime = Time::UnscaledFixedDeltaTime();
-	m_sVar.distRange = { 10.f, 1.f };
-	m_sVar.eRange = { 0.f, 0.25f };
-	m_sVar.iRange = { -10.f, 10.f };
-	m_sVar.maxFixedFrames = 1000;
+	m_sVar = Session::Me().m_variables;
 }
 
 void SceneAsteroidBase::Init()
@@ -56,29 +51,8 @@ void SceneAsteroidBase::Init()
 	//Add Asteroids
 	SpawnAsteroids (m_sVar.numAsteroids, m_sVar.distRange, m_sVar.eRange, Vector2(1.f, 15.f), planet);
 
-	LogSessionVariables();
+	Session::Me().m_variables.Log();
 	AdjustMainLoop();
-}
-
-void SceneAsteroidBase::SpawnAsteroids(int num, float dist, float speed)
-{
-	float angle = 360.f / ((float)num);
-	Quaternion rotationOffset = Quaternion::Euler(0.f, 0.f, angle);
-	Vector3 pos = Vector3::Up * dist;
-	Vector3 vel = Vector3::Left * speed;
-
-	for (int i = 0; i < num; ++i)
-	{
-		Asteroid* asteroid = AddGameObject <Asteroid>();
-		asteroid->transform.SetPosition(pos);
-
-		PhysicObject* rb = asteroid->GetComponent<PhysicObject>().get();
-		rb->SetVelocity(vel);
-		pos = rotationOffset * pos;
-		vel = rotationOffset * vel;
-
-		OnOrbitalBodySpawned (asteroid);
-	}
 }
 
 void SceneAsteroidBase::SpawnAsteroids(int num, Vector2 dist, Vector2 e, Vector2 i, GameObject* planet)
@@ -113,20 +87,6 @@ void SceneAsteroidBase::SpawnAsteroids(int num, Vector2 dist, Vector2 e, Vector2
 
 			OnOrbitalBodySpawned(asteroid);
 		}
-}
-
-void SceneAsteroidBase::LogSessionVariables()
-{
-	SessionLoggerManager* slm = SessionLoggerManager::Me();
-	slm->m_variables.WriteLine("method;" + std::to_string(m_sVar.method));
-	slm->m_variables.WriteLine("numAsteroids;" + std::to_string(m_sVar.numAsteroids));
-	slm->m_variables.WriteLine("ugc;" + std::to_string(m_sVar.ugc));
-	slm->m_variables.WriteLine("fixedDeltaTime;" + std::to_string(m_sVar.fixedDeltaTime));
-	slm->m_variables.WriteLine("distRange;" + std::to_string(m_sVar.distRange.x) + ";" + std::to_string(m_sVar.distRange.y));
-	slm->m_variables.WriteLine("eRange;" + std::to_string(m_sVar.eRange.x) + ";" + std::to_string(m_sVar.eRange.y));
-	slm->m_variables.WriteLine("iRange;" + std::to_string(m_sVar.iRange.x) + ";" + std::to_string(m_sVar.iRange.y));
-	slm->m_variables.WriteLine("maxFixedFrames;" + std::to_string(m_sVar.maxFixedFrames));
-	slm->m_variables.WriteLine("maxDurationSec;" + std::to_string(m_sVar.maxDurationSec));
 }
 
 void SceneAsteroidBase::AdjustMainLoop()

@@ -1,0 +1,9 @@
+method;2
+numAsteroids;10240
+ugc;0.000050
+fixedDeltaTime;0.020000
+distRange;10.000000;1.000000
+eRange;0.000000;0.250000
+iRange;-10.000000;10.000000
+maxFixedFrames;0
+maxDurationSec;0
