@@ -13,8 +13,7 @@ void SessionLoggerManager::OnEnable()
 
 void SessionLoggerManager::Update()
 {
-	if (Input::KeyDown(Key::KEY_ESC))
-		IvyyyEngine::Me()->Exit();
+
 }
 
 void SessionLoggerManager::OnDisable()

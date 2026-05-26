@@ -2,6 +2,7 @@
 #include "DebugInfo.h"
 #include <IvyyyTime.h>
 #include "IvyyyDebug.h"
+#include <IvyyyEngine.h>
 
 void DebugInfo::Start ()
 {
@@ -19,6 +20,9 @@ void DebugInfo::Update ()
 
 	if (Input::KeyDown(Key::KEY_G))
 		Gizmo::Draw = !Gizmo::Draw;
+
+	if (Input::KeyDown(Key::KEY_ESC))
+		IvyyyEngine::Me()->Exit();
 }
 
 void DebugInfo::UpdateFps()
