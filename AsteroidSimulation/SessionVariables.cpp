@@ -121,6 +121,39 @@ bool SessionVariablesLoadFromFile(SessionVariables& variables, const std::string
 		else
 			return false;
 
+		if (std::getline(file, buffer))
+		{
+			GetValueFromString(buffer, valBuffer1);
+			variables.seed = valBuffer1;
+		}
+		else
+			return false;
+
+		if (std::getline(file, buffer))
+		{
+			GetValueFromString(buffer, valBuffer1);
+			variables.centralMass = stof(valBuffer1);
+		}
+		else
+			return false;
+
+		if (std::getline(file, buffer))
+		{
+			GetRangeFromString(buffer, valBuffer1, valBuffer2);
+			variables.massRangeAsteroids.x = stof(valBuffer1);
+			variables.massRangeAsteroids.y = stof(valBuffer2);
+		}
+		else
+			return false;
+
+		if (std::getline(file, buffer))
+		{
+			GetValueFromString(buffer, valBuffer1);
+			variables.minMassAsteroids = stof(valBuffer1);
+		}
+		else
+			return false;
+
 		return true;
 	}
 
@@ -140,4 +173,8 @@ void SessionVariables::Log()
 	Session::Me().m_variablesFile.WriteLine("iRange;" + std::to_string(iRange.x) + ";" + std::to_string(iRange.y));
 	Session::Me().m_variablesFile.WriteLine("maxFixedFrames;" + std::to_string(maxFixedFrames));
 	Session::Me().m_variablesFile.WriteLine("maxDurationSec;" + std::to_string(maxDurationSec));
+	Session::Me().m_variablesFile.WriteLine("seed;" + seed);
+	Session::Me().m_variablesFile.WriteLine("centralMass;" + std::to_string(centralMass));
+	Session::Me().m_variablesFile.WriteLine("massRangeAsteroids;" + std::to_string(massRangeAsteroids.x) + ";" + std::to_string(massRangeAsteroids.y));
+	Session::Me().m_variablesFile.WriteLine("minMassAsteroids;" + std::to_string(minMassAsteroids));
 }

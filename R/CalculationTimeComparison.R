@@ -3,7 +3,7 @@ library(data.table)
 library(ggplot2)
 library(Hmisc)
 
-setwd("D:/00_Git/hardware-accelerated-barnes-hut/Out")
+setwd("D:/00_Git/hardware-accelerated-barnes-hut/Out/1025")
 
 variablesGpu <- data.table::fread(paste("GPU","/variables.csv", sep = ""),fill = TRUE)
 variablesCpu <- data.table::fread(paste("CPU","/variables.csv", sep = ""),fill = TRUE)

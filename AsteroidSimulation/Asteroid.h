@@ -21,6 +21,7 @@ private:
 public:
 	Asteroid();
 
+	void SetPhysicalProperties (float mass, float size);
 	void SetOrbit (OrbitalElement oe, const PhysicObject* soi);
 };
 

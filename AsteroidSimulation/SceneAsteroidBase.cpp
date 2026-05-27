@@ -40,6 +40,7 @@ void SceneAsteroidBase::Init()
 
 	//Add Planet
 	Planet* planet = AddGameObject <Planet>();
+	planet->GetComponent<PhysicObject>()->SetMass(Session::Me().m_variables.centralMass);
 	OnOrbitalBodySpawned (planet);
 
 	//Add Asteroids
@@ -55,12 +56,15 @@ void SceneAsteroidBase::SpawnAsteroids(int num, Vector2 dist, Vector2 e, Vector2
 		dist = dist * 10.f;
 		e = e * 10.f;
 
-		std::string str ("85245679");
+		SessionVariables variables = Session::Me().m_variables;
+
+		std::string str (Session::Me().m_variables.seed);
 		std::seed_seq seed1(str.begin(), str.end());
 		std::mt19937 gen(seed1); // seed the generator
 		std::normal_distribution<float> smaRnd(dist.x, dist.y); // define the range
 		std::uniform_int_distribution<> eRnd(e.x, e.y); // define the range
-		std::uniform_int_distribution<> iRnd(i.x, i.y); // define the range
+		std::normal_distribution<float> massRnd(variables.massRangeAsteroids.x, variables.massRangeAsteroids.y);
+		std::normal_distribution<float> iRnd(variables.iRange.x, variables.iRange.y);
 		std::uniform_int_distribution<> oRnd(0, 360); // define the range
 		std::uniform_int_distribution<> wRnd(0, 360); // define the range
 		std::uniform_int_distribution<> m0Rnd(0, 360); // define the range
@@ -70,12 +74,16 @@ void SceneAsteroidBase::SpawnAsteroids(int num, Vector2 dist, Vector2 e, Vector2
 			OrbitalElement oe;
 			oe.a = smaRnd(gen) * 0.1f;
 			oe.e = eRnd(gen) * 0.1f;
-			oe.i = float (iRnd(gen));
 			oe.o = float (oRnd(gen));
 			oe.w = float (wRnd(gen));
 			oe.m0 = float (m0Rnd(gen));
 
+			float mass = float(massRnd(gen));
+			mass = max(mass, variables.minMassAsteroids);
+			float size = mass / variables.massRangeAsteroids.x;
+
 			Asteroid* asteroid = AddGameObject <Asteroid>();
+			asteroid->SetPhysicalProperties(mass, size);
 			asteroid->SetOrbit (oe, soi);
 
 			OnOrbitalBodySpawned(asteroid);

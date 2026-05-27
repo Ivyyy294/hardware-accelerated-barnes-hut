@@ -1,6 +1,7 @@
 #pragma once
 
 #include <IvyyyVector2.h>
+#include <string>
 
 struct SessionVariables
 {
@@ -26,6 +27,10 @@ public:
 	Ivyyy::Vector2 iRange;
 	int maxFixedFrames = 0;
 	int maxDurationSec = 0;
+	std::string seed = "";
+	float centralMass = 0.f;
+	Ivyyy::Vector2 massRangeAsteroids = {10.f, 0.5f};
+	float minMassAsteroids = 0.1f;
 
 //Methods
 public:

@@ -36,6 +36,12 @@ Asteroid::Asteroid()
 	transform.SetLocalScale ({0.05f, 0.05f, 0.05f});
 }
 
+void Asteroid::SetPhysicalProperties(float mass, float size)
+{
+	m_physicObject->SetMass(mass);
+	transform.SetLocalScale(Vector3{ 0.05f, 0.05f, 0.05f } * size);
+}
+
 void Asteroid::SetOrbit(OrbitalElement oe, const PhysicObject* soi)
 {
 	OrbitalData orbitalData = KeplerOrbit::CallculateOrbitalData (oe, soi->GetMass());
