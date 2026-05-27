@@ -14,12 +14,12 @@ void SessionDurationController::Update()
 
 	if (m_maxDurationSec > 0.f && diff >= m_maxDurationSec)
 		IvyyyEngine::Me()->Exit();
+
+	if (m_maxFixedFrames > 0 && m_fixedFramesCounter >= m_maxFixedFrames)
+		IvyyyEngine::Me()->Exit();
 }
 
 void SessionDurationController::FixedUpdate()
 {
 	m_fixedFramesCounter++;
-
-	if (m_maxFixedFrames > 0 && m_fixedFramesCounter >= m_maxFixedFrames)
-		IvyyyEngine::Me()->Exit();
 }
