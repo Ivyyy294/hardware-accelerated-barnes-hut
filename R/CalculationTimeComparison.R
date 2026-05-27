@@ -1,6 +1,7 @@
 ## Libraries
 library(data.table)
 library(ggplot2)
+library(Hmisc)
 
 setwd("D:/00_Git/hardware-accelerated-barnes-hut/Out")
 
@@ -29,10 +30,14 @@ if (variablesOk){
   frameTime[, direct := frameTimeDirect[[1]][1:rowCount]]
 
   ggplot(frameTime, aes(x = step)) +
+    #Plot Lines
     geom_line(aes(y = direct, color="Direct"))+
     geom_line(aes(y = cpu, color="CPU")) +
     geom_line(aes(y = gpu, color="GPU")) +
+    scale_y_log10() +
+    #Line color
     scale_color_manual(values=c("GPU" = "red", "CPU" = "blue", "Direct" = "green"))+
+    #Labels
     labs(color="Method", y = "MS", x ="Fixed Time Step")+
     ggtitle(sprintf("Force calculation time comparison n = %d", nCount))
     
