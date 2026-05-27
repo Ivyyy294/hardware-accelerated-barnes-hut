@@ -2,6 +2,7 @@
 #include "CSDoubleBuffer.hlsli"
 
 #define NUM_THREADS 256
+#define NUM_PARALLEL_NODES 8
 #define L 10
 
 cbuffer SettingsBuffer : register(b0)
@@ -23,6 +24,7 @@ struct ParticleData
 
 struct NodeData
 {
+    uint index;
     uint firstChild;
     bool isInternalNode;
     float cellWidth;
@@ -53,7 +55,6 @@ RWStructuredBuffer<float3> forceBuffer : register(u0);
 //Groupshared
 groupshared CDoubleBuffer stack;
 
-groupshared uint nodeIndex = 0;
 groupshared bool gCriterium = 0.f;
 groupshared uint minSqrDistInt = 0;
 groupshared bool gDone = false;
@@ -88,6 +89,7 @@ void GetNodeData(out NodeData data, in const uint nodeIndex)
 {
     const uint nk = nkBuffer[nodeIndex];
     const uint level = GetTreeLevelFromWs(nk);
+    data.index = nodeIndex;
     data.firstChild = coBuffer[nodeIndex];
     data.isInternalNode = data.firstChild > 0;
     data.cellWidth = cellWidth[ nodeIndex];
@@ -141,7 +143,7 @@ float3 ApplyCloseRangeForces(const float pMass, const float3 pPos, const uint no
     return force;
 }
 
-bool IsTraversalDone(const uint3 GTid, out int localNodeIndex)
+bool IsTraversalDone(const uint3 GTid)
 {
     if (GTid.x == 0)
     {
@@ -151,14 +153,11 @@ bool IsTraversalDone(const uint3 GTid, out int localNodeIndex)
         {
             if (stack.IsFrontEmpty())
                 stack.Swap();
-                
-            stack.Pop(nodeIndex);
         }
     }
         
     GroupMemoryBarrierWithGroupSync();
     bool done = gDone;
-    localNodeIndex = nodeIndex;
         
     return done;
 }
@@ -211,13 +210,15 @@ void main(uint3 GTid : SV_GroupThreadID,
     [loop]
     while (true)
     {
-        int localNodeIndex = -1;
-        
-        if (IsTraversalDone(GTid, localNodeIndex))
+        if (IsTraversalDone(GTid))
             break;
 
         if (GTid.x == 0)
+        {
+            int localNodeIndex = -1;
+            stack.Pop(localNodeIndex);
             GetNodeData(gNodeData, localNodeIndex);
+        }
         
         GroupMemoryBarrierWithGroupSync();
         
@@ -255,7 +256,7 @@ void main(uint3 GTid : SV_GroupThreadID,
         }
         //apply leafs
         else
-            pData.force += ApplyCloseRangeForces(pData.mass, pData.pos, localNodeIndex);
+            pData.force += ApplyCloseRangeForces(pData.mass, pData.pos, nData.index);
     }
     
     if (pData.isParticle)
