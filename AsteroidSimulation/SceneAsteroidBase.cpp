@@ -74,6 +74,7 @@ void SceneAsteroidBase::SpawnAsteroids(int num, Vector2 dist, Vector2 e, Vector2
 			OrbitalElement oe;
 			oe.a = smaRnd(gen) * 0.1f;
 			oe.e = eRnd(gen) * 0.1f;
+			oe.i = iRnd(gen);
 			oe.o = float (oRnd(gen));
 			oe.w = float (wRnd(gen));
 			oe.m0 = float (m0Rnd(gen));

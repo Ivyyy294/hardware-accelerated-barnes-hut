@@ -6,6 +6,7 @@ ugc;0.000050
 fixedDeltaTime;0.020000
 distRange;20.000000;1.0
 eRange;0.000000;0.250000
+iRange;0.0;2.5
 maxFixedFrames;5000
 maxDurationSec;0
 seed;85245679
