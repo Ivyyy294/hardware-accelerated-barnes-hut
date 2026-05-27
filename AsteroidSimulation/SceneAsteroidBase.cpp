@@ -11,8 +11,6 @@
 #include "Planet.h"
 #include "SessionDurationController.h"
 #include "Session.h"
-#include "FrameTimeRecorder.h"
-#include "Session.h"
 
 SceneAsteroidBase::SceneAsteroidBase()
 {
@@ -31,9 +29,6 @@ void SceneAsteroidBase::Init()
 	//Add Camera movement
 	GameObject* camera = Camera::MainCamera()->GetGameObject();
 	camera->AddComponent<CameraMovement>();
-	
-	//Add Recording
-	camera->AddComponent<FrameTimeRecorder>();
 
 	//Add duration controller
 	SessionDurationController* sdc = camera->AddComponent<SessionDurationController>().get();
@@ -51,7 +46,6 @@ void SceneAsteroidBase::Init()
 	SpawnAsteroids (m_sVar.numAsteroids, m_sVar.distRange, m_sVar.eRange, m_sVar.iRange, planet);
 
 	Session::Me().m_variables.Log();
-	AdjustMainLoop();
 }
 
 void SceneAsteroidBase::SpawnAsteroids(int num, Vector2 dist, Vector2 e, Vector2 i, GameObject* planet)
@@ -88,22 +82,11 @@ void SceneAsteroidBase::SpawnAsteroids(int num, Vector2 dist, Vector2 e, Vector2
 		}
 }
 
-void SceneAsteroidBase::AdjustMainLoop()
-{
-	MainLoop& mainLoop = IvyyyEngine::Me()->GetMainLoop();
-	MainLoopNode& node = mainLoop.GetNode();
-	auto mainLoopNodes = node.GetChildren();
-
-	FrameTimeRecorder* recorder = FrameTimeRecorder::Me();
-	mainLoopNodes.emplace(mainLoopNodes.begin() + 2, std::make_shared <MainLoopNode>("LogFrameTime", Event().Bind<FrameTimeRecorder, &FrameTimeRecorder::LogFrameTime>(recorder)));
-	node.SetChildren(mainLoopNodes);
-}
-
 void SceneAsteroidBase::AdjustFixedUpdateLoop(ForceGeneratorBase* forceGenerator)
 {
 	MainLoop& mainLoop = IvyyyEngine::Me()->GetMainLoop();
 	MainLoopNode node = mainLoop.GetNode();
-	auto mainLoopNodes = node.GetChildren()[5];
+	auto mainLoopNodes = node.GetChildren()[4];
 	auto physicNode = mainLoopNodes->GetChildren()[0];
 
 	auto fixedUpdateNodes = physicNode->GetChildren();

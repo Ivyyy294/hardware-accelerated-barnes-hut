@@ -7,7 +7,7 @@ Session::Session()
 	, m_forceFile("force.csv")
 	, m_gpuMemDumpFile("gpuMemDump.csv")
 	, m_shaderTimeFile("shader.csv")
-	, m_frameTimeFile("frameTime.csv")
+	, m_forceCalcTimeFile("forceCalcTime.csv")
 {
 #ifdef _DEBUG
 	m_logDebugInfo = true;

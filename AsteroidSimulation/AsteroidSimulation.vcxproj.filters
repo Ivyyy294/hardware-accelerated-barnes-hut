@@ -137,9 +137,6 @@
     <ClCompile Include="SessionFile.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="FrameTimeRecorder.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="SessionDurationController.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -246,9 +243,6 @@
     </ClInclude>
     <ClInclude Include="Planet.h">
       <Filter>01_GameObjects</Filter>
-    </ClInclude>
-    <ClInclude Include="FrameTimeRecorder.h">
-      <Filter>02_Components</Filter>
     </ClInclude>
     <ClInclude Include="CameraMovement.h">
       <Filter>02_Components</Filter>

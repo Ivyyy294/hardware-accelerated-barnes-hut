@@ -151,7 +151,6 @@
     <ClCompile Include="CsCornerStone_F.cpp" />
     <ClCompile Include="ForceGeneratorBarnesHutCS.cpp" />
     <ClCompile Include="ForceGeneratorDirect.cpp" />
-    <ClCompile Include="FrameTimeRecorder.cpp" />
     <ClCompile Include="KeplerOrbit.cpp" />
     <ClCompile Include="OrbitalElement.cpp" />
     <ClCompile Include="SceneBarnesHutCS.cpp" />
@@ -198,7 +197,6 @@
     <ClInclude Include="CsCornerStone_F.h" />
     <ClInclude Include="ForceGeneratorBarnesHutCS.h" />
     <ClInclude Include="ForceGeneratorDirect.h" />
-    <ClInclude Include="FrameTimeRecorder.h" />
     <ClInclude Include="KeplerOrbit.h" />
     <ClInclude Include="OrbitalElement.h" />
     <ClInclude Include="SceneBarnesHutCS.h" />

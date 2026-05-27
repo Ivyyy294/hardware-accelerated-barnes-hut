@@ -1,7 +1,6 @@
 #include "pch.h"
 #include "ForceGeneratorBase.h"
 #include "Session.h"
-#include "FrameTimeRecorder.h"
 
 void ForceGeneratorBase::FixedUpdate()
 {
@@ -75,10 +74,12 @@ float ForceGeneratorBase::GetMaxCoordinate()
 
 void ForceGeneratorBase::PreCalculateForces()
 {
-	clock_t startTime = clock();
+	auto startTime = std::chrono::high_resolution_clock::now();
 	PreCalculateForcesInternal();
+	auto endTime = std::chrono::high_resolution_clock::now();
 
-	clock_t endTime = clock();
-	long diff = (long)(endTime - startTime);
-	FrameTimeRecorder::Me()->m_forceCalcTime = diff;
+	std::chrono::duration<double, std::milli> ms = endTime - startTime;
+	double elapsed = ms.count();
+
+	Session::Me().m_forceCalcTimeFile.WriteLine(std::to_string(elapsed));
 }

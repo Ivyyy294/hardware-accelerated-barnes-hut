@@ -13,7 +13,7 @@ public:
 	SessionFile m_forceFile;
 	SessionFile m_gpuMemDumpFile;
 	SessionFile m_shaderTimeFile;
-	SessionFile m_frameTimeFile;
+	SessionFile m_forceCalcTimeFile;
 
 	bool m_logDebugInfo = false;
 
