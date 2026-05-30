@@ -46,6 +46,28 @@ class CDoubleBuffer
         return true;
     }
     
+    bool InterlockedPop(uint3 GTid, inout uint val)
+    {
+        if (m_fCount <= 0 || GTid.x >= m_fCount)
+            return false;
+        
+        uint fCount = 0;
+        InterlockedAdd(m_fCount, -1, fCount);
+        
+        uint index = fCount - 1;
+        val = m_buffer[m_fBaseIndex + index];
+        return true;
+    }
+    
+    bool Peek(in uint index, inout uint val)
+    {
+        if (m_fCount <= 0 || index >= m_fCount)
+            return false;
+        
+        val = m_buffer[m_fBaseIndex + index];
+        return true;
+    }
+    
     bool IsFull()
     {
         return m_bCount >= DBUFFER_SIZE;

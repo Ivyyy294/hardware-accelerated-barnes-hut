@@ -31,6 +31,8 @@ struct NodeData
     float3 com;
     float mass;
     float3 center;
+    bool criterium;
+    int minSqrDistInt;
 };
 
 //Particle data buffer
@@ -55,15 +57,13 @@ RWStructuredBuffer<float3> forceBuffer : register(u0);
 //Groupshared
 groupshared CDoubleBuffer stack;
 
-groupshared bool gCriterium = 0.f;
-groupshared uint minSqrDistInt = 0;
 groupshared bool gDone = false;
 
 groupshared bool gIsInternalNode = false;
 groupshared uint gPCount = 0;
 groupshared uint gFirstChild = 0;
 
-groupshared NodeData gNodeData;
+groupshared NodeData gNodeData[2];
 
 void GetParticleData(const uint index, bool isParticle, out ParticleData data)
 {
@@ -96,12 +96,17 @@ void GetNodeData(out NodeData data, in const uint nodeIndex)
     data.com = centerOfMass[nodeIndex];
     data.mass = combinedMass[nodeIndex];
     data.center = cellCenter[nodeIndex];
+    data.criterium = false;
+    data.minSqrDistInt = 0xFFFFFFFF;
     
     debugBuffer[nodeIndex] = data.cellWidth;
 }
 
-float3 ApplyForceFromNode(float pMass, float p2Mass, float3 direction, float sqrDistance)
+float3 ApplyForceFromNode(float pMass, const float3 pPos, float p2Mass, const uint nodeDataIndex)
 {
+    float3 direction = gNodeData[nodeDataIndex].com - pPos;
+    float sqrDistance = dot(direction, direction);
+    
     if (sqrDistance < 0.001f)
         return float3(0, 0, 0);
     
@@ -162,20 +167,35 @@ bool IsTraversalDone(const uint3 GTid)
     return done;
 }
 
-bool GetCriteriumForNode(const uint3 GTid, const NodeData nData, const float minSqrDist)
+void SetCriteriumForNode(const uint3 GTid, const uint nodeDataIndex)
 {
     if (GTid.x == 0)
     {
-        float delta = distance(nData.com, nData.center);
-        float critVal = (nData.cellWidth / theta) + delta;
-        gCriterium = minSqrDist > (critVal * critVal);
+        float minSqrDist = UintToFloat(gNodeData[nodeDataIndex].minSqrDistInt);
+        float delta = distance(gNodeData[nodeDataIndex].com, gNodeData[nodeDataIndex].center);
+        float critVal = (gNodeData[nodeDataIndex].cellWidth / theta) + delta;
+        gNodeData[nodeDataIndex].criterium = minSqrDist > (critVal * critVal);
     }
     
     GroupMemoryBarrierWithGroupSync();
+}
+
+//void SetMinDistForNodes(const uint3 GTid)
+//{
     
-    bool val = gCriterium;
-    
-    return val;
+//}
+
+void SetMinDistForNode(const uint3 GTid, const uint nodeDataIndex, const ParticleData pData)
+{
+    float3 direction = gNodeData[nodeDataIndex].com - pData.pos;
+    float sqrDistance = dot(direction, direction);
+        
+    GroupMemoryBarrierWithGroupSync();
+        
+    if (pData.isParticle)
+        InterlockedMin(gNodeData[nodeDataIndex].minSqrDistInt, FloatToUint(sqrDistance));
+
+    GroupMemoryBarrierWithGroupSync();
 }
 
 [numthreads(NUM_THREADS, 1, 1)]
@@ -216,33 +236,21 @@ void main(uint3 GTid : SV_GroupThreadID,
         if (GTid.x == 0)
         {
             int localNodeIndex = -1;
-            stack.Pop(localNodeIndex);
-            GetNodeData(gNodeData, localNodeIndex);
+            stack.InterlockedPop(GTid, localNodeIndex);
+            GetNodeData(gNodeData[0], localNodeIndex);
         }
         
         GroupMemoryBarrierWithGroupSync();
-        
-        NodeData nData = gNodeData;
-        float3 direction = nData.com - pData.pos;
-        float sqrDistance = dot(direction, direction);
-        
-        if (GTid.x == 0)
-            minSqrDistInt = FloatToUint(sqrDistance);
-        
-        GroupMemoryBarrierWithGroupSync();
-        
-        if (pData.isParticle)
-            InterlockedMin(minSqrDistInt, FloatToUint(sqrDistance));
-
-        GroupMemoryBarrierWithGroupSync();
+               
+        SetMinDistForNode(GTid, 0, pData);
             
-        float minSqrDist = UintToFloat(minSqrDistInt);
-            
-        bool criterium = GetCriteriumForNode(GTid, nData, minSqrDist);
+        SetCriteriumForNode(GTid, 0);
        
+        NodeData nData = gNodeData[0];
+        
         //apply node
-        if (criterium)
-            pData.force += ApplyForceFromNode(pData.mass, nData.mass, direction, sqrDistance);
+        if (nData.criterium)
+            pData.force += ApplyForceFromNode(pData.mass, pData.pos, nData.mass, nData.index);
         //push childen
         else if (nData.isInternalNode)
         {
