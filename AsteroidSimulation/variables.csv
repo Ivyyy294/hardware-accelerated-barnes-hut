@@ -11,5 +11,5 @@ maxFixedFrames;5000
 maxDurationSec;0
 seed;85245679
 centralMass;25000
-massRangeAsteroids;1.0;0
+massRangeAsteroids;1.0;0.1
 minMassAsteroids;0.1
