@@ -37,6 +37,15 @@ class CDoubleBuffer
         return true;
     }
     
+    bool InterlockedPush(uint val)
+    {    
+        uint index = 0;
+        InterlockedAdd(m_bCount, 1, index);
+        
+        m_buffer[m_bBaseIndex + index] = val;
+        return true;
+    }
+    
     bool Pop(inout uint val)
     {
         if (m_fCount <= 0)
@@ -46,11 +55,8 @@ class CDoubleBuffer
         return true;
     }
     
-    bool InterlockedPop(uint3 GTid, inout uint val)
+    bool InterlockedPop(inout uint val)
     {
-        if (m_fCount <= 0 || GTid.x >= m_fCount)
-            return false;
-        
         uint fCount = 0;
         InterlockedAdd(m_fCount, -1, fCount);
         
