@@ -2,7 +2,7 @@
 #include "CSDoubleBuffer.hlsli"
 
 #define NUM_THREADS 256
-#define NUM_PARALLEL_NODES 8
+#define NUM_PARALLEL_NODES 256
 #define L 10
 
 cbuffer SettingsBuffer : register(b0)
@@ -63,7 +63,8 @@ groupshared bool gIsInternalNode = false;
 groupshared uint gPCount = 0;
 groupshared uint gFirstChild = 0;
 
-groupshared NodeData gNodeData[2];
+groupshared NodeData gNodeData[NUM_PARALLEL_NODES];
+groupshared uint gNodeCount = 0;
 
 void GetParticleData(const uint index, bool isParticle, out ParticleData data)
 {
@@ -159,6 +160,8 @@ bool IsTraversalDone(const uint3 GTid)
             if (stack.IsFrontEmpty())
                 stack.Swap();
         }
+        
+        gNodeCount = min(NUM_PARALLEL_NODES, stack.m_fCount);
     }
         
     GroupMemoryBarrierWithGroupSync();
@@ -167,17 +170,14 @@ bool IsTraversalDone(const uint3 GTid)
     return done;
 }
 
-void SetCriteriumForNode(const uint3 GTid, const uint nodeDataIndex)
+void SetCriteriumForNode(const uint3 GTid)
 {
-    if (GTid.x == 0)
-    {
-        float minSqrDist = UintToFloat(gNodeData[nodeDataIndex].minSqrDistInt);
-        float delta = distance(gNodeData[nodeDataIndex].com, gNodeData[nodeDataIndex].center);
-        float critVal = (gNodeData[nodeDataIndex].cellWidth / theta) + delta;
-        gNodeData[nodeDataIndex].criterium = minSqrDist > (critVal * critVal);
-    }
-    
-    GroupMemoryBarrierWithGroupSync();
+    const uint nodeDataIndex = GTid.x;
+
+    float minSqrDist = UintToFloat(gNodeData[nodeDataIndex].minSqrDistInt);
+    float delta = distance(gNodeData[nodeDataIndex].com, gNodeData[nodeDataIndex].center);
+    float critVal = (gNodeData[nodeDataIndex].cellWidth / theta) + delta;
+    gNodeData[nodeDataIndex].criterium = minSqrDist > (critVal * critVal);
 }
 
 //void SetMinDistForNodes(const uint3 GTid)
@@ -233,38 +233,46 @@ void main(uint3 GTid : SV_GroupThreadID,
         if (IsTraversalDone(GTid))
             break;
 
-        if (GTid.x == 0)
+        const uint nodeCount = gNodeCount;
+        
+        if (GTid.x < nodeCount)
         {
             int localNodeIndex = -1;
             stack.InterlockedPop(GTid, localNodeIndex);
-            GetNodeData(gNodeData[0], localNodeIndex);
+            GetNodeData(gNodeData[GTid.x], localNodeIndex);
         }
         
         GroupMemoryBarrierWithGroupSync();
                
-        SetMinDistForNode(GTid, 0, pData);
-            
-        SetCriteriumForNode(GTid, 0);
-       
-        NodeData nData = gNodeData[0];
+        for (uint iDist = 0; iDist < nodeCount; ++iDist)
+            SetMinDistForNode(GTid, iDist, pData);
         
-        //apply node
-        if (nData.criterium)
-            pData.force += ApplyForceFromNode(pData.mass, pData.pos, nData.mass, nData.index);
-        //push childen
-        else if (nData.isInternalNode)
+        if (GTid.x < nodeCount)
+            SetCriteriumForNode(GTid);
+        
+        GroupMemoryBarrierWithGroupSync();
+        
+        for (uint iChild = 0; iChild < 8; ++iChild)
         {
-            if (GTid.x == 0)
-            {
-                const uint count = 8;
+            if (GTid.x < nodeCount && gNodeData[GTid.x].criterium == false && gNodeData[GTid.x].isInternalNode)
+                stack.Push(gNodeData[GTid.x].firstChild + iChild);
             
-                for (uint i = 0; i < count; ++i)
-                    stack.Push(nData.firstChild + i);
-            }
+            GroupMemoryBarrierWithGroupSync();
         }
-        //apply leafs
-        else
-            pData.force += ApplyCloseRangeForces(pData.mass, pData.pos, nData.index);
+        
+        for (uint j = 0; j < nodeCount; ++j)
+        {
+            NodeData nData = gNodeData[j];
+        
+            //apply node
+            if (nData.criterium)
+                pData.force += ApplyForceFromNode(pData.mass, pData.pos, nData.mass, nData.index);
+            //push childen
+            else if (nData.isInternalNode == false)
+                pData.force += ApplyCloseRangeForces(pData.mass, pData.pos, nData.index);
+        }
+        
+        GroupMemoryBarrierWithGroupSync();
     }
     
     if (pData.isParticle)
