@@ -48,7 +48,7 @@ Vector3 ForceGeneratorBarnesHut::CalculateForces(PhysicObject* physicObj)
 			Vector3 direction = diff.Normalized();
 			float distance = diff.Magnitude();
 
-			if (distance > 0.f)
+			if (distance > 0.01f)
 			{
 				float force = (Ivyyy::IvyyyPhysic::GravitationalConstant() * current->Mass() * physicObj->GetMass()) / (distance * distance);
 
