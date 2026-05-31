@@ -44,27 +44,30 @@ void SceneAsteroidBase::Init()
 	OnOrbitalBodySpawned (planet);
 
 	//Add Asteroids
-	SpawnAsteroids (m_sVar.numAsteroids, m_sVar.distRange, m_sVar.eRange, m_sVar.iRange, planet);
+	SpawnAsteroids (m_sVar.numAsteroids, planet);
 
 	Session::Me().m_variables.Log();
 }
 
-void SceneAsteroidBase::SpawnAsteroids(int num, Vector2 dist, Vector2 e, Vector2 i, GameObject* planet)
+void SceneAsteroidBase::SpawnAsteroids(int num, GameObject* planet)
 {
 		PhysicObject* soi = planet->GetComponent<PhysicObject>().get();
 
-		dist = dist * 10.f;
-		e = e * 10.f;
-
 		SessionVariables variables = Session::Me().m_variables;
+
+		Vector2 dist = variables.distRange * 10.f;
+		Vector2 e = variables.eRange * 10.f;
+
+
+		const float minVal = 0.001f;
 
 		std::string str (Session::Me().m_variables.seed);
 		std::seed_seq seed1(str.begin(), str.end());
 		std::mt19937 gen(seed1); // seed the generator
-		std::normal_distribution<float> smaRnd(dist.x, dist.y); // define the range
+		std::normal_distribution<float> smaRnd(dist.x, max(minVal, dist.y)); // define the range
 		std::uniform_int_distribution<> eRnd(e.x, e.y); // define the range
-		std::normal_distribution<float> massRnd(variables.massRangeAsteroids.x, variables.massRangeAsteroids.y);
-		std::normal_distribution<float> iRnd(variables.iRange.x, variables.iRange.y);
+		std::normal_distribution<float> massRnd(variables.massRangeAsteroids.x, max(minVal, variables.massRangeAsteroids.y));
+		std::normal_distribution<float> iRnd(variables.iRange.x, max(minVal, variables.iRange.y));
 		std::uniform_int_distribution<> oRnd(0, 360); // define the range
 		std::uniform_int_distribution<> wRnd(0, 360); // define the range
 		std::uniform_int_distribution<> m0Rnd(0, 360); // define the range
@@ -72,14 +75,15 @@ void SceneAsteroidBase::SpawnAsteroids(int num, Vector2 dist, Vector2 e, Vector2
 		for (int j = 0; j < num; ++j)
 		{
 			OrbitalElement oe;
-			oe.a = smaRnd(gen) * 0.1f;
+
+			oe.a = dist.y >= minVal ? smaRnd(gen) * 0.1f : dist.x * 0.1f;
 			oe.e = eRnd(gen) * 0.1f;
-			oe.i = iRnd(gen);
+			oe.i = variables.iRange.y >= minVal ? iRnd(gen) : variables.iRange.x;
 			oe.o = float (oRnd(gen));
 			oe.w = float (wRnd(gen));
 			oe.m0 = float (m0Rnd(gen));
 
-			float mass = float(massRnd(gen));
+			float mass = variables.massRangeAsteroids.y >= minVal ? massRnd(gen) : variables.massRangeAsteroids.x;
 			mass = max(mass, variables.minMassAsteroids);
 			float size = mass / variables.massRangeAsteroids.x;
 
