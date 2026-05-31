@@ -10,7 +10,7 @@ Planet::Planet()
 {
 	//Material
 	auto colorMaterial = std::make_shared<ColorMaterial>();
-	colorMaterial->SetColor(Color(0, 0, 255));
+	colorMaterial->SetColor(Color(252, 120, 1));
 
 	//MeshRenderer
 	auto meshRenderer = AddComponent<MeshRenderer>();
