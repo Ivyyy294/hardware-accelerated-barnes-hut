@@ -2,7 +2,6 @@
 #include "CSDoubleBuffer.hlsli"
 
 #define NUM_THREADS 256
-#define NUM_PARALLEL_NODES 8
 #define L 10
 
 cbuffer SettingsBuffer : register(b0)
@@ -63,8 +62,8 @@ groupshared bool gIsInternalNode = false;
 groupshared uint gPCount = 0;
 groupshared uint gFirstChild = 0;
 
-groupshared NodeData gNodeData[NUM_PARALLEL_NODES];
-groupshared uint gBaseNodeIndex = 0;
+groupshared NodeData gNodeData[NUM_THREADS];
+groupshared uint gNodeCount;
 
 void GetParticleData(const uint index, bool isParticle, out ParticleData data)
 {
@@ -216,6 +215,13 @@ void main(uint3 GTid : SV_GroupThreadID,
     {
         stack.Initialize();
         stack.Push(1);
+        stack.Push(2);
+        stack.Push(3);
+        stack.Push(4);
+        stack.Push(5);
+        stack.Push(6);
+        stack.Push(7);
+        stack.Push(8);
     }
     
     [loop]
@@ -225,49 +231,58 @@ void main(uint3 GTid : SV_GroupThreadID,
             break;
 
         if (GTid.x == 0)
-            stack.Pop(gBaseNodeIndex);
+            gNodeCount = 0;
         
         GroupMemoryBarrierWithGroupSync();
-
-        //Load Node Data
-        if (GTid.x < NUM_PARALLEL_NODES)
+        
+        uint nodeIndex;
+        bool ok = stack.InterlockedPop(nodeIndex);
+        uint slot = 0;
+        
+        if (ok)
         {
-            int localNodeIndex = gBaseNodeIndex + GTid.x;
-            GetNodeData(gNodeData[GTid.x], localNodeIndex);
+            InterlockedAdd(gNodeCount, 1, slot);
+            GetNodeData(gNodeData[slot], nodeIndex);
         }
         
         GroupMemoryBarrierWithGroupSync();
         
         //Determin minDist
-        for (uint iDist = 0; iDist < NUM_PARALLEL_NODES; ++iDist)
+        const uint nodeCount = gNodeCount;
+        
+        for (uint iDist = 0; iDist < nodeCount; ++iDist)
             SetMinDistForNode(iDist, pData);
         
-        GroupMemoryBarrierWithGroupSync();
+        GroupMemoryBarrier();
         
         //Determin criterium
-        if (GTid.x < NUM_PARALLEL_NODES)
+        if (GTid.x < nodeCount)
         {
             SetCriteriumForNode(GTid);
-            
-            if (gNodeData[GTid.x].criterium == false && gNodeData[GTid.x].isInternalNode)
-                stack.InterlockedPush(GTid.x, gNodeData[GTid.x].firstChild);
+                
+            if (!gNodeData[GTid.x].criterium && gNodeData[GTid.x].isInternalNode)
+            {
+                uint first = gNodeData[GTid.x].firstChild;
+
+                [unroll]
+                for (uint c = 0; c < 8; ++c)
+                    stack.InterlockedPush(first + c);
+            }
         }
         
-        GroupMemoryBarrierWithGroupSync();
+        GroupMemoryBarrier();
         
         //Apply nodes
-        for (uint j = 0; j < NUM_PARALLEL_NODES; ++j)
+        for (uint j = 0; j < nodeCount; ++j)
         {
             NodeData nData = gNodeData[j];
-        
+            debugBuffer[nData.index] = 1;
             //apply node
             if (nData.criterium)
                 pData.force += ApplyForceFromNode(pData.mass, pData.pos, nData);
             else if (nData.isInternalNode == false)
                 pData.force += ApplyCloseRangeForces(pData.mass, pData.pos, nData.index);
         }
-        
-        GroupMemoryBarrierWithGroupSync();
     }
     
     if (pData.isParticle)

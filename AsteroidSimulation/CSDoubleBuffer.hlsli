@@ -42,6 +42,13 @@ class CDoubleBuffer
         uint index = 0;
         InterlockedAdd(m_bCount, 1, index);
         
+        if (index >= DBUFFER_SIZE)
+        {
+            // Undo increment
+            InterlockedAdd(m_bCount, -1);
+            return false;
+        }
+        
         m_buffer[m_bBaseIndex + index] = val;
         return true;
     }
@@ -59,6 +66,13 @@ class CDoubleBuffer
     {
         uint fCount = 0;
         InterlockedAdd(m_fCount, -1, fCount);
+        
+        if (fCount == 0 || fCount > DBUFFER_SIZE)
+        {
+            // Undo decrement
+            InterlockedAdd(m_fCount, 1);
+            return false;
+        }
         
         uint index = fCount - 1;
         val = m_buffer[m_fBaseIndex + index];
