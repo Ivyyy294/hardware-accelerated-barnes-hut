@@ -3,7 +3,7 @@ library(data.table)
 library(ggplot2)
 library(Hmisc)
 
-setwd("D:/00_Git/hardware-accelerated-barnes-hut/Out/1025")
+setwd("D:/00_Git/hardware-accelerated-barnes-hut/Out/10241")
 
 variablesGpu <- data.table::fread(paste("GPU","/variables.csv", sep = ""),fill = TRUE)
 variablesCpu <- data.table::fread(paste("CPU","/variables.csv", sep = ""),fill = TRUE)
@@ -31,10 +31,10 @@ if (variablesOk){
 
   ggplot(frameTime, aes(x = step)) +
     #Plot Lines
-    geom_line(aes(y = direct, color="Direct"))+
-    geom_line(aes(y = cpu, color="CPU")) +
-    geom_line(aes(y = gpu, color="GPU")) +
-    scale_y_log10() +
+    geom_line(size = 1, aes(y = direct, color="Direct"))+
+    geom_line(size = 1, aes(y = cpu, color="CPU")) +
+    geom_line(size = 1, aes(y = gpu, color="GPU")) +
+    scale_y_log10(breaks = scales::log_breaks(n = 10)) +
     #Line color
     scale_color_manual(values=c("GPU" = "red", "CPU" = "blue", "Direct" = "green"))+
     #Labels
