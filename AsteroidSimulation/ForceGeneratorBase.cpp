@@ -1,10 +1,12 @@
 #include "pch.h"
 #include "ForceGeneratorBase.h"
-#include "SessionLoggerManager.h"
-#include "FrameTimeRecorder.h"
+#include "Session.h"
 
 void ForceGeneratorBase::FixedUpdate()
 {
+	if (!Session::Me().m_logDebugInfo)
+		return;
+
 	string posData;
 	string forceData;
 
@@ -19,8 +21,20 @@ void ForceGeneratorBase::FixedUpdate()
 		forceData += std::to_string(force.x) + ";" + std::to_string(force.y) + ";" + std::to_string(force.z) + ";";
 	}
 
-	SessionLoggerManager::Me()->m_position.WriteLine(posData);
-	SessionLoggerManager::Me()->m_force.WriteLine(forceData);
+	Session::Me().m_positionFile.WriteLine(posData);
+	Session::Me().m_forceFile.WriteLine(forceData);
+}
+
+ForceGeneratorBase::ForceGeneratorBase()
+	: m_theta (Session::Me().m_variables.theta)
+	, m_maxParticleCount(Session::Me().m_variables.numAsteroids + 1)
+{
+	m_forceBuffer = new XMFLOAT3[m_maxParticleCount];
+}
+
+ForceGeneratorBase::~ForceGeneratorBase()
+{
+	delete[] m_forceBuffer;
 }
 
 void ForceGeneratorBase::ApplyForceForObject(PhysicObject* physicObj) const
@@ -60,10 +74,12 @@ float ForceGeneratorBase::GetMaxCoordinate()
 
 void ForceGeneratorBase::PreCalculateForces()
 {
-	clock_t startTime = clock();
+	auto startTime = std::chrono::high_resolution_clock::now();
 	PreCalculateForcesInternal();
+	auto endTime = std::chrono::high_resolution_clock::now();
 
-	clock_t endTime = clock();
-	long diff = (long)(endTime - startTime);
-	FrameTimeRecorder::Me()->m_forceCalcTime = diff;
+	std::chrono::duration<double, std::milli> ms = endTime - startTime;
+	double elapsed = ms.count();
+
+	Session::Me().m_forceCalcTimeFile.WriteLine(std::to_string(elapsed));
 }

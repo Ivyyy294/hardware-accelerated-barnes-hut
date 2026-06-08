@@ -2,8 +2,26 @@
 #include "ForceGeneratorBarnesHutCS.h"
 
 ForceGeneratorBarnesHutCS::ForceGeneratorBarnesHutCS()
-	: m_deviceContext (D3D::Instance().GetDeviceContext())
+	: ForceGeneratorBase()
+	, m_deviceContext (D3D::Instance().GetDeviceContext())
+	, m_nCrit (Session::Me().m_variables.nCrit)
+	, m_buffer (m_maxParticleCount)
 {
+	const uint32_t maxCapacity = m_buffer.MaxCapacity();
+	m_cellWidth = new float[maxCapacity];
+	m_cellCenter = new XMFLOAT3 [maxCapacity];
+	m_cellCom = new XMFLOAT3 [maxCapacity];
+	m_cellCo = new uint32_t [maxCapacity];
+	m_cellLc = new uint32_t [maxCapacity];
+}
+
+ForceGeneratorBarnesHutCS::~ForceGeneratorBarnesHutCS()
+{
+	delete[] m_cellWidth;
+	delete[] m_cellCenter;
+	delete[] m_cellCom;
+	delete[] m_cellCo;
+	delete[] m_cellLc;
 }
 
 void ForceGeneratorBarnesHutCS::Start()
@@ -60,7 +78,7 @@ void ForceGeneratorBarnesHutCS::Start()
 	m_csBarnesHut_CF.Initialize();
 	m_csBarnesHut_CF.m_sharedBuffer = &m_buffer;
 
-	SessionLoggerManager::Me()->m_shaderTime.WriteLine("CSMortonCodes;CSCornerStone_F;CSCornerStone_G1;CSCornerStone_G2;CSCornerStone_G3;CSCornerStone_NK;CSCornerStone_LO;CSCornerStone_CO;CSBarnesHut_MP;CSBarnesHut_CF");
+	Session::Me().m_shaderTimeFile.WriteLine("CSMortonCodes;RadixSort_MKey;CSCornerStone_F;CSCornerStone_G1;CSCornerStone_G2;CSCornerStone_G3;CSCornerStone_NK;RadixSort_NK;CSCornerStone_LO;CSCornerStone_CO;CSBarnesHut_MP;CSBarnesHut_CF");
 }
 
 
@@ -88,7 +106,7 @@ void ForceGeneratorBarnesHutCS::SetShaderParameter()
 
 	m_maxCoord = 0.f;
 
-	for (int i = 0; i < m_objects.size() && i < MAX_PARTICLE_COUNT; ++i)
+	for (int i = 0; i < m_objects.size(); ++i)
 	{
 		Vector3 pos = m_objects[i]->GetTransform()->GetPosition();
 		positionPtr[i].x = pos.x;
@@ -111,7 +129,7 @@ void ForceGeneratorBarnesHutCS::SetShaderParameter()
 	m_deviceContext->CopyResource(m_buffer.m_inMassBuffer, m_buffer.m_upMassBuffer);
 
 	m_maxCoord = std::ceilf(m_maxCoord);
-	m_csMortonCodes.SetShaderParameter({-m_maxCoord, -m_maxCoord, -m_maxCoord}, { m_maxCoord, m_maxCoord, m_maxCoord });
+	m_csMortonCodes.SetShaderParameter({ m_maxCoord, m_maxCoord, m_maxCoord });
 
 	//Clear UAV
 	m_buffer.ClearUavBuffer();
@@ -131,10 +149,25 @@ void ForceGeneratorBarnesHutCS::Exit()
 	m_csCornerStone_F.ShutdownShader();
 }
 
-void ForceGeneratorBarnesHutCS::Update()
+void ForceGeneratorBarnesHutCS::OnDrawGizmo()
 {
-	if (Input::KeyDown(Key::KEY_P))
-		m_dumpMemmory = true;
+	uint32_t count = m_counterBuffer[0] + m_counterBuffer[1];
+
+	for (uint32_t i = 0; i < count; ++i)
+	{
+		if (m_cellCo[i] == 0 && m_cellLc[i] > 0)
+		{
+			Vector3 center (m_cellCenter[i].x, m_cellCenter[i].y, m_cellCenter[i].z);
+
+			Vector3 halfExtends (m_cellWidth[i] * 0.5f, m_cellWidth[i] * 0.5f, m_cellWidth[i] * 0.5f);
+			Gizmo::AddCube (center, halfExtends, Color::Green, Transform::Space::WORLD);
+
+			Vector3 com (m_cellCom[i].x, m_cellCom[i].y, m_cellCom[i].z);
+			Gizmo::AddCube (com, Vector3(0.1f, 0.1f, 0.1f), Color::Red, Transform::Space::WORLD);
+
+			Gizmo::AddLine (center, com, Color::Red, Transform::Space::WORLD);
+		}
+	}
 }
 
 void ForceGeneratorBarnesHutCS::PreCalculateForcesInternal()
@@ -146,19 +179,18 @@ void ForceGeneratorBarnesHutCS::PreCalculateForcesInternal()
 	CallculateMortonKeys(capacity);
 	DispatchRadixSort (capacity);
 	BuildOctree (capacity);
+
 	CallculateForces (capacity);
 
 	CopyForceData();
-	CopyTestData();
 
-	RecordExecutionTime();
+	if (Gizmo::Draw)
+		CopyCellData();
 
-	m_dumpMemmory = true;
-
-	if (m_dumpMemmory)
+	if (Session::Me().m_logDebugInfo)
 	{
+		RecordExecutionTime();
 		m_buffer.RecordBufferSnapshot();
-		m_dumpMemmory = false;
 	}
 }
 
@@ -222,6 +254,14 @@ void ForceGeneratorBarnesHutCS::BuildOctree(uint32_t elementCount)
 
 	m_deviceContext->CopyResource(m_buffer.m_inNkBuffer, m_buffer.m_outNkBuffer);
 
+	//record sort time before sorting nk
+	if (Session::Me().m_logDebugInfo)
+	{
+		m_sortTimeKeyMs = m_csRadixSort_1.GetExecutionTimeMs()
+		+ m_csRadixSort_2.GetExecutionTimeMs()
+		+ m_csRadixSort_3.GetExecutionTimeMs();
+	}
+
 	//Sort NK
 	uint32_t nCount = m_counterBuffer[0] + m_counterBuffer[1];
 	m_buffer.SetSettingParameter(nCount, 40);
@@ -282,8 +322,8 @@ void ForceGeneratorBarnesHutCS::CopyForceData()
 	if (SUCCEEDED(hr))
 	{
 		XMFLOAT3* dataPtr = (XMFLOAT3*)mappedResource.pData;
-		XMFLOAT3 test = dataPtr[MAX_PARTICLE_COUNT-1];
-		memcpy(m_forceBuffer, dataPtr, sizeof(XMFLOAT3) * (MAX_PARTICLE_COUNT));
+		XMFLOAT3 test = dataPtr[m_maxParticleCount-1];
+		memcpy(m_forceBuffer, dataPtr, sizeof(XMFLOAT3) * (m_maxParticleCount));
 		m_deviceContext->Unmap(m_buffer.m_outForceBuffer, 0);
 	}
 }
@@ -302,19 +342,95 @@ void ForceGeneratorBarnesHutCS::CopyCounterBuffer()
 	}
 }
 
+void ForceGeneratorBarnesHutCS::CopyCellData()
+{
+	//Copy cellWidth
+	m_deviceContext->CopyResource(m_buffer.m_dFloatBuffer, m_buffer.m_cellWidthBuffer);
+
+	D3D11_MAPPED_SUBRESOURCE mappedResource;
+	HRESULT hr = m_deviceContext->Map(m_buffer.m_dFloatBuffer, 0, D3D11_MAP_READ, 0, &mappedResource);
+
+	const uint32_t maxCapacity = m_buffer.MaxCapacity();
+
+	if (SUCCEEDED(hr))
+	{
+		float* dataPtr = (float*)mappedResource.pData;
+		memcpy(m_cellWidth, dataPtr, sizeof(float) * maxCapacity);
+		m_deviceContext->Unmap(m_buffer.m_dFloatBuffer, 0);
+	}
+
+	//Copy cell center
+	m_deviceContext->CopyResource(m_buffer.m_dFloat3Buffer, m_buffer.m_cellCenterBuffer);
+
+	mappedResource;
+	hr = m_deviceContext->Map(m_buffer.m_dFloat3Buffer, 0, D3D11_MAP_READ, 0, &mappedResource);
+
+	if (SUCCEEDED(hr))
+	{
+		XMFLOAT3* dataPtr = (XMFLOAT3*)mappedResource.pData;
+		memcpy(m_cellCenter, dataPtr, sizeof(XMFLOAT3) * maxCapacity);
+		m_deviceContext->Unmap(m_buffer.m_dFloat3Buffer, 0);
+	}
+
+	//Copy cell com
+	m_deviceContext->CopyResource(m_buffer.m_dFloat3Buffer, m_buffer.m_centerMassBuffer);
+
+	mappedResource;
+	hr = m_deviceContext->Map(m_buffer.m_dFloat3Buffer, 0, D3D11_MAP_READ, 0, &mappedResource);
+
+	if (SUCCEEDED(hr))
+	{
+		XMFLOAT3* dataPtr = (XMFLOAT3*)mappedResource.pData;
+		memcpy(m_cellCom, dataPtr, sizeof(XMFLOAT3) * maxCapacity);
+		m_deviceContext->Unmap(m_buffer.m_dFloat3Buffer, 0);
+	}
+
+	//Copy cell co
+	m_deviceContext->CopyResource(m_buffer.m_dUint32Buffer, m_buffer.m_coBuffer);
+
+	mappedResource;
+	hr = m_deviceContext->Map(m_buffer.m_dUint32Buffer, 0, D3D11_MAP_READ, 0, &mappedResource);
+
+	if (SUCCEEDED(hr))
+	{
+		uint32_t* dataPtr = (uint32_t*)mappedResource.pData;
+		memcpy(m_cellCo, dataPtr, sizeof(uint32_t) * maxCapacity);
+		m_deviceContext->Unmap(m_buffer.m_dUint32Buffer, 0);
+	}
+
+	//Copy cell lc
+	m_deviceContext->CopyResource(m_buffer.m_dUint32Buffer, m_buffer.m_lcBuffer);
+
+	mappedResource;
+	hr = m_deviceContext->Map(m_buffer.m_dUint32Buffer, 0, D3D11_MAP_READ, 0, &mappedResource);
+
+	if (SUCCEEDED(hr))
+	{
+		uint32_t* dataPtr = (uint32_t*)mappedResource.pData;
+		memcpy(m_cellLc, dataPtr, sizeof(uint32_t) * maxCapacity);
+		m_deviceContext->Unmap(m_buffer.m_dUint32Buffer, 0);
+	}
+}
+
 void ForceGeneratorBarnesHutCS::RecordExecutionTime()
 {
+	float sortTimeKeyMs = m_csRadixSort_1.GetExecutionTimeMs()
+		+ m_csRadixSort_2.GetExecutionTimeMs()
+		+ m_csRadixSort_4.GetExecutionTimeMs();;
+
 	string val = std::to_string(m_csMortonCodes.GetExecutionTimeMs())
+		+ ";" + std::to_string(m_sortTimeKeyMs)
 		+ ";" + std::to_string(m_csCornerStone_F.GetExecutionTimeMs())
 		+ ";" + std::to_string(m_csCornerStone_G1.GetExecutionTimeMs())
 		+ ";" + std::to_string(m_csCornerStone_G2.GetExecutionTimeMs())
 		+ ";" + std::to_string(m_csCornerStone_G3.GetExecutionTimeMs())
 		+ ";" + std::to_string(m_csCornerStone_NK.GetExecutionTimeMs())
+		+ ";" + std::to_string(sortTimeKeyMs)
 		+ ";" + std::to_string(m_csCornerStone_LO.GetExecutionTimeMs())
 		+ ";" + std::to_string(m_csCornerStone_CO.GetExecutionTimeMs())
 		+ ";" + std::to_string(m_csBarnesHut_MP.GetExecutionTimeMs())
 		+ ";" + std::to_string(m_csBarnesHut_CF.GetExecutionTimeMs());
 
-	SessionLoggerManager::Me()->m_shaderTime.WriteLine(val);
+	Session::Me().m_shaderTimeFile.WriteLine(val);
 }
 

@@ -27,19 +27,20 @@ Asteroid::Asteroid()
 
 	//Physics
 	m_physicObject = AddComponent<PhysicObject>().get();
-	//physic->SetMass(0.1f);
-
-	//Collider
-	//auto collider = AddComponent<CircleCollider>();
-	//collider->SetRadius (0.5f);
 
 	transform.SetLocalScale ({0.05f, 0.05f, 0.05f});
+}
+
+void Asteroid::SetPhysicalProperties(float mass, float size)
+{
+	m_physicObject->SetMass(mass);
+	transform.SetLocalScale(Vector3{ 0.05f, 0.05f, 0.05f } * size);
 }
 
 void Asteroid::SetOrbit(OrbitalElement oe, const PhysicObject* soi)
 {
 	OrbitalData orbitalData = KeplerOrbit::CallculateOrbitalData (oe, soi->GetMass());
-	Vector3 pos = KeplerOrbit::CalculateOrbitalPositionAtTime (oe, orbitalData, 0.f);
+	Vector3 pos = soi->GetTransform()->GetPosition() + KeplerOrbit::CalculateOrbitalPositionAtTime (oe, orbitalData, 0.f);
 	Vector3 vel = KeplerOrbit::CalculateOrbitalVelocityAtPosition (oe, orbitalData, pos) * -1.f;
 	transform.SetPosition (pos);
 	m_physicObject->SetVelocity(vel);

@@ -7,7 +7,7 @@ CsMortonCodes::CsMortonCodes()
 {
 }
 
-void CsMortonCodes::SetShaderParameter(XMFLOAT3 boundsMin, XMFLOAT3 boundsMax)
+void CsMortonCodes::SetShaderParameter(XMFLOAT3 boundsHalf)
 {
 	ID3D11DeviceContext* m_deviceContext = D3D::Instance().GetDeviceContext();
 
@@ -22,8 +22,7 @@ void CsMortonCodes::SetShaderParameter(XMFLOAT3 boundsMin, XMFLOAT3 boundsMax)
 		return;
 
 	UnitCube* unitCube = (UnitCube*)mappedUnitCube.pData;
-	unitCube->boundsMax = boundsMax;
-	unitCube->boundsMin = boundsMin;
+	unitCube->boundsMax = boundsHalf;
 
 	m_deviceContext->Unmap(m_unitCubeBuffer, 0);
 }

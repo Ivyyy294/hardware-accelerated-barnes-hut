@@ -1,5 +1,5 @@
 #include "CSUtils.hlsli"
-#include "CSStack.hlsli"
+#include "CSDoubleBuffer.hlsli"
 
 #define NUM_THREADS 256
 #define L 10
@@ -28,35 +28,33 @@ struct NodeData
     float cellWidth;
     float3 com;
     float mass;
+    float3 center;
 };
 
 //Particle data buffer
-StructuredBuffer<uint> keyBuffer : register(t0);
-StructuredBuffer<float3> posBuffer : register(t1);
-StructuredBuffer<float> massBuffer : register(t2);
-StructuredBuffer<uint> newToOldIndexBuffer : register(t3);
+StructuredBuffer<float3> posBuffer : register(t0);
+StructuredBuffer<float> massBuffer : register(t1);
+StructuredBuffer<uint> newToOldIndexBuffer : register(t2);
 
 //Tree data buffer
-StructuredBuffer<uint> kBuffer : register(t4);
-StructuredBuffer<uint> nkBuffer : register(t5);
-StructuredBuffer<uint> loBuffer : register(t6);
-StructuredBuffer<uint> coBuffer : register(t7);
-StructuredBuffer<uint> counterBuffer : register(t8);
+StructuredBuffer<uint> nkBuffer : register(t3);
+StructuredBuffer<uint> coBuffer : register(t4);
 
 //Multipole data
-StructuredBuffer<float3> centerOfMass : register(t9);
-StructuredBuffer<float> combinedMass : register(t10);
-
-StructuredBuffer<uint> liBuffer : register(t11);
-StructuredBuffer<uint> lcBuffer : register(t12);
+StructuredBuffer<float3> centerOfMass : register(t5);
+StructuredBuffer<float> combinedMass : register(t6);
+StructuredBuffer<uint> liBuffer : register(t7);
+StructuredBuffer<uint> lcBuffer : register(t8);
+StructuredBuffer<float> cellWidth : register(t9);
+StructuredBuffer<float3> cellCenter : register(t10);
 
 RWStructuredBuffer<float3> forceBuffer : register(u0);
 
 //Groupshared
-groupshared CStack stack;
+groupshared CDoubleBuffer stack;
 
 groupshared uint nodeIndex = 0;
-groupshared float criterium = 0.f;
+groupshared bool gCriterium = 0.f;
 groupshared uint minSqrDistInt = 0;
 groupshared bool gDone = false;
 
@@ -92,9 +90,12 @@ void GetNodeData(out NodeData data, in const uint nodeIndex)
     const uint level = GetTreeLevelFromWs(nk);
     data.firstChild = coBuffer[nodeIndex];
     data.isInternalNode = data.firstChild > 0;
-    data.cellWidth = globallCellWidth / (1 << level);
+    data.cellWidth = cellWidth[ nodeIndex];
     data.com = centerOfMass[nodeIndex];
     data.mass = combinedMass[nodeIndex];
+    data.center = cellCenter[nodeIndex];
+    
+    debugBuffer[nodeIndex] = data.cellWidth;
 }
 
 float3 ApplyForceFromNode(float pMass, float p2Mass, float3 direction, float sqrDistance)
@@ -144,10 +145,15 @@ bool IsTraversalDone(const uint3 GTid, out int localNodeIndex)
 {
     if (GTid.x == 0)
     {
-        gDone = stack.IsEmpty();
+        gDone = stack.IsFrontEmpty() && stack.IsBackEmpty();
         
         if (!gDone)
+        {
+            if (stack.IsFrontEmpty())
+                stack.Swap();
+                
             stack.Pop(nodeIndex);
+        }
     }
         
     GroupMemoryBarrierWithGroupSync();
@@ -157,24 +163,21 @@ bool IsTraversalDone(const uint3 GTid, out int localNodeIndex)
     return done;
 }
 
-//void ApplyNodeStack(inout ParticleData pData, in uint stack[256], const uint count)
-//{
-//    for (uint i = 0; i < count; ++i)
-//    {
-//        const float nodeMass = combinedMass[stack[i]];
-//        pData.force += ApplyForceFromNode(pData.mass, nodeMass, direction, sqrDistance);
-//    }
+bool GetCriteriumForNode(const uint3 GTid, const NodeData nData, const float minSqrDist)
+{
+    if (GTid.x == 0)
+    {
+        float delta = distance(nData.com, nData.center);
+        float critVal = (nData.cellWidth / theta) + delta;
+        gCriterium = minSqrDist > (critVal * critVal);
+    }
     
-//    GroupMemoryBarrierWithGroupSync();
-//}
-
-//void ApplyParticleStack(inout ParticleData pData, in uint stack[256], const uint count)
-//{
-//    for (uint i = 0; i < count; ++i)
-//        pData.force += ApplyCloseRangeForces(pData.mass, pData.pos, stack[i]);
+    GroupMemoryBarrierWithGroupSync();
     
-//    GroupMemoryBarrierWithGroupSync();
-//}
+    bool val = gCriterium;
+    
+    return val;
+}
 
 [numthreads(NUM_THREADS, 1, 1)]
 void main(uint3 GTid : SV_GroupThreadID,
@@ -234,15 +237,10 @@ void main(uint3 GTid : SV_GroupThreadID,
             
         float minSqrDist = UintToFloat(minSqrDistInt);
             
-        if (GTid.x == 0)
-            criterium = minSqrDist > 0.f ? (nData.cellWidth * nData.cellWidth) / minSqrDist : theta;
-            
-        GroupMemoryBarrierWithGroupSync();
-            
-        float localCriterium = criterium;
-        
+        bool criterium = GetCriteriumForNode(GTid, nData, minSqrDist);
+       
         //apply node
-        if (localCriterium < theta)
+        if (criterium)
             pData.force += ApplyForceFromNode(pData.mass, nData.mass, direction, sqrDistance);
         //push childen
         else if (nData.isInternalNode)

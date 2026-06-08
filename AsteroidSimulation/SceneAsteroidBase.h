@@ -22,10 +22,6 @@ protected:
 	void AdjustFixedUpdateLoop (ForceGeneratorBase* forceGenerator);
 
 private:
-	void SpawnAsteroids(int num, float dist, float speed);
-	void SpawnAsteroids(int num, Vector2 dist, Vector2 e, Vector2 i, GameObject* planet);
-
-	void LogSessionVariables();
-	void AdjustMainLoop();
+	void SpawnAsteroids(int num, GameObject* planet);
 };
 

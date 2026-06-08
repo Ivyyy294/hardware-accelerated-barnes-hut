@@ -1,4 +1,5 @@
 #include "CSUtils.hlsli"
+#include "CSZOrder.hlsli"
 
 #define L 10
 #define NUM_THREADS 256
@@ -27,101 +28,61 @@ RWStructuredBuffer<float3> centerOfMass : register(u0);
 RWStructuredBuffer<float> combinedMass : register(u1);
 RWStructuredBuffer<uint> liBuffer : register(u2);
 RWStructuredBuffer<uint> lcBuffer : register(u3);
-
-groupshared float gCombinedMass[NUM_THREADS];
-groupshared float3 gCenterOfMass[NUM_THREADS];
-groupshared uint gCount = 0;
-groupshared uint gIndexBegin = 0;
-groupshared bool gIsLeaf = false;
+RWStructuredBuffer<float> cellWidthBuffer : register(u4);
+RWStructuredBuffer<float3> cellCenterBuffer : register(u5);
 
 [numthreads(NUM_THREADS, 1, 1)]
 void main(uint3 GTid : SV_GroupThreadID,
           uint3 Gid : SV_GroupID)
 {
-    if (GTid.x == 0)
-    {
-        uint ws = nkBuffer[Gid.x];
-        uint level = GetTreeLevelFromWs(ws);
-        uint prefix = ws - (1 << (3 * level));
-        uint range = 3 * (L - level);
+    const uint index = Gid.x * NUM_THREADS + GTid.x;
+    const uint ni = counterBuffer[1];
+    const uint nl = counterBuffer[0];
+    const uint n = ni + nl;
     
-        uint begin = prefix << range;
-        uint end = (prefix + 1) << range;
+    if (index >= n)
+        return;
     
-        gIndexBegin = BinarySearch(begin, keyBuffer, pCount);
-        uint indexLast = BinarySearch(end, keyBuffer, pCount);
-        gCount = indexLast - gIndexBegin;
+    uint ws = nkBuffer[index];
+    uint level = GetTreeLevelFromWs(ws);
+    uint prefix = ws - (1 << (3 * level));
+    uint range = 3 * (L - level);
+    
+    uint begin = prefix << range;
+    uint end = (prefix + 1) << range;
+    
+    uint indexBegin = BinarySearch(begin, keyBuffer, pCount);
+    uint indexLast = BinarySearch(end, keyBuffer, pCount);
+    uint count = indexLast - indexBegin;
+    
+    float mass = 0.f;
+    float3 center = float3(0.f, 0.f, 0.f);
         
-        liBuffer[Gid.x] = gIndexBegin;
-        lcBuffer[Gid.x] = gCount;
-        gIsLeaf = coBuffer[Gid.x] == 0;
+    for (uint i = indexBegin; i < indexLast; ++i)
+    {
+        const float iMass = massBuffer[i];
+        mass += iMass;
+        
+        const float3 iPos = posBuffer[i];
+        center.x += iPos.x * iMass;
+        center.y += iPos.y * iMass;
+        center.z += iPos.z * iMass;
     }
     
-    AllMemoryBarrierWithGroupSync();
-    
-    if (gIsLeaf)
-    {
-        if (GTid.x < gCount)
-        {
-            const uint pIndex = gIndexBegin + GTid.x;
-            const float mass = massBuffer[pIndex];
-            float3 pos = posBuffer[pIndex];
-        
-            gCombinedMass[GTid.x] = mass;
-            gCenterOfMass[GTid.x] = pos * mass;
-        }
-        
-        AllMemoryBarrierWithGroupSync();
-        
-        if (GTid.x == 0)
-        {
-            float mass;
-            float3 pos;
+    if (mass > 0.f)
+        centerOfMass[index] = center / mass;
             
-            for (uint i = 0; i < gCount; ++i)
-            {
-                mass += gCombinedMass[i];
-                pos += gCenterOfMass[i];
-            }
+    combinedMass[index] = mass;
             
-            centerOfMass[Gid.x] = mass > 0.f ? pos / mass : float3(0.f, 0.f, 0.f);
-            combinedMass[Gid.x] = mass;
-        }
-    }
+    liBuffer[index] = indexBegin;
+    lcBuffer[index] = count;
     
-    //for (uint i = 0; i < count; i += NUM_THREADS)
-    //{
-    //    const uint pOffset = GTid.x + i;
-    //    const uint pIndex = indexBegin + pOffset;
-        
-    //    if (pOffset < gCount)
-    //    {
-    //        float mass = massBuffer[pIndex];
-    //        InterlockedAdd(gCombinedMass, asuint(mass));
-            
-    //        float3 pos = posBuffer[pIndex];
-    //        InterlockedAdd(gCenterOfMass[0], asuint(pos.x * mass));
-    //        InterlockedAdd(gCenterOfMass[1], asuint(pos.y * mass));
-    //        InterlockedAdd(gCenterOfMass[2], asuint(pos.z * mass));
-    //    }
-    //}
+    //Callculate cell width
+    float cellWidth = globallCellWidth / (1 << level);
+    cellWidthBuffer[index] = cellWidth;
     
-    //GroupMemoryBarrierWithGroupSync();
+    float3 boundsMin = globallCellWidth * -0.5f;
+    float3 boundsMax = globallCellWidth * 0.5f;
     
-    //if (GTid.x == 0)
-    //{
-    //    const float mass = asfloat(gCombinedMass);
-    //    combinedMass[Gid.x] = mass;
-        
-    //    if (mass > 0.f)
-    //    {
-    //        float3 center = 0.f;
-    //        center.x = asfloat(gCenterOfMass[0]);
-    //        center.y = asfloat(gCenterOfMass[1]);
-    //        center.z = asfloat(gCenterOfMass[2]);
-    //        centerOfMass[Gid.x] = center / mass;
-    //    }
-    //    else
-    //        centerOfMass[Gid.x] = float3(0.f, 0.f, 0.f);
-    //}
+    cellCenterBuffer[index] = DecodeWSKey(ws, level, boundsMin, boundsMax);
 }

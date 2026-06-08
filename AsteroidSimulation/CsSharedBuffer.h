@@ -1,7 +1,7 @@
 #pragma once
 
 #include "CSSettings.h"
-#include "SessionLoggerManager.h"
+#include "Session.h"
 
 struct BhSettings
 {
@@ -11,12 +11,13 @@ struct BhSettings
 	float theta;
 };
 
-
 class CsSharedBuffer
 {
 //Variables
 private:
 	ID3D11DeviceContext* m_deviceContext{ nullptr };
+	uint32_t m_maxParticleCount = 0;
+	uint32_t m_maxCapacity = 0;
 
 public:
 	//Debug buffer
@@ -26,6 +27,7 @@ public:
 
 	ID3D11Buffer* m_dUint32Buffer{ nullptr };
 	ID3D11Buffer* m_dFloatBuffer{ nullptr };
+	ID3D11Buffer* m_dFloat3Buffer{ nullptr };
 
 	//Settings buffer
 	ID3D11Buffer* m_settingsBuffer{ nullptr };
@@ -128,9 +130,17 @@ public:
 	ID3D11Buffer* m_outForceBuffer{ nullptr };
 	ID3D11UnorderedAccessView* m_uavForceBuffer = nullptr;
 
+	ID3D11Buffer* m_cellWidthBuffer{ nullptr };
+	ID3D11UnorderedAccessView* m_uavCellWidthBuffer = nullptr;
+	ID3D11ShaderResourceView* m_srvCellWidthBuffer = nullptr;
+
+	ID3D11Buffer* m_cellCenterBuffer{ nullptr };
+	ID3D11UnorderedAccessView* m_uavCellCenterBuffer = nullptr;
+	ID3D11ShaderResourceView* m_srvCellCenterBuffer = nullptr;
+
 //Methods
 public:
-	CsSharedBuffer();
+	CsSharedBuffer(uint32_t maxParticleCount);
 
 	bool InitShaderParameters();
 	void ReleaseShaderParameters();
@@ -140,6 +150,8 @@ public:
 	void SwapParticleBuffer ();
 
 	void RecordBufferSnapshot();
+
+	inline uint32_t MaxCapacity() const {return m_maxCapacity;}
 
 private:
 	HRESULT InitDebugShaderParameters(ID3D11Device* device);
@@ -156,7 +168,7 @@ private:
 };
 
 template<typename T>
-inline void CsSharedBuffer::RecordBufferSnapshot(ID3D11Buffer* dest, ID3D11Buffer* source, const string name, const size_t count)
+void CsSharedBuffer::RecordBufferSnapshot(ID3D11Buffer* dest, ID3D11Buffer* source, const string name, const size_t count)
 {
 	//m_deviceContext->CopyResource (dest, source);
 	m_deviceContext->CopySubresourceRegion (dest, 0, 0,0,0, source, 0, nullptr);
@@ -174,7 +186,7 @@ inline void CsSharedBuffer::RecordBufferSnapshot(ID3D11Buffer* dest, ID3D11Buffe
 		for (size_t i = 0; i < count; ++i)
 			memDump += std::to_string(data[i]) + ";";
 
-		SessionLoggerManager::Me()->m_gpuMemDump.WriteLine (memDump);
+		Session::Me().m_gpuMemDumpFile.WriteLine (memDump);
 
 		m_deviceContext->Unmap(dest, 0);
 	}

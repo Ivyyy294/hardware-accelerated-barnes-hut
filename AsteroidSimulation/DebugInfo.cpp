@@ -2,6 +2,8 @@
 #include "DebugInfo.h"
 #include <IvyyyTime.h>
 #include "IvyyyDebug.h"
+#include <IvyyyEngine.h>
+#include "Session.h"
 
 void DebugInfo::Start ()
 {
@@ -16,6 +18,15 @@ void DebugInfo::Update ()
 		fontmesh->SetText ( L"FPS: " + std::to_wstring (fps) + L"\nDeltaTIme: " + std::to_wstring (deltatime));
 	//else
 	//	Debug::Log("FPS: " + std::to_string(fps) + ", DeltaTIme: " + std::to_string(deltatime));
+
+	if (Input::KeyDown(Key::KEY_G))
+		Gizmo::Draw = !Gizmo::Draw;
+
+	if (Input::KeyDown(Key::KEY_ESC))
+		IvyyyEngine::Me()->Exit();
+
+	if (Input::KeyDown(Key::KEY_P))
+		Session::Me().m_logDebugInfo = true;
 }
 
 void DebugInfo::UpdateFps()

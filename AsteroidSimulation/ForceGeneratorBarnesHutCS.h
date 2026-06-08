@@ -30,7 +30,7 @@ class ForceGeneratorBarnesHutCS :
 {
 //Variables
 private:
-	const uint32_t m_nCrit {128};
+	const uint32_t m_nCrit {64};
 
 	ID3D11DeviceContext* m_deviceContext {nullptr};
 	
@@ -57,16 +57,25 @@ private:
 	CsBarnesHut_CF m_csBarnesHut_CF;
 
 	float m_maxCoord = 0.f;
-	bool m_dumpMemmory = false;
-	uint32_t m_counterBuffer[3];
+	uint32_t m_counterBuffer[3] = {1,0,1};
+
+	float* m_cellWidth = nullptr;
+	XMFLOAT3* m_cellCenter = nullptr;
+	XMFLOAT3* m_cellCom = nullptr;
+	uint32_t* m_cellCo = nullptr;
+	uint32_t* m_cellLc = nullptr;
+
+	float m_sortTimeKeyMs = 0.f;
 
 //Methods
 public:
 	ForceGeneratorBarnesHutCS();
+	~ForceGeneratorBarnesHutCS();
 
 	void Start() override;
 	void Exit() override;
-	void Update() override;
+
+	void OnDrawGizmo() override;
 
 private:
 	void PreCalculateForcesInternal() override;
@@ -80,8 +89,8 @@ private:
 	void CopyTestData();
 	void CopyForceData();
 	void CopyCounterBuffer();
+	void CopyCellData();
 
 	void RecordExecutionTime();
-
 };
 

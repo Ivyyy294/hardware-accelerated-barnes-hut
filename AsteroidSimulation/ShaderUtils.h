@@ -1,7 +1,5 @@
 #pragma once
 
-#define MAX_CAPACITY MAX_PARTICLE_COUNT + MAX_PARTICLE_COUNT
-
 class ShaderUtils
 {
 //Methods

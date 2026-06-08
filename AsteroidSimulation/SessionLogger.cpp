@@ -58,7 +58,7 @@ string SessionLogger::GetSessionName()
 	tm datetime;
 	localtime_s(&datetime ,&timestamp);
 
-	strftime (buffer,32, "%Y-%b-%d-%H-%M", &datetime);
+	strftime (buffer,32, "%Y-%b-%d-%H-%M-%S", &datetime);
 
 	return std::string(buffer);
 }
