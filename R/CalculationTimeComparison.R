@@ -44,7 +44,43 @@ if (variablesOk){
   ## must be <0.05 to reject null hypothesis
   oneway.test(time ~ method, data = frameTimeLong, var.equal = FALSE)
   
-  games_howell_test(time ~ method, data = frameTimeLong)
+  #post-hoc
+  gamesHowellTable <- games_howell_test(time ~ method, data = frameTimeLong)
+  sig_df <- gamesHowellTable %>%
+    mutate(
+      xmin = group1,
+      xmax = group2,
+      annotations = p.adj.signif,
+      y_position = c(1.05, 1.15, 1.25) * max(frameTimeLong$time)
+    )
+  
+  shapiroTable <- frameTimeLong[
+    , .(
+      W       = shapiro.test(time)$statistic,
+      p_value = shapiro.test(time)$p.value
+    ),
+    by = method
+  ]
+  
+  ##qq plot
+  ggplot(frameTimeLong) +
+    aes(sample = time, color = method) +
+    stat_qq() +
+    stat_qq_line() +
+    facet_wrap(~method, scales = "free") +
+    labs(color = "Method", y = "MS", x ="Method") +
+    ggtitle(sprintf("QQ-Plots per method n = %d", nCount)) +
+    theme_minimal()
+  
+  #box plot
+  ggplot(frameTimeLong) +
+    aes(x = method, y = time, fill = method) +
+    geom_boxplot(alpha = 0.5, outlier.shape = NA) +
+    geom_jitter(alpha = 0.2, width = 0.1, size = 0.7) +
+    facet_wrap(~method, scales = "free_y") +
+    labs(fill = "Method", y = "MS", x ="Method") +
+    ggtitle(sprintf("Box-Plots per method n = %d", nCount)) +
+    theme_minimal()
   
   ##Scatter plot
   ggplot (frameTimeLong) +
