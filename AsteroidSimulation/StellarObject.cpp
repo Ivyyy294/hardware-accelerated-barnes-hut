@@ -10,7 +10,7 @@ StellarObject::StellarObject()
 void StellarObject::SetPhysicalProperties(float mass, float size)
 {
 	m_physicObject->SetMass(mass);
-	transform.SetLocalScale(Vector3{ 0.05f, 0.05f, 0.05f } *size);
+	transform.SetLocalScale(Vector3::One * size);
 }
 
 void StellarObject::SetOrbit(OrbitalElement oe, const PhysicObject* soi)
