@@ -410,6 +410,7 @@ void CsSharedBuffer::RecordBufferSnapshot()
 	RecordBufferSnapshot <uint32_t> (m_dUint32Buffer, m_liBuffer, "LI", m_maxCapacity);
 	RecordBufferSnapshot <uint32_t> (m_dUint32Buffer, m_lcBuffer, "LC", m_maxCapacity);
 	RecordBufferSnapshot <float> (m_dFloatBuffer, m_combinedMassBuffer, "CM", m_maxCapacity);
+	RecordBufferSnapshot <float> (m_dFloatBuffer, m_cellWidthBuffer, "CW", m_maxCapacity);
 	RecordBufferSnapshot <uint32_t> (m_dUint32Buffer, m_counterBuffer, "n", 2);
 
 	//m_deviceContext->CopyResource (dest, source);

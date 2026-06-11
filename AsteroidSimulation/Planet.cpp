@@ -20,11 +20,6 @@ Planet::Planet()
 	//Physics
 	auto physic = AddComponent<PhysicObject>();
 	physic->SetMass (25000);
-	//physic->SetStatic(true);
-
-	//Collider
-	auto collider = AddComponent<CircleCollider>();
-	collider->SetRadius(0.5f);
 
 	transform.SetLocalScale({ 2.0f, 2.0f, 2.0f });
 }
