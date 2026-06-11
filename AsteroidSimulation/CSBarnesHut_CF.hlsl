@@ -1,7 +1,7 @@
 #include "CSUtils.hlsli"
 #include "CSDoubleBuffer.hlsli"
 
-#define NUM_THREADS 256
+#define NUM_THREADS 64
 #define L 10
 
 cbuffer SettingsBuffer : register(b0)
