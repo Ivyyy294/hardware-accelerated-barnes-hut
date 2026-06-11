@@ -5,11 +5,11 @@ numAsteroids;10240
 ugc;0.000050
 fixedDeltaTime;0.02
 distRange;10.0;0.5
-eRange;0.0;0.1
+eRange;0.0;0.05
 iRange;0.0;2
 maxFixedFrames;0
 maxDurationSec;0
 seed;85245679
-centralMass;1000000
+centralMass;500000
 massRangeAsteroids;1.0;0.2
 minMassAsteroids;0.1

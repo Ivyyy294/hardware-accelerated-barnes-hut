@@ -54,8 +54,6 @@ StructuredBuffer<float3> cellCenter : register(t10);
 RWStructuredBuffer<float3> forceBuffer : register(u0);
 
 //Groupshared
-groupshared CDoubleBuffer stack;
-
 groupshared bool gDone = false;
 
 groupshared bool gIsInternalNode = false;
@@ -150,12 +148,12 @@ bool IsTraversalDone(const uint3 GTid)
 {
     if (GTid.x == 0)
     {
-        gDone = stack.IsFrontEmpty() && stack.IsBackEmpty();
+        gDone = DB_IsFrontEmpty() && DB_IsBackEmpty();
         
         if (!gDone)
         {
-            if (stack.IsFrontEmpty())
-                stack.Swap();
+            if (DB_IsFrontEmpty())
+                DB_Swap();
         }
     }
         
@@ -209,15 +207,15 @@ void main(uint3 GTid : SV_GroupThreadID,
 
     if (GTid.x == 0)
     {
-        stack.Initialize();
-        stack.Push(1);
-        stack.Push(2);
-        stack.Push(3);
-        stack.Push(4);
-        stack.Push(5);
-        stack.Push(6);
-        stack.Push(7);
-        stack.Push(8);
+        DB_Initialize();
+        DB_Push(1);
+        DB_Push(2);
+        DB_Push(3);
+        DB_Push(4);
+        DB_Push(5);
+        DB_Push(6);
+        DB_Push(7);
+        DB_Push(8);
     }
     
     [loop]
@@ -232,7 +230,7 @@ void main(uint3 GTid : SV_GroupThreadID,
         GroupMemoryBarrierWithGroupSync();
         
         uint nodeIndex;
-        bool ok = stack.InterlockedPop(nodeIndex);
+        bool ok = DB_InterlockedPop(nodeIndex);
         uint slot = 0;
         
         if (ok)
@@ -262,13 +260,14 @@ void main(uint3 GTid : SV_GroupThreadID,
 
                 [unroll]
                 for (uint c = 0; c < 8; ++c)
-                    stack.InterlockedPush(first + c);
+                    DB_InterlockedPush(first + c);
             }
         }
         
         GroupMemoryBarrierWithGroupSync();
         
         //Apply nodes
+
         for (uint j = 0; j < nodeCount; ++j)
         {
             //apply node
