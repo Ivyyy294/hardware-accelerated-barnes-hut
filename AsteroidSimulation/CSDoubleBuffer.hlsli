@@ -37,12 +37,54 @@ class CDoubleBuffer
         return true;
     }
     
+    bool InterlockedPush(uint val)
+    {    
+        uint index = 0;
+        InterlockedAdd(m_bCount, 1, index);
+        
+        if (index >= DBUFFER_SIZE)
+        {
+            // Undo increment
+            InterlockedAdd(m_bCount, -1);
+            return false;
+        }
+        
+        m_buffer[m_bBaseIndex + index] = val;
+        return true;
+    }
+    
     bool Pop(inout uint val)
     {
         if (m_fCount <= 0)
             return false;
 
         val = m_buffer[m_fBaseIndex + --m_fCount];
+        return true;
+    }
+    
+    bool InterlockedPop(inout uint val)
+    {
+        uint fCount = 0;
+        InterlockedAdd(m_fCount, -1, fCount);
+        
+        if (fCount == 0 || fCount > DBUFFER_SIZE)
+        {
+            // Undo decrement
+            InterlockedAdd(m_fCount, 1);
+            return false;
+        }
+        
+        uint index = fCount - 1;
+        val = m_buffer[m_fBaseIndex + index];
+        return true;
+    }
+    
+    bool Peek(in uint index, inout uint val)
+    {
+        if (m_fCount <= 0 || index >= m_fCount)
+            return false;
+        
+        val = m_buffer[m_fBaseIndex + index];
         return true;
     }
     
