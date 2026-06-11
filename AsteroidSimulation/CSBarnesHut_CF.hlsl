@@ -23,15 +23,15 @@ struct ParticleData
 
 struct NodeData
 {
-    uint index;
-    uint firstChild;
-    bool isInternalNode;
-    float cellWidth;
-    float3 com;
-    float mass;
-    float3 center;
-    bool criterium;
-    int minSqrDistInt;
+    uint index[NUM_THREADS];
+    uint firstChild[NUM_THREADS];
+    bool isInternalNode[NUM_THREADS];
+    float cellWidth[NUM_THREADS];
+    float3 com[NUM_THREADS];
+    float mass[NUM_THREADS];
+    float3 center[NUM_THREADS];
+    bool criterium[NUM_THREADS];
+    int minSqrDistInt[NUM_THREADS];
 };
 
 //Particle data buffer
@@ -62,7 +62,7 @@ groupshared bool gIsInternalNode = false;
 groupshared uint gPCount = 0;
 groupshared uint gFirstChild = 0;
 
-groupshared NodeData gNodeData[NUM_THREADS];
+groupshared NodeData gNodeData;
 groupshared uint gNodeCount;
 
 void GetParticleData(const uint index, bool isParticle, out ParticleData data)
@@ -85,32 +85,30 @@ void GetParticleData(const uint index, bool isParticle, out ParticleData data)
     }
 }
 
-void GetNodeData(out NodeData data, in const uint nodeIndex)
+void GetNodeData(in const uint slot, in const uint nodeIndex)
 {
     const uint nk = nkBuffer[nodeIndex];
     const uint level = GetTreeLevelFromWs(nk);
-    data.index = nodeIndex;
-    data.firstChild = coBuffer[nodeIndex];
-    data.isInternalNode = data.firstChild > 0;
-    data.cellWidth = cellWidth[ nodeIndex];
-    data.com = centerOfMass[nodeIndex];
-    data.mass = combinedMass[nodeIndex];
-    data.center = cellCenter[nodeIndex];
-    data.criterium = false;
-    data.minSqrDistInt = 0xFFFFFFFF;
-    
-    debugBuffer[nodeIndex] = data.cellWidth;
+    gNodeData.index[slot] = nodeIndex;
+    gNodeData.firstChild[slot] = coBuffer[nodeIndex];
+    gNodeData.isInternalNode[slot] = coBuffer[nodeIndex] > 0;
+    gNodeData.cellWidth[slot] = cellWidth[nodeIndex];
+    gNodeData.com[slot] = centerOfMass[nodeIndex];
+    gNodeData.mass[slot] = combinedMass[nodeIndex];
+    gNodeData.center[slot] = cellCenter[nodeIndex];
+    gNodeData.criterium[slot] = false;
+    gNodeData.minSqrDistInt[slot] = 0xFFFFFFFF;
 }
 
-float3 ApplyForceFromNode(float pMass, const float3 pPos, NodeData nData)
+float3 ApplyForceFromNode(float pMass, const float3 pPos, const uint nodeIndex)
 {
-    float3 direction = nData.com - pPos;
+    float3 direction = gNodeData.com[nodeIndex] - pPos;
     float sqrDistance = dot(direction, direction);
     
     if (sqrDistance < 0.001f)
         return float3(0, 0, 0);
     
-    float forceMag = ugc * ((nData.mass * pMass) / sqrDistance);
+    float forceMag = ugc * ((gNodeData.mass[nodeIndex] * pMass) / sqrDistance);
     
     const float3 forceDirection = normalize(direction);
     
@@ -167,25 +165,23 @@ bool IsTraversalDone(const uint3 GTid)
     return done;
 }
 
-void SetCriteriumForNode(const uint3 GTid)
+void SetCriteriumForNode(const uint nodeDataIndex)
 {
-    const uint nodeDataIndex = GTid.x;
-
-    float minSqrDist = UintToFloat(gNodeData[nodeDataIndex].minSqrDistInt);
-    float delta = distance(gNodeData[nodeDataIndex].com, gNodeData[nodeDataIndex].center);
-    float critVal = (gNodeData[nodeDataIndex].cellWidth / theta) + delta;
-    gNodeData[nodeDataIndex].criterium = minSqrDist > (critVal * critVal);
+    float minSqrDist = UintToFloat(gNodeData.minSqrDistInt[nodeDataIndex]);
+    float delta = distance(gNodeData.com[nodeDataIndex], gNodeData.center[nodeDataIndex]);
+    float critVal = (gNodeData.cellWidth[nodeDataIndex] / theta) + delta;
+    gNodeData.criterium[nodeDataIndex] = minSqrDist > (critVal * critVal);
 }
 
 void SetMinDistForNode(const uint nodeDataIndex, const ParticleData pData)
 {
-    float3 direction = gNodeData[nodeDataIndex].com - pData.pos;
+    float3 direction = gNodeData.com[nodeDataIndex] - pData.pos;
     float sqrDistance = dot(direction, direction);
         
     GroupMemoryBarrierWithGroupSync();
         
     if (pData.isParticle)
-        InterlockedMin(gNodeData[nodeDataIndex].minSqrDistInt, FloatToUint(sqrDistance));
+        InterlockedMin(gNodeData.minSqrDistInt[nodeDataIndex], FloatToUint(sqrDistance));
 }
 
 [numthreads(NUM_THREADS, 1, 1)]
@@ -242,7 +238,7 @@ void main(uint3 GTid : SV_GroupThreadID,
         if (ok)
         {
             InterlockedAdd(gNodeCount, 1, slot);
-            GetNodeData(gNodeData[slot], nodeIndex);
+            GetNodeData(slot, nodeIndex);
         }
         
         GroupMemoryBarrierWithGroupSync();
@@ -253,16 +249,16 @@ void main(uint3 GTid : SV_GroupThreadID,
         for (uint iDist = 0; iDist < nodeCount; ++iDist)
             SetMinDistForNode(iDist, pData);
         
-        GroupMemoryBarrier();
+        GroupMemoryBarrierWithGroupSync();
         
         //Determin criterium
-        if (GTid.x < nodeCount)
+        if (ok)
         {
-            SetCriteriumForNode(GTid);
+            SetCriteriumForNode(slot);
                 
-            if (!gNodeData[GTid.x].criterium && gNodeData[GTid.x].isInternalNode)
+            if (!gNodeData.criterium[slot] && gNodeData.isInternalNode[slot])
             {
-                uint first = gNodeData[GTid.x].firstChild;
+                uint first = gNodeData.firstChild[slot];
 
                 [unroll]
                 for (uint c = 0; c < 8; ++c)
@@ -270,18 +266,16 @@ void main(uint3 GTid : SV_GroupThreadID,
             }
         }
         
-        GroupMemoryBarrier();
+        GroupMemoryBarrierWithGroupSync();
         
         //Apply nodes
         for (uint j = 0; j < nodeCount; ++j)
         {
-            NodeData nData = gNodeData[j];
-            debugBuffer[nData.index] = 1;
             //apply node
-            if (nData.criterium)
-                pData.force += ApplyForceFromNode(pData.mass, pData.pos, nData);
-            else if (nData.isInternalNode == false)
-                pData.force += ApplyCloseRangeForces(pData.mass, pData.pos, nData.index);
+            if (gNodeData.criterium[j])
+                pData.force += ApplyForceFromNode(pData.mass, pData.pos, j);
+            else if (gNodeData.isInternalNode[j] == false)
+                pData.force += ApplyCloseRangeForces(pData.mass, pData.pos, gNodeData.index[j]);
         }
     }
     
