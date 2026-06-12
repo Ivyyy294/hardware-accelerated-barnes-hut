@@ -25,11 +25,9 @@ struct NodeData
 {
     uint index[NUM_THREADS];
     uint firstChild[NUM_THREADS];
-    bool isInternalNode[NUM_THREADS];
     float cellWidth[NUM_THREADS];
     float3 com[NUM_THREADS];
     float mass[NUM_THREADS];
-    float3 center[NUM_THREADS];
     bool criterium[NUM_THREADS];
     int minSqrDistInt[NUM_THREADS];
 };
@@ -97,12 +95,8 @@ void GetNodeData(in const uint slot, in const uint nodeIndex)
     const uint nk = nkBuffer[nodeIndex];
     const uint level = GetTreeLevelFromWs(nk);
     gNodeData.index[slot] = nodeIndex;
-    gNodeData.firstChild[slot] = coBuffer[nodeIndex];
-    gNodeData.isInternalNode[slot] = coBuffer[nodeIndex] >= 1;
-    gNodeData.cellWidth[slot] = cellWidth[nodeIndex];
     gNodeData.com[slot] = centerOfMass[nodeIndex];
     gNodeData.mass[slot] = combinedMass[nodeIndex];
-    gNodeData.center[slot] = cellCenter[nodeIndex];
     gNodeData.criterium[slot] = false;
     gNodeData.minSqrDistInt[slot] = 0xFFFFFFFF;
 }
@@ -143,9 +137,11 @@ bool IsTraversalDone(const uint3 GTid)
 
 void SetCriteriumForNode(const uint nodeDataIndex)
 {
+    uint nodeIndex = gNodeData.index[nodeDataIndex];
+    
     float minSqrDist = UintToFloat(gNodeData.minSqrDistInt[nodeDataIndex]);
-    float delta = distance(gNodeData.com[nodeDataIndex], gNodeData.center[nodeDataIndex]);
-    float critVal = (gNodeData.cellWidth[nodeDataIndex] / theta) + delta;
+    float delta = distance(gNodeData.com[nodeDataIndex], cellCenter[nodeIndex]);
+    float critVal = (cellWidth[nodeIndex] / theta) + delta;
     gNodeData.criterium[nodeDataIndex] = minSqrDist > (critVal * critVal);
 }
 
@@ -231,10 +227,12 @@ void main(uint3 GTid : SV_GroupThreadID,
         if (ok)
         {
             SetCriteriumForNode(slot);
-                
-            if (!gNodeData.criterium[slot] && gNodeData.isInternalNode[slot])
+            
+            bool isInternalNode = coBuffer[gNodeData.index[slot]] > 0;
+            
+            if (!gNodeData.criterium[slot] && isInternalNode)
             {
-                uint first = gNodeData.firstChild[slot];
+                uint first = coBuffer[gNodeData.index[slot]];
 
                 [unroll]
                 for (uint c = 0; c < 8; ++c)
@@ -248,10 +246,12 @@ void main(uint3 GTid : SV_GroupThreadID,
 
         for (uint j = 0; j < nodeCount; ++j)
         {
+            bool isInternalNode = coBuffer[gNodeData.index[j]] > 0;
+            
             //apply node
             if (gNodeData.criterium[j])
                 pData.force += ApplyForceFromNode(pData.mass, pData.pos, j);
-            else if (gNodeData.isInternalNode[j] == false)
+            else if (isInternalNode == false)
             {
                 //Preload count and first particle index
                 if (GTid.x == 0)
