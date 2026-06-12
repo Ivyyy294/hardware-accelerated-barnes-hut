@@ -20,8 +20,6 @@ void main(uint3 GTid : SV_GroupThreadID,
         for (uint i = startIndex; i < targetIndex; i++)
             counter += globalHistogram[i];
         
-        InterlockedAdd(exclusivePrefixSum[targetIndex], counter);
+        exclusivePrefixSum[targetIndex] = counter;
     }
-    
-    GroupMemoryBarrierWithGroupSync();
 }

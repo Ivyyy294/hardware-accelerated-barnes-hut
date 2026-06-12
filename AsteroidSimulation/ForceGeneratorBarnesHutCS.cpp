@@ -190,6 +190,7 @@ void ForceGeneratorBarnesHutCS::PreCalculateForcesInternal()
 	{
 		RecordExecutionTime();
 		m_buffer.RecordBufferSnapshot();
+		CopyTestData();
 	}
 }
 

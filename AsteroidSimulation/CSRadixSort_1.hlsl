@@ -24,8 +24,6 @@ void main(uint3 DTid : SV_DispatchThreadID,
           uint3 GTid : SV_GroupThreadID,
           uint3 Gid : SV_GroupID)
 {
-    //debugBuffer[Gid.x * NUM_THREADS + GTid.x] = keyBuffer[Gid.x * NUM_THREADS + GTid.x];
-    //debugBuffer[Gid.x * NUM_THREADS + GTid.x] = globalHistogram[Gid.x * NUM_THREADS + GTid.x];
     const uint tileSize = ITEM_PER_THREAD * NUM_THREADS;
     uint histSize = NUM_DIGITS * NUM_BINS;
     const uint groupId = Gid.x;
@@ -35,7 +33,6 @@ void main(uint3 DTid : SV_DispatchThreadID,
     for (uint i = threadId; i < histSize; i += NUM_THREADS)
         localHistogram[i] = 0;
  
-    //debugBuffer[Gid.x * NUM_THREADS + GTid.x] = localHistogram[Gid.x * NUM_THREADS + GTid.x];
     //Blocks execution of all threads in a group until all group shared accesses have been completed
     //and all threads in the group have reached this call.
     GroupMemoryBarrierWithGroupSync();
@@ -78,9 +75,4 @@ void main(uint3 DTid : SV_DispatchThreadID,
         if (value > 0)
             InterlockedAdd(globalHistogram[i], value);
     }
-    
-    //Sync point
-    GroupMemoryBarrierWithGroupSync();
-    //debugBuffer[Gid.x * NUM_THREADS + GTid.x] = globalHistogram[Gid.x * NUM_THREADS + GTid.x];
-
 }
