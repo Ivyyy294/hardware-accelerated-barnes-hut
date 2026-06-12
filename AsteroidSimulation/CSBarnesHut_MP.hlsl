@@ -31,58 +31,92 @@ RWStructuredBuffer<uint> lcBuffer : register(u3);
 RWStructuredBuffer<float> cellWidthBuffer : register(u4);
 RWStructuredBuffer<float3> cellCenterBuffer : register(u5);
 
+groupshared bool gAbort;
+
+groupshared uint gIndexBegin;
+groupshared uint gIndexEnd;
+groupshared uint gCount;
+groupshared float4 gLocalComMass[NUM_THREADS];
+
 [numthreads(NUM_THREADS, 1, 1)]
 void main(uint3 GTid : SV_GroupThreadID,
           uint3 Gid : SV_GroupID)
 {
-    const uint index = Gid.x * NUM_THREADS + GTid.x;
-    const uint ni = counterBuffer[1];
-    const uint nl = counterBuffer[0];
-    const uint n = ni + nl;
-    
-    if (index >= n)
-        return;
-    
-    uint ws = nkBuffer[index];
-    uint level = GetTreeLevelFromWs(ws);
-    uint prefix = ws - (1 << (3 * level));
-    uint range = 3 * (L - level);
-    
-    uint begin = prefix << range;
-    uint end = (prefix + 1) << range;
-    
-    uint indexBegin = BinarySearch(begin, keyBuffer, pCount);
-    uint indexLast = BinarySearch(end, keyBuffer, pCount);
-    uint count = indexLast - indexBegin;
-    
-    float mass = 0.f;
-    float3 center = float3(0.f, 0.f, 0.f);
-        
-    for (uint i = indexBegin; i < indexLast; ++i)
+    if (GTid.x == 0)
     {
-        const float iMass = massBuffer[i];
-        mass += iMass;
-        
-        const float3 iPos = posBuffer[i];
-        center.x += iPos.x * iMass;
-        center.y += iPos.y * iMass;
-        center.z += iPos.z * iMass;
+        const uint ni = counterBuffer[1];
+        const uint nl = counterBuffer[0];
+        const uint n = ni + nl;
+        gAbort = Gid.x >= n;
     }
     
-    if (mass > 0.f)
-        centerOfMass[index] = center / mass;
-            
-    combinedMass[index] = mass;
-            
-    liBuffer[index] = indexBegin;
-    lcBuffer[index] = count;
+    GroupMemoryBarrierWithGroupSync();
     
-    //Callculate cell width
-    float cellWidth = globallCellWidth / (1 << level);
-    cellWidthBuffer[index] = cellWidth;
+    if (gAbort)
+        return;
     
-    float3 boundsMin = globallCellWidth * -0.5f;
-    float3 boundsMax = globallCellWidth * 0.5f;
+    const uint index = Gid.x;
+
+    if (GTid.x == 0)
+    {
+        uint ws = nkBuffer[index];
+        uint level = GetTreeLevelFromWs(ws);
+        uint prefix = ws - (1 << (3 * level));
+        uint range = 3 * (L - level);
     
-    cellCenterBuffer[index] = DecodeWSKey(ws, level, boundsMin, boundsMax);
+        uint begin = prefix << range;
+        uint end = (prefix + 1) << range;
+        
+        float cellWidth = globallCellWidth / (1 << level);
+        cellWidthBuffer[index] = cellWidth;
+    
+        float3 boundsMin = globallCellWidth * -0.5f;
+        float3 boundsMax = globallCellWidth * 0.5f;
+    
+        cellCenterBuffer[index] = DecodeWSKey(ws, level, boundsMin, boundsMax);
+        
+        gIndexBegin = BinarySearch(begin, keyBuffer, pCount);
+        gIndexEnd = BinarySearch(end, keyBuffer, pCount);
+        gCount = gIndexEnd - gIndexBegin;
+        
+        liBuffer[index] = gIndexBegin;
+        lcBuffer[index] = gCount;
+    }
+    
+    GroupMemoryBarrierWithGroupSync();
+        
+    float4 localComMass = 0.f;
+    
+    for (uint i = gIndexBegin + GTid.x; i < gIndexEnd; i += NUM_THREADS)
+    {
+        const float iMass = massBuffer[i];
+        localComMass.w += iMass;
+        
+        const float3 iPos = posBuffer[i];
+        localComMass.x += iPos.x * iMass;
+        localComMass.y += iPos.y * iMass;
+        localComMass.z += iPos.z * iMass;
+    }
+    
+    gLocalComMass[GTid.x] = localComMass;
+    
+    GroupMemoryBarrierWithGroupSync();
+    
+    if (GTid.x == 0)
+    {
+        float3 com = 0.f;
+        float mass = 0.f;
+        
+        for (uint i = 0; i < NUM_THREADS; ++i)
+        {
+            com += gLocalComMass[i].xyz;
+            mass += gLocalComMass[i].w;
+        }
+        
+        if (mass > 0.f)
+            com = com / mass;
+        
+        combinedMass[index] = mass;
+        centerOfMass[index] = com;
+    }
 }
