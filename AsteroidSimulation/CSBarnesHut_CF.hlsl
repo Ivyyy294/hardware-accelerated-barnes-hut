@@ -36,10 +36,9 @@ struct NodeData
 
 struct NodeParticleData
 {
+    float4 posMass[NUM_THREADS];
     uint count;
     uint firstChild;
-    float mass[NUM_THREADS];
-    float3 pos[NUM_THREADS];
 };
 
 //Particle data buffer
@@ -267,24 +266,22 @@ void main(uint3 GTid : SV_GroupThreadID,
                 if (GTid.x < gNodeParticleData.count)
                 {
                     uint pIndex = gNodeParticleData.firstChild + GTid.x;
-                    gNodeParticleData.mass[GTid.x] = massBuffer[pIndex];
-                    gNodeParticleData.pos[GTid.x] = posBuffer[pIndex];
+                    gNodeParticleData.posMass[GTid.x].w = massBuffer[pIndex];
+                    gNodeParticleData.posMass[GTid.x].xyz = posBuffer[pIndex];
                 }
                 
                 GroupMemoryBarrierWithGroupSync();
                 
                 for (uint pIndex = 0; pIndex < gNodeParticleData.count; ++pIndex)
                 {
-                    const float p2Mass = gNodeParticleData.mass[pIndex];
-                    const float3 p2Pos = gNodeParticleData.pos[pIndex];
-                    float3 forceDirection = p2Pos - pData.pos;
+                    float3 forceDirection = gNodeParticleData.posMass[pIndex].xyz - pData.pos;
                     const float sqrDistance = dot(forceDirection, forceDirection);
     
                     if (sqrDistance < 0.001f)
                         continue;
     
                     forceDirection = normalize(forceDirection);
-                    float forceMag = ugc * ((p2Mass * pData.mass) / sqrDistance);
+                    float forceMag = ugc * ((gNodeParticleData.posMass[pIndex].w * pData.mass) / sqrDistance);
     
                     pData.force += forceDirection * forceMag;
                 }
