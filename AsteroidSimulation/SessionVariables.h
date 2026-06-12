@@ -29,7 +29,7 @@ public:
 	float centralMass = 0.f;
 	Ivyyy::Vector2 massRangeAsteroids = {10.f, 0.5f};
 	float minMassAsteroids = 0.1f;
-
+	std::string outDir = "";
 //Methods
 public:
 	void Log ();

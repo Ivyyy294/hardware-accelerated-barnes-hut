@@ -6,6 +6,7 @@
 #include <IvyyyScreen.h>
 #include <IvyyyEngine.h>
 #include <IvyyySceneHandler.h>
+#include <IvyyyMsgBox.h>
 
 #include "SceneDirectIntegration.h"
 #include "SceneBarnesHut.h"
@@ -21,6 +22,7 @@ int WINAPI WinMain (_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance,
 	//Load session variables
 	SessionVariables variables;
 
+
 	if (!SessionVariablesLoadFromFile (variables, "variables.csv"))
 	{
 		variables.numAsteroids = 1024;
@@ -34,22 +36,29 @@ int WINAPI WinMain (_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance,
 
 	Session::Me().m_variables = variables;
 
-	SessionLogger::Me().StartSession("..//Out");
+	if (SessionLogger::Me().StartSession(variables.outDir))
+	{
+		Window::SetFullscreen (true);
+		Screen::SetResolution (Ivyyy::Resolution{ 1920, 1080 });
+		Renderer::SetMode (Renderer::Mode::DX11);
 
-	Window::SetFullscreen (true);
-	Screen::SetResolution (Ivyyy::Resolution{ 1920, 1080 });
-	Renderer::SetMode (Renderer::Mode::DX11);
+		if (variables.method == SessionVariables::ForceGeneratorMethod::DIRECT)
+			SceneHandler::AddScene <SceneDirectIntegration>();
+		else if (variables.method == SessionVariables::ForceGeneratorMethod::BARNES_HUT_CPU)
+			SceneHandler::AddScene <SceneBarnesHut>();
+		else
+			SceneHandler::AddScene <SceneBarnesHutCS>();
 
-	if (variables.method == SessionVariables::ForceGeneratorMethod::DIRECT)
-		SceneHandler::AddScene <SceneDirectIntegration>();
-	else if (variables.method == SessionVariables::ForceGeneratorMethod::BARNES_HUT_CPU)
-		SceneHandler::AddScene <SceneBarnesHut>();
+		int val = IvyyyEngine::Start(hInstance, nShowCmd);
+
+		SessionLogger::Me().EndSession();
+
+		return val;
+	}
 	else
-		SceneHandler::AddScene <SceneBarnesHutCS>();
+	{
+		Ivyyy::MsgBox::ShowError(L"Failed to start session!");
+		return 0;
+	}
 
-	int val = IvyyyEngine::Start(hInstance, nShowCmd);
-
-	SessionLogger::Me().EndSession();
-
-	return val;
 }

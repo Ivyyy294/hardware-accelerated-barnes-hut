@@ -138,6 +138,14 @@ bool SessionVariablesLoadFromFile(SessionVariables& variables, const std::string
 		else
 			return false;
 
+		if (std::getline(file, buffer))
+		{
+			GetValueFromString(buffer, valBuffer1);
+			variables.outDir = valBuffer1;
+		}
+		else
+			return false;
+
 		return true;
 	}
 

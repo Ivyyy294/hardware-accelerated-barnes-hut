@@ -3,12 +3,12 @@
 
 #include <filesystem>
 #include <ctime>
-
+#include <IvyyyMsgBox.h>
 
 bool SessionLogger::StartSession (const string& rootDir)
 {
 	string sessionName = GetSessionName();
-	string targetDir = rootDir + "//" + sessionName;
+	string targetDir = rootDir.length() > 0 ? rootDir + "//" + sessionName : sessionName;
 	std::filesystem::path path = std::filesystem::path(targetDir);
 
 	if (!filesystem::create_directory(path))
