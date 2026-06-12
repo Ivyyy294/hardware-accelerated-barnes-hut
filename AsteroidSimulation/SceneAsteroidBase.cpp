@@ -32,7 +32,6 @@ void SceneAsteroidBase::Init()
 
 	//Add duration controller
 	SessionDurationController* sdc = camera->AddComponent<SessionDurationController>().get();
-	sdc->m_maxDurationSec = m_sVar.maxDurationSec;
 	sdc->m_maxFixedFrames = m_sVar.maxFixedFrames;
 
 	//Add Debug UI

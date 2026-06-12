@@ -7,7 +7,6 @@ distRange;10.0;0.5
 eRange;0.0;0.05
 iRange;0.0;2
 maxFixedFrames;512
-maxDurationSec;0
 seed;85245679
 centralMass;500000
 massRangeAsteroids;1.0;0.2
