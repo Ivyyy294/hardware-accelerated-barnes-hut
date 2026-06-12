@@ -176,6 +176,7 @@
     <ClCompile Include="SessionVariables.cpp" />
     <ClCompile Include="ShaderUtils.cpp" />
     <ClCompile Include="SpatialOctree.cpp" />
+    <ClCompile Include="StellarObject.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Asteroid.h" />
@@ -218,6 +219,7 @@
     <ClInclude Include="SessionVariables.h" />
     <ClInclude Include="ShaderUtils.h" />
     <ClInclude Include="SpatialOctree.h" />
+    <ClInclude Include="StellarObject.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="color.hlsl">

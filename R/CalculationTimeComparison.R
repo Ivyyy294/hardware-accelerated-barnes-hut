@@ -5,7 +5,7 @@ library(Hmisc)
 library(car)
 library(rstatix)
 
-setwd("D:/00_Git/hardware-accelerated-barnes-hut/Out/10241")
+setwd("D:/00_Git/hardware-accelerated-barnes-hut/Out/10000")
 
 variablesGpu <- data.table::fread(paste("GPU","/variables.csv", sep = ""),fill = TRUE)
 variablesCpu <- data.table::fread(paste("CPU","/variables.csv", sep = ""),fill = TRUE)
@@ -18,8 +18,8 @@ variablesOk <- identical(variablesGpu[-1], variablesCpu[-1]) && identical(variab
   variablesDirect[[2]][1] == 0
 
 if (variablesOk){
-  rowCount <- variablesGpu[[2]][10]
-  nCount <- variablesGpu[[2]][4] + 1
+  rowCount <- variablesGpu[[2]][9]
+  nCount <- variablesGpu[[2]][3] + 1
 
   frameTime <- data.table(step = 1:rowCount)
   

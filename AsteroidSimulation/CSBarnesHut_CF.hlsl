@@ -1,7 +1,7 @@
 #include "CSUtils.hlsli"
 #include "CSDoubleBuffer.hlsli"
 
-#define NUM_THREADS 256
+#define NUM_THREADS 64
 #define L 10
 
 cbuffer SettingsBuffer : register(b0)
@@ -23,15 +23,17 @@ struct ParticleData
 
 struct NodeData
 {
+    float4 comMass[NUM_THREADS];
     uint index[NUM_THREADS];
-    uint firstChild[NUM_THREADS];
-    bool isInternalNode[NUM_THREADS];
-    float cellWidth[NUM_THREADS];
-    float3 com[NUM_THREADS];
-    float mass[NUM_THREADS];
-    float3 center[NUM_THREADS];
-    bool criterium[NUM_THREADS];
     int minSqrDistInt[NUM_THREADS];
+    bool criterium[NUM_THREADS];
+};
+
+struct NodeParticleData
+{
+    float4 posMass[NUM_THREADS];
+    uint count;
+    uint firstChild;
 };
 
 //Particle data buffer
@@ -54,16 +56,15 @@ StructuredBuffer<float3> cellCenter : register(t10);
 RWStructuredBuffer<float3> forceBuffer : register(u0);
 
 //Groupshared
-groupshared CDoubleBuffer stack;
-
 groupshared bool gDone = false;
 
 groupshared bool gIsInternalNode = false;
 groupshared uint gPCount = 0;
 groupshared uint gFirstChild = 0;
+groupshared uint gNodeCount;
 
 groupshared NodeData gNodeData;
-groupshared uint gNodeCount;
+groupshared NodeParticleData gNodeParticleData;
 
 void GetParticleData(const uint index, bool isParticle, out ParticleData data)
 {
@@ -90,72 +91,22 @@ void GetNodeData(in const uint slot, in const uint nodeIndex)
     const uint nk = nkBuffer[nodeIndex];
     const uint level = GetTreeLevelFromWs(nk);
     gNodeData.index[slot] = nodeIndex;
-    gNodeData.firstChild[slot] = coBuffer[nodeIndex];
-    gNodeData.isInternalNode[slot] = coBuffer[nodeIndex] > 0;
-    gNodeData.cellWidth[slot] = cellWidth[nodeIndex];
-    gNodeData.com[slot] = centerOfMass[nodeIndex];
-    gNodeData.mass[slot] = combinedMass[nodeIndex];
-    gNodeData.center[slot] = cellCenter[nodeIndex];
+    gNodeData.comMass[slot].xyz = centerOfMass[nodeIndex];
+    gNodeData.comMass[slot].w = combinedMass[nodeIndex];
     gNodeData.criterium[slot] = false;
     gNodeData.minSqrDistInt[slot] = 0xFFFFFFFF;
-}
-
-float3 ApplyForceFromNode(float pMass, const float3 pPos, const uint nodeIndex)
-{
-    float3 direction = gNodeData.com[nodeIndex] - pPos;
-    float sqrDistance = dot(direction, direction);
-    
-    if (sqrDistance < 0.001f)
-        return float3(0, 0, 0);
-    
-    float forceMag = ugc * ((gNodeData.mass[nodeIndex] * pMass) / sqrDistance);
-    
-    const float3 forceDirection = normalize(direction);
-    
-    return forceDirection * forceMag;
-}
-
-float3 GetForceFromParticle(const float pMass, const float3 pPos, uint p2Index)
-{
-    const float p2Mass = massBuffer[p2Index];
-    const float3 p2Pos = posBuffer[p2Index];
-    float3 forceDirection = p2Pos - pPos;
-    const float sqrDistance = dot(forceDirection, forceDirection);
-    
-    if (sqrDistance < 0.001f)
-        return float3(0, 0, 0);
-    
-    forceDirection = normalize(forceDirection);
-    float forceMag = ugc * ((p2Mass * pMass) / sqrDistance);
-    
-    return forceDirection * forceMag;
-}
-
-float3 ApplyCloseRangeForces(const float pMass, const float3 pPos, const uint nodeIndex)
-{
-    float3 force = float3(0.f, 0.f, 0.f);
-        
-    uint indexBegin = liBuffer[nodeIndex];
-    uint count = lcBuffer[nodeIndex];
-        
-    for (uint i = 0; i < count; ++i)
-    {
-        const uint p2Index = indexBegin + i;
-        force += GetForceFromParticle(pMass, pPos, p2Index);
-    }
-    return force;
 }
 
 bool IsTraversalDone(const uint3 GTid)
 {
     if (GTid.x == 0)
     {
-        gDone = stack.IsFrontEmpty() && stack.IsBackEmpty();
+        gDone = DB_IsFrontEmpty() && DB_IsBackEmpty();
         
         if (!gDone)
         {
-            if (stack.IsFrontEmpty())
-                stack.Swap();
+            if (DB_IsFrontEmpty())
+                DB_Swap();
         }
     }
         
@@ -167,15 +118,17 @@ bool IsTraversalDone(const uint3 GTid)
 
 void SetCriteriumForNode(const uint nodeDataIndex)
 {
+    uint nodeIndex = gNodeData.index[nodeDataIndex];
+    
     float minSqrDist = UintToFloat(gNodeData.minSqrDistInt[nodeDataIndex]);
-    float delta = distance(gNodeData.com[nodeDataIndex], gNodeData.center[nodeDataIndex]);
-    float critVal = (gNodeData.cellWidth[nodeDataIndex] / theta) + delta;
+    float delta = distance(gNodeData.comMass[nodeDataIndex].xyz, cellCenter[nodeIndex]);
+    float critVal = (cellWidth[nodeIndex] / theta) + delta;
     gNodeData.criterium[nodeDataIndex] = minSqrDist > (critVal * critVal);
 }
 
 void SetMinDistForNode(const uint nodeDataIndex, const ParticleData pData)
 {
-    float3 direction = gNodeData.com[nodeDataIndex] - pData.pos;
+    float3 direction = gNodeData.comMass[nodeDataIndex].xyz - pData.pos;
     float sqrDistance = dot(direction, direction);
         
     GroupMemoryBarrierWithGroupSync();
@@ -209,15 +162,15 @@ void main(uint3 GTid : SV_GroupThreadID,
 
     if (GTid.x == 0)
     {
-        stack.Initialize();
-        stack.Push(1);
-        stack.Push(2);
-        stack.Push(3);
-        stack.Push(4);
-        stack.Push(5);
-        stack.Push(6);
-        stack.Push(7);
-        stack.Push(8);
+        DB_Initialize();
+        DB_Push(1);
+        DB_Push(2);
+        DB_Push(3);
+        DB_Push(4);
+        DB_Push(5);
+        DB_Push(6);
+        DB_Push(7);
+        DB_Push(8);
     }
     
     [loop]
@@ -232,7 +185,7 @@ void main(uint3 GTid : SV_GroupThreadID,
         GroupMemoryBarrierWithGroupSync();
         
         uint nodeIndex;
-        bool ok = stack.InterlockedPop(nodeIndex);
+        bool ok = DB_InterlockedPop(nodeIndex);
         uint slot = 0;
         
         if (ok)
@@ -255,27 +208,79 @@ void main(uint3 GTid : SV_GroupThreadID,
         if (ok)
         {
             SetCriteriumForNode(slot);
-                
-            if (!gNodeData.criterium[slot] && gNodeData.isInternalNode[slot])
+            
+            bool isInternalNode = coBuffer[gNodeData.index[slot]] > 0;
+            
+            if (!gNodeData.criterium[slot] && isInternalNode)
             {
-                uint first = gNodeData.firstChild[slot];
+                uint first = coBuffer[gNodeData.index[slot]];
 
                 [unroll]
                 for (uint c = 0; c < 8; ++c)
-                    stack.InterlockedPush(first + c);
+                    DB_InterlockedPush(first + c);
             }
         }
         
-        GroupMemoryBarrierWithGroupSync();
+        GroupMemoryBarrier();
         
         //Apply nodes
+
         for (uint j = 0; j < nodeCount; ++j)
         {
-            //apply node
+            uint currentNodeIndex = gNodeData.index[j];
+            bool isInternalNode = coBuffer[currentNodeIndex] > 0;
+            
+            //apply from node
             if (gNodeData.criterium[j])
-                pData.force += ApplyForceFromNode(pData.mass, pData.pos, j);
-            else if (gNodeData.isInternalNode[j] == false)
-                pData.force += ApplyCloseRangeForces(pData.mass, pData.pos, gNodeData.index[j]);
+            {
+                float3 direction = gNodeData.comMass[j].xyz - pData.pos;
+                float sqrDistance = dot(direction, direction);
+    
+                if (sqrDistance >= 0.001f)
+                {
+                    float forceMag = ugc * ((gNodeData.comMass[j].w * pData.mass) / sqrDistance);
+    
+                    const float3 forceDirection = normalize(direction);
+    
+                    pData.force += forceDirection * forceMag;
+                }
+            }
+            //apply particle of node
+            else if (isInternalNode == false)
+            {
+                //Preload count and first particle index
+                if (GTid.x == 0)
+                {
+                    gNodeParticleData.firstChild = liBuffer[currentNodeIndex];
+                    gNodeParticleData.count = min(NUM_THREADS, lcBuffer[currentNodeIndex]);
+                }
+                
+                GroupMemoryBarrierWithGroupSync();
+                
+                //preload particle mass and pos
+                if (GTid.x < gNodeParticleData.count)
+                {
+                    uint pIndex = gNodeParticleData.firstChild + GTid.x;
+                    gNodeParticleData.posMass[GTid.x].w = massBuffer[pIndex];
+                    gNodeParticleData.posMass[GTid.x].xyz = posBuffer[pIndex];
+                }
+                
+                GroupMemoryBarrierWithGroupSync();
+                
+                for (uint pIndex = 0; pIndex < gNodeParticleData.count; ++pIndex)
+                {
+                    float3 forceDirection = gNodeParticleData.posMass[pIndex].xyz - pData.pos;
+                    const float sqrDistance = dot(forceDirection, forceDirection);
+    
+                    if (sqrDistance < 0.001f)
+                        continue;
+    
+                    forceDirection = normalize(forceDirection);
+                    float forceMag = ugc * ((gNodeParticleData.posMass[pIndex].w * pData.mass) / sqrDistance);
+    
+                    pData.force += forceDirection * forceMag;
+                }
+            }
         }
     }
     

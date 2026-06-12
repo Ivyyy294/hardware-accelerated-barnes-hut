@@ -20,6 +20,7 @@ uint Compact1By2(uint x)
 
 float3 MapToUnitCube(float3 value, float3 boundsMin, float3 boundsMax)
 {
+    value = clamp(value, boundsMin, boundsMax);
     const float3 boundsDim = boundsMax - boundsMin;
     value.x = (value.x + boundsMax.x) / boundsDim.x;
     value.y = (value.y + boundsMax.y) / boundsDim.y;

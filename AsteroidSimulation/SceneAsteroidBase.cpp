@@ -32,19 +32,18 @@ void SceneAsteroidBase::Init()
 
 	//Add duration controller
 	SessionDurationController* sdc = camera->AddComponent<SessionDurationController>().get();
-	sdc->m_maxDurationSec = m_sVar.maxDurationSec;
 	sdc->m_maxFixedFrames = m_sVar.maxFixedFrames;
 
 	//Add Debug UI
 	AddGameObject<DebugInfoUi>();
 
-	//Add Planet
-	Planet* planet = AddGameObject <Planet>();
-	planet->GetComponent<PhysicObject>()->SetMass(Session::Me().m_variables.centralMass);
-	OnOrbitalBodySpawned (planet);
+	//Add Sun
+	Planet* sun = AddGameObject <Planet>();
+	sun->SetData (Color(252, 120, 1), Session::Me().m_variables.centralMass, 2.0f);
+	OnOrbitalBodySpawned (sun);
 
 	//Add Asteroids
-	SpawnAsteroids (m_sVar.numAsteroids, planet);
+	SpawnAsteroids (m_sVar.numAsteroids, sun);
 
 	Session::Me().m_variables.Log();
 }
@@ -88,7 +87,7 @@ void SceneAsteroidBase::SpawnAsteroids(int num, GameObject* planet)
 			float size = mass / variables.massRangeAsteroids.x;
 
 			Asteroid* asteroid = AddGameObject <Asteroid>();
-			asteroid->SetPhysicalProperties(mass, size);
+			asteroid->SetPhysicalProperties(mass, 0.05f * size);
 			asteroid->SetOrbit (oe, soi);
 
 			OnOrbitalBodySpawned(asteroid);

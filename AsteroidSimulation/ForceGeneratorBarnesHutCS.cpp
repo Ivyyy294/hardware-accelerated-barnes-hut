@@ -4,7 +4,6 @@
 ForceGeneratorBarnesHutCS::ForceGeneratorBarnesHutCS()
 	: ForceGeneratorBase()
 	, m_deviceContext (D3D::Instance().GetDeviceContext())
-	, m_nCrit (Session::Me().m_variables.nCrit)
 	, m_buffer (m_maxParticleCount)
 {
 	const uint32_t maxCapacity = m_buffer.MaxCapacity();

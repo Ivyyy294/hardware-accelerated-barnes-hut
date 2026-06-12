@@ -1,105 +1,102 @@
 
-#define DBUFFER_SIZE 256
+#define DBUFFER_SIZE 512
 
-class CDoubleBuffer
+groupshared uint db_fBaseIndex;
+groupshared uint db_bBaseIndex;
+groupshared uint db_fCount;
+groupshared uint db_bCount;
+groupshared uint db_buffer[DBUFFER_SIZE * 2];
+    
+void DB_Initialize()
 {
-    uint m_fBaseIndex;
-    uint m_bBaseIndex;
-    uint m_fCount;
-    uint m_bCount;
-    uint m_buffer[DBUFFER_SIZE * 2];
+    db_fBaseIndex = 0;
+    db_bBaseIndex = DBUFFER_SIZE;
+    db_fCount = 0;
+    db_bCount = 0;
+}
     
-    void Initialize()
-    {
-        m_fBaseIndex = 0;
-        m_bBaseIndex = DBUFFER_SIZE;
-        m_fCount = 0;
-        m_bCount = 0;
-    }
-    
-    void Swap()
-    {
-        //Swap buffer index
-        uint tmp = m_fBaseIndex;
-        m_fBaseIndex = m_bBaseIndex;
-        m_bBaseIndex = tmp;
+void DB_Swap()
+{
+    //Swap buffer index
+    uint tmp = db_fBaseIndex;
+    db_fBaseIndex = db_bBaseIndex;
+    db_bBaseIndex = tmp;
         
-        m_fCount = m_bCount;
-        m_bCount = 0;
-    }
+    db_fCount = db_bCount;
+    db_bCount = 0;
+}
     
-    bool Push(uint val)
+bool DB_Push(uint val)
+{
+    if (db_bCount >= DBUFFER_SIZE)
+        return false;
+        
+    db_buffer[db_bBaseIndex + db_bCount++] = val;
+    return true;
+}
+    
+bool DB_InterlockedPush(uint val)
+{    
+    uint index = 0;
+    InterlockedAdd(db_bCount, 1, index);
+        
+    if (index >= DBUFFER_SIZE)
     {
-        if (m_bCount >= DBUFFER_SIZE)
-            return false;
-        
-        m_buffer[m_bBaseIndex + m_bCount++] = val;
-        return true;
+        // Undo increment
+        InterlockedAdd(db_bCount, -1);
+        return false;
     }
-    
-    bool InterlockedPush(uint val)
-    {    
-        uint index = 0;
-        InterlockedAdd(m_bCount, 1, index);
         
-        if (index >= DBUFFER_SIZE)
-        {
-            // Undo increment
-            InterlockedAdd(m_bCount, -1);
-            return false;
-        }
-        
-        m_buffer[m_bBaseIndex + index] = val;
-        return true;
-    }
+    db_buffer[db_bBaseIndex + index] = val;
+    return true;
+}
     
-    bool Pop(inout uint val)
-    {
-        if (m_fCount <= 0)
-            return false;
+bool DB_Pop(inout uint val)
+{
+    if (db_fCount <= 0)
+        return false;
 
-        val = m_buffer[m_fBaseIndex + --m_fCount];
-        return true;
-    }
+    val = db_buffer[db_fBaseIndex + --db_fCount];
+    return true;
+}
     
-    bool InterlockedPop(inout uint val)
-    {
-        uint fCount = 0;
-        InterlockedAdd(m_fCount, -1, fCount);
+bool DB_InterlockedPop(inout uint val)
+{
+    uint fCount = 0;
+    InterlockedAdd(db_fCount, -1, fCount);
         
-        if (fCount == 0 || fCount > DBUFFER_SIZE)
-        {
-            // Undo decrement
-            InterlockedAdd(m_fCount, 1);
-            return false;
-        }
+    if (fCount == 0 || fCount > DBUFFER_SIZE)
+    {
+        // Undo decrement
+        InterlockedAdd(db_fCount, 1);
+        return false;
+    }
         
-        uint index = fCount - 1;
-        val = m_buffer[m_fBaseIndex + index];
-        return true;
-    }
+    uint index = fCount - 1;
+    val = db_buffer[db_fBaseIndex + index];
+    return true;
+}
     
-    bool Peek(in uint index, inout uint val)
-    {
-        if (m_fCount <= 0 || index >= m_fCount)
-            return false;
+bool DB_Peek(in uint index, inout uint val)
+{
+    if (db_fCount <= 0 || index >= db_fCount)
+        return false;
         
-        val = m_buffer[m_fBaseIndex + index];
-        return true;
-    }
+    val = db_buffer[db_fBaseIndex + index];
+    return true;
+}
     
-    bool IsFull()
-    {
-        return m_bCount >= DBUFFER_SIZE;
-    }
+bool DB_IsFull()
+{
+    return db_bCount >= DBUFFER_SIZE;
+}
     
-    bool IsFrontEmpty()
-    {
-        return m_fCount <= 0;
-    }
+bool DB_IsFrontEmpty()
+{
+    return db_fCount <= 0;
+}
     
-    bool IsBackEmpty()
-    {
-        return m_bCount <= 0;
-    }
-};
+bool DB_IsBackEmpty()
+{
+    return db_bCount <= 0;
+}

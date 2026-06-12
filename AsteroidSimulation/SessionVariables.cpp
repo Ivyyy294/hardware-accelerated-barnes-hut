@@ -49,14 +49,6 @@ bool SessionVariablesLoadFromFile(SessionVariables& variables, const std::string
 		if (std::getline(file, buffer))
 		{
 			GetValueFromString(buffer, valBuffer1);
-			variables.nCrit = stoi(valBuffer1);
-		}
-		else
-			return false;
-
-		if (std::getline(file, buffer))
-		{
-			GetValueFromString(buffer, valBuffer1);
 			variables.numAsteroids = stoi(valBuffer1);
 		}
 		else
@@ -116,14 +108,6 @@ bool SessionVariablesLoadFromFile(SessionVariables& variables, const std::string
 		if (std::getline(file, buffer))
 		{
 			GetValueFromString(buffer, valBuffer1);
-			variables.maxDurationSec = stoi(valBuffer1);
-		}
-		else
-			return false;
-
-		if (std::getline(file, buffer))
-		{
-			GetValueFromString(buffer, valBuffer1);
 			variables.seed = valBuffer1;
 		}
 		else
@@ -164,7 +148,6 @@ void SessionVariables::Log()
 {
 	Session::Me().m_variablesFile.WriteLine("method;" + std::to_string(method));
 	Session::Me().m_variablesFile.WriteLine("theta;" + std::to_string(theta));
-	Session::Me().m_variablesFile.WriteLine("nCrit;" + std::to_string(nCrit));
 	Session::Me().m_variablesFile.WriteLine("numAsteroids;" + std::to_string(numAsteroids));
 	Session::Me().m_variablesFile.WriteLine("ugc;" + std::to_string(ugc));
 	Session::Me().m_variablesFile.WriteLine("fixedDeltaTime;" + std::to_string(fixedDeltaTime));
@@ -172,7 +155,6 @@ void SessionVariables::Log()
 	Session::Me().m_variablesFile.WriteLine("eRange;" + std::to_string(eRange.x) + ";" + std::to_string(eRange.y));
 	Session::Me().m_variablesFile.WriteLine("iRange;" + std::to_string(iRange.x) + ";" + std::to_string(iRange.y));
 	Session::Me().m_variablesFile.WriteLine("maxFixedFrames;" + std::to_string(maxFixedFrames));
-	Session::Me().m_variablesFile.WriteLine("maxDurationSec;" + std::to_string(maxDurationSec));
 	Session::Me().m_variablesFile.WriteLine("seed;" + seed);
 	Session::Me().m_variablesFile.WriteLine("centralMass;" + std::to_string(centralMass));
 	Session::Me().m_variablesFile.WriteLine("massRangeAsteroids;" + std::to_string(massRangeAsteroids.x) + ";" + std::to_string(massRangeAsteroids.y));
