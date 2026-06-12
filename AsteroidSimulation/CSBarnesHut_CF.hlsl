@@ -23,13 +23,10 @@ struct ParticleData
 
 struct NodeData
 {
+    float4 comMass[NUM_THREADS];
     uint index[NUM_THREADS];
-    uint firstChild[NUM_THREADS];
-    float cellWidth[NUM_THREADS];
-    float3 com[NUM_THREADS];
-    float mass[NUM_THREADS];
-    bool criterium[NUM_THREADS];
     int minSqrDistInt[NUM_THREADS];
+    bool criterium[NUM_THREADS];
 };
 
 struct NodeParticleData
@@ -64,10 +61,9 @@ groupshared bool gDone = false;
 groupshared bool gIsInternalNode = false;
 groupshared uint gPCount = 0;
 groupshared uint gFirstChild = 0;
-
-groupshared NodeData gNodeData;
 groupshared uint gNodeCount;
 
+groupshared NodeData gNodeData;
 groupshared NodeParticleData gNodeParticleData;
 
 void GetParticleData(const uint index, bool isParticle, out ParticleData data)
@@ -95,25 +91,10 @@ void GetNodeData(in const uint slot, in const uint nodeIndex)
     const uint nk = nkBuffer[nodeIndex];
     const uint level = GetTreeLevelFromWs(nk);
     gNodeData.index[slot] = nodeIndex;
-    gNodeData.com[slot] = centerOfMass[nodeIndex];
-    gNodeData.mass[slot] = combinedMass[nodeIndex];
+    gNodeData.comMass[slot].xyz = centerOfMass[nodeIndex];
+    gNodeData.comMass[slot].w = combinedMass[nodeIndex];
     gNodeData.criterium[slot] = false;
     gNodeData.minSqrDistInt[slot] = 0xFFFFFFFF;
-}
-
-float3 ApplyForceFromNode(float pMass, const float3 pPos, const uint nodeIndex)
-{
-    float3 direction = gNodeData.com[nodeIndex] - pPos;
-    float sqrDistance = dot(direction, direction);
-    
-    if (sqrDistance < 0.001f)
-        return float3(0, 0, 0);
-    
-    float forceMag = ugc * ((gNodeData.mass[nodeIndex] * pMass) / sqrDistance);
-    
-    const float3 forceDirection = normalize(direction);
-    
-    return forceDirection * forceMag;
 }
 
 bool IsTraversalDone(const uint3 GTid)
@@ -140,14 +121,14 @@ void SetCriteriumForNode(const uint nodeDataIndex)
     uint nodeIndex = gNodeData.index[nodeDataIndex];
     
     float minSqrDist = UintToFloat(gNodeData.minSqrDistInt[nodeDataIndex]);
-    float delta = distance(gNodeData.com[nodeDataIndex], cellCenter[nodeIndex]);
+    float delta = distance(gNodeData.comMass[nodeDataIndex].xyz, cellCenter[nodeIndex]);
     float critVal = (cellWidth[nodeIndex] / theta) + delta;
     gNodeData.criterium[nodeDataIndex] = minSqrDist > (critVal * critVal);
 }
 
 void SetMinDistForNode(const uint nodeDataIndex, const ParticleData pData)
 {
-    float3 direction = gNodeData.com[nodeDataIndex] - pData.pos;
+    float3 direction = gNodeData.comMass[nodeDataIndex].xyz - pData.pos;
     float sqrDistance = dot(direction, direction);
         
     GroupMemoryBarrierWithGroupSync();
@@ -246,23 +227,37 @@ void main(uint3 GTid : SV_GroupThreadID,
 
         for (uint j = 0; j < nodeCount; ++j)
         {
-            bool isInternalNode = coBuffer[gNodeData.index[j]] > 0;
+            uint currentNodeIndex = gNodeData.index[j];
+            bool isInternalNode = coBuffer[currentNodeIndex] > 0;
             
-            //apply node
+            //apply from node
             if (gNodeData.criterium[j])
-                pData.force += ApplyForceFromNode(pData.mass, pData.pos, j);
+            {
+                float3 direction = gNodeData.comMass[j].xyz - pData.pos;
+                float sqrDistance = dot(direction, direction);
+    
+                if (sqrDistance >= 0.001f)
+                {
+                    float forceMag = ugc * ((gNodeData.comMass[j].w * pData.mass) / sqrDistance);
+    
+                    const float3 forceDirection = normalize(direction);
+    
+                    pData.force += forceDirection * forceMag;
+                }
+            }
+            //apply particle of node
             else if (isInternalNode == false)
             {
                 //Preload count and first particle index
                 if (GTid.x == 0)
                 {
-                    uint pIndex = gNodeData.index[j];
-                    gNodeParticleData.firstChild = liBuffer[pIndex];
-                    gNodeParticleData.count = min(NUM_THREADS, lcBuffer[pIndex]);
+                    gNodeParticleData.firstChild = liBuffer[currentNodeIndex];
+                    gNodeParticleData.count = min(NUM_THREADS, lcBuffer[currentNodeIndex]);
                 }
                 
                 GroupMemoryBarrierWithGroupSync();
                 
+                //preload particle mass and pos
                 if (GTid.x < gNodeParticleData.count)
                 {
                     uint pIndex = gNodeParticleData.firstChild + GTid.x;
