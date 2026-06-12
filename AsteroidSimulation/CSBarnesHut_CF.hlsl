@@ -34,6 +34,14 @@ struct NodeData
     int minSqrDistInt[NUM_THREADS];
 };
 
+struct NodeParticleData
+{
+    uint count;
+    uint firstChild;
+    float mass[NUM_THREADS];
+    float3 pos[NUM_THREADS];
+};
+
 //Particle data buffer
 StructuredBuffer<float3> posBuffer : register(t0);
 StructuredBuffer<float> massBuffer : register(t1);
@@ -63,6 +71,8 @@ groupshared uint gFirstChild = 0;
 groupshared NodeData gNodeData;
 groupshared uint gNodeCount;
 
+groupshared NodeParticleData gNodeParticleData;
+
 void GetParticleData(const uint index, bool isParticle, out ParticleData data)
 {
     data.isParticle = isParticle;
@@ -89,7 +99,7 @@ void GetNodeData(in const uint slot, in const uint nodeIndex)
     const uint level = GetTreeLevelFromWs(nk);
     gNodeData.index[slot] = nodeIndex;
     gNodeData.firstChild[slot] = coBuffer[nodeIndex];
-    gNodeData.isInternalNode[slot] = coBuffer[nodeIndex] > 0;
+    gNodeData.isInternalNode[slot] = coBuffer[nodeIndex] >= 1;
     gNodeData.cellWidth[slot] = cellWidth[nodeIndex];
     gNodeData.com[slot] = centerOfMass[nodeIndex];
     gNodeData.mass[slot] = combinedMass[nodeIndex];
@@ -111,37 +121,6 @@ float3 ApplyForceFromNode(float pMass, const float3 pPos, const uint nodeIndex)
     const float3 forceDirection = normalize(direction);
     
     return forceDirection * forceMag;
-}
-
-float3 GetForceFromParticle(const float pMass, const float3 pPos, uint p2Index)
-{
-    const float p2Mass = massBuffer[p2Index];
-    const float3 p2Pos = posBuffer[p2Index];
-    float3 forceDirection = p2Pos - pPos;
-    const float sqrDistance = dot(forceDirection, forceDirection);
-    
-    if (sqrDistance < 0.001f)
-        return float3(0, 0, 0);
-    
-    forceDirection = normalize(forceDirection);
-    float forceMag = ugc * ((p2Mass * pMass) / sqrDistance);
-    
-    return forceDirection * forceMag;
-}
-
-float3 ApplyCloseRangeForces(const float pMass, const float3 pPos, const uint nodeIndex)
-{
-    float3 force = float3(0.f, 0.f, 0.f);
-        
-    uint indexBegin = liBuffer[nodeIndex];
-    uint count = lcBuffer[nodeIndex];
-        
-    for (uint i = 0; i < count; ++i)
-    {
-        const uint p2Index = indexBegin + i;
-        force += GetForceFromParticle(pMass, pPos, p2Index);
-    }
-    return force;
 }
 
 bool IsTraversalDone(const uint3 GTid)
@@ -264,7 +243,7 @@ void main(uint3 GTid : SV_GroupThreadID,
             }
         }
         
-        GroupMemoryBarrierWithGroupSync();
+        GroupMemoryBarrier();
         
         //Apply nodes
 
@@ -274,7 +253,42 @@ void main(uint3 GTid : SV_GroupThreadID,
             if (gNodeData.criterium[j])
                 pData.force += ApplyForceFromNode(pData.mass, pData.pos, j);
             else if (gNodeData.isInternalNode[j] == false)
-                pData.force += ApplyCloseRangeForces(pData.mass, pData.pos, gNodeData.index[j]);
+            {
+                //Preload count and first particle index
+                if (GTid.x == 0)
+                {
+                    uint pIndex = gNodeData.index[j];
+                    gNodeParticleData.firstChild = liBuffer[pIndex];
+                    gNodeParticleData.count = min(NUM_THREADS, lcBuffer[pIndex]);
+                }
+                
+                GroupMemoryBarrierWithGroupSync();
+                
+                if (GTid.x < gNodeParticleData.count)
+                {
+                    uint pIndex = gNodeParticleData.firstChild + GTid.x;
+                    gNodeParticleData.mass[GTid.x] = massBuffer[pIndex];
+                    gNodeParticleData.pos[GTid.x] = posBuffer[pIndex];
+                }
+                
+                GroupMemoryBarrierWithGroupSync();
+                
+                for (uint pIndex = 0; pIndex < gNodeParticleData.count; ++pIndex)
+                {
+                    const float p2Mass = gNodeParticleData.mass[pIndex];
+                    const float3 p2Pos = gNodeParticleData.pos[pIndex];
+                    float3 forceDirection = p2Pos - pData.pos;
+                    const float sqrDistance = dot(forceDirection, forceDirection);
+    
+                    if (sqrDistance < 0.001f)
+                        continue;
+    
+                    forceDirection = normalize(forceDirection);
+                    float forceMag = ugc * ((p2Mass * pData.mass) / sqrDistance);
+    
+                    pData.force += forceDirection * forceMag;
+                }
+            }
         }
     }
     

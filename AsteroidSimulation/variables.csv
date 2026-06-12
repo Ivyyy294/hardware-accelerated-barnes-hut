@@ -1,9 +1,9 @@
-method;1
+method;2
 theta;0.8
 numAsteroids;9999
 ugc;0.000050
 fixedDeltaTime;0.02
-distRange;10.0;0.5
+distRange;15.0;2
 eRange;0.0;0.05
 iRange;0.0;2
 maxFixedFrames;512
