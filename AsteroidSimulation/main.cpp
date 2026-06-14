@@ -25,13 +25,8 @@ int WINAPI WinMain (_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance,
 
 	if (!SessionVariablesLoadFromFile (variables, "variables.csv"))
 	{
-		variables.numAsteroids = 1024;
-		variables.ugc = 0.00005f;
-		variables.fixedDeltaTime = Time::UnscaledFixedDeltaTime();
-		variables.distRange = { 10.f, 1.f };
-		variables.eRange = { 0.f, 0.25f };
-		variables.iRange = { -10.f, 10.f };
-		variables.maxFixedFrames = 0;
+		Ivyyy::MsgBox::ShowError(L"Failed to load variables.csv!");
+		return 0;
 	}
 
 	Session::Me().m_variables = variables;
@@ -56,9 +51,5 @@ int WINAPI WinMain (_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance,
 		return val;
 	}
 	else
-	{
-		Ivyyy::MsgBox::ShowError(L"Failed to start session!");
 		return 0;
-	}
-
 }

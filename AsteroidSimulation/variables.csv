@@ -11,4 +11,4 @@ seed;85245679
 centralMass;500000
 massRangeAsteroids;1.0;0.2
 minMassAsteroids;0.1
-outDir;
+outDir;../Out

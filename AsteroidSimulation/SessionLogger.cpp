@@ -9,10 +9,22 @@ bool SessionLogger::StartSession (const string& rootDir)
 {
 	string sessionName = GetSessionName();
 	string targetDir = rootDir.length() > 0 ? rootDir + "//" + sessionName : sessionName;
+
+	std::filesystem::path rootPath = std::filesystem::path(rootDir);
+
+	if (!std::filesystem::exists(rootPath) && !filesystem::create_directory(rootPath))
+	{
+		MsgBox::ShowError("Failed to create root directory: " + rootDir);
+		return false;
+	}
+
 	std::filesystem::path path = std::filesystem::path(targetDir);
 
 	if (!filesystem::create_directory(path))
+	{
+		MsgBox::ShowError("Failed to create session directory: " + targetDir);
 		return false;
+	}
 
 	if (!CreateSessionFiles(targetDir))
 		return false;
@@ -67,10 +79,14 @@ bool SessionLogger::CreateSessionFiles(const string& targetDir)
 {
 	for (auto iter = m_fileMap.begin(); iter != m_fileMap.end(); ++iter)
 	{
-		iter->second.open(targetDir + "//" + iter->first);
+		std::string filePath = targetDir + "//" + iter->first;
+		iter->second.open(filePath);
 		
 		if (!iter->second.is_open())
+		{
+			MsgBox::ShowError("Failed to create session file: " + filePath);
 			return false;
+		}
 	}
 
 	return true;
