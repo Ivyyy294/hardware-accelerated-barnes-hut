@@ -1,5 +1,7 @@
 #include "pch.h"
 #include "ForceGeneratorBarnesHutCS.h"
+#include <IvyyyEngine.h>
+#include <IvyyyMsgBox.h>
 
 ForceGeneratorBarnesHutCS::ForceGeneratorBarnesHutCS()
 	: ForceGeneratorBase()
@@ -25,18 +27,42 @@ ForceGeneratorBarnesHutCS::~ForceGeneratorBarnesHutCS()
 
 void ForceGeneratorBarnesHutCS::Start()
 {
-	m_buffer.InitShaderParameters();
+	m_initOk = m_buffer.InitShaderParameters();
 
-	m_csMortonCodes.Initialize();
+	if (!m_initOk)
+	{
+		Ivyyy::MsgBox::ShowError("Failed to init shared shader buffer!");
+		Ivyyy::IvyyyEngine::Exit();
+		return;
+	}
+
+	m_initOk = m_csMortonCodes.Initialize()
+		&& m_csRadixSort_1.Initialize()
+		&& m_csRadixSort_2.Initialize()
+		&& m_csRadixSort_3.Initialize()
+		&& m_csRadixSort_4.Initialize()
+		&& m_csCornerStone_F.Initialize()
+		&& m_csCornerStone_G1.Initialize()
+		&& m_csCornerStone_G2.Initialize()
+		&& m_csCornerStone_G3.Initialize()
+		&& m_csCornerStone_NK.Initialize()
+		&& m_csCornerStone_LO.Initialize()
+		&& m_csCornerStone_CO.Initialize()
+		&& m_csBarnesHut_MP.Initialize()
+		&& m_csBarnesHut_CF.Initialize();
+
+	if (!m_initOk)
+	{
+		Ivyyy::IvyyyEngine::Exit();
+		return;
+	}
+
 	m_csMortonCodes.m_sharedBuffer = &m_buffer;
 
-	m_csRadixSort_1.Initialize();
 	m_csRadixSort_1.m_sharedBuffer = &m_buffer;
 
-	m_csRadixSort_2.Initialize();
 	m_csRadixSort_2.m_sharedBuffer = &m_buffer;
 
-	m_csRadixSort_3.Initialize();
 	m_csRadixSort_3.m_sharedBuffer = &m_buffer;
 	m_csRadixSort_3.m_uavKeyBuffer = m_buffer.m_uavMortonCodeBuffer;
 	m_csRadixSort_3.m_uavVal1Buffer = m_buffer.m_uavPositionBuffer;
@@ -45,36 +71,26 @@ void ForceGeneratorBarnesHutCS::Start()
 	m_csRadixSort_3.m_srvVal1Buffer = m_buffer.m_srvPositionBuffer;
 	m_csRadixSort_3.m_srvVal2Buffer = m_buffer.m_srvMassBuffer;
 
-	m_csRadixSort_4.Initialize();
 	m_csRadixSort_4.m_sharedBuffer = &m_buffer;
 	m_csRadixSort_4.m_srvKeyBuffer = m_buffer.m_srvNkBuffer;
 	m_csRadixSort_4.m_uavKeyBuffer = m_buffer.m_uavNkBuffer;
 
-	m_csCornerStone_F.Initialize();
 	m_csCornerStone_F.m_sharedBuffer = &m_buffer;
 
-	m_csCornerStone_G1.Initialize();
 	m_csCornerStone_G1.m_sharedBuffer = &m_buffer;
 
-	m_csCornerStone_G2.Initialize();
 	m_csCornerStone_G2.m_sharedBuffer = &m_buffer;
 
-	m_csCornerStone_G3.Initialize();
 	m_csCornerStone_G3.m_sharedBuffer = &m_buffer;
 
-	m_csCornerStone_NK.Initialize();
 	m_csCornerStone_NK.m_sharedBuffer = &m_buffer;
 
-	m_csCornerStone_LO.Initialize();
 	m_csCornerStone_LO.m_sharedBuffer = &m_buffer;
 
-	m_csCornerStone_CO.Initialize();
 	m_csCornerStone_CO.m_sharedBuffer = &m_buffer;
 
-	m_csBarnesHut_MP.Initialize();
 	m_csBarnesHut_MP.m_sharedBuffer = &m_buffer;
 
-	m_csBarnesHut_CF.Initialize();
 	m_csBarnesHut_CF.m_sharedBuffer = &m_buffer;
 
 	Session::Me().m_shaderTimeFile.WriteLine("CSMortonCodes;RadixSort_MKey;CSCornerStone_F;CSCornerStone_G1;CSCornerStone_G2;CSCornerStone_G3;CSCornerStone_NK;RadixSort_NK;CSCornerStone_LO;CSCornerStone_CO;CSBarnesHut_MP;CSBarnesHut_CF");
@@ -171,6 +187,12 @@ void ForceGeneratorBarnesHutCS::OnDrawGizmo()
 
 void ForceGeneratorBarnesHutCS::PreCalculateForcesInternal()
 {
+	if (!m_initOk)
+	{
+		Ivyyy::IvyyyEngine::Exit();
+		return;
+	}
+
 	SetShaderParameter();
 	//SetTestShaderParameter();
 	uint32_t capacity = m_objects.size();

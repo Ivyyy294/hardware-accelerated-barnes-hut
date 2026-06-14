@@ -67,6 +67,7 @@ private:
 
 	float m_sortTimeKeyMs = 0.f;
 
+	bool m_initOk = false;
 //Methods
 public:
 	ForceGeneratorBarnesHutCS();
