@@ -20,8 +20,7 @@ void CsBarnesHut_CF::BindShaderParameters(ID3D11DeviceContext* deviceContext)
 	deviceContext->CSSetShaderResources(6, 1, &m_sharedBuffer->m_srvCombinedMassBuffer);
 	deviceContext->CSSetShaderResources(7, 1, &m_sharedBuffer->m_srvLiBuffer);
 	deviceContext->CSSetShaderResources(8, 1, &m_sharedBuffer->m_srvLcBuffer);
-	deviceContext->CSSetShaderResources(9, 1, &m_sharedBuffer->m_srvCellWidthBuffer);
-	deviceContext->CSSetShaderResources(10, 1, &m_sharedBuffer->m_srvCellCenterBuffer);
+	deviceContext->CSSetShaderResources(9, 1, &m_sharedBuffer->m_srvCellGeoDataBuffer);
 	
 	deviceContext->CSSetUnorderedAccessViews(0, 1, &m_sharedBuffer->m_uavForceBuffer, nullptr);
 	deviceContext->CSSetUnorderedAccessViews(7, 1, &m_sharedBuffer->m_uavDebugBuffer, nullptr);

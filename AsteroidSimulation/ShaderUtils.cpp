@@ -16,7 +16,7 @@ bool ShaderUtils::CreateStagingBuffer(ID3D11Device* device, HRESULT& result, ID3
 	return SUCCEEDED(result);
 }
 
-bool ShaderUtils::CreateDynamicBuffer(ID3D11Device* device, HRESULT& result, ID3D11Buffer** buffer, UINT byteStride, UINT elementCount, D3D11_RESOURCE_MISC_FLAG miscFlag)
+bool ShaderUtils::CreateDynamicBuffer(ID3D11Device* device, HRESULT& result, ID3D11Buffer** buffer, UINT byteStride, UINT elementCount, unsigned int miscFlag)
 {
 	D3D11_BUFFER_DESC bufferDesc = {};
 	bufferDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
@@ -31,7 +31,7 @@ bool ShaderUtils::CreateDynamicBuffer(ID3D11Device* device, HRESULT& result, ID3
 	return SUCCEEDED(result);
 }
 
-bool ShaderUtils::CreateResourceBuffer(ID3D11Device* device, HRESULT& result, ID3D11Buffer** buffer, UINT byteStride, UINT elementCount, D3D11_RESOURCE_MISC_FLAG miscFlag, D3D11_SUBRESOURCE_DATA* initalData)
+bool ShaderUtils::CreateResourceBuffer(ID3D11Device* device, HRESULT& result, ID3D11Buffer** buffer, UINT byteStride, UINT elementCount, unsigned int miscFlag, D3D11_SUBRESOURCE_DATA* initalData)
 {
 	D3D11_BUFFER_DESC bufferDesc = {};
 	bufferDesc.BindFlags = D3D11_BIND_UNORDERED_ACCESS | D3D11_BIND_SHADER_RESOURCE;

@@ -51,8 +51,7 @@ StructuredBuffer<float3> centerOfMass : register(t5);
 StructuredBuffer<float> combinedMass : register(t6);
 StructuredBuffer<uint> liBuffer : register(t7);
 StructuredBuffer<uint> lcBuffer : register(t8);
-StructuredBuffer<float> cellWidth : register(t9);
-StructuredBuffer<float3> cellCenter : register(t10);
+Buffer<float4> cellGeoData : register(t9);
 
 RWStructuredBuffer<float3> forceBuffer : register(u0);
 
@@ -122,8 +121,8 @@ void SetCriteriumForNode(const uint nodeDataIndex)
     uint nodeIndex = gNodeData.index[nodeDataIndex];
     
     float minSqrDist = UintToFloat(gNodeData.minSqrDistInt[nodeDataIndex]);
-    float delta = distance(gNodeData.comMass[nodeDataIndex].xyz, cellCenter[nodeIndex]);
-    float critVal = (cellWidth[nodeIndex] / theta) + delta;
+    float delta = distance(gNodeData.comMass[nodeDataIndex].xyz, cellGeoData[nodeIndex].xyz);
+    float critVal = (cellGeoData[nodeIndex].w / theta) + delta;
     gNodeData.criterium[nodeDataIndex] = minSqrDist > (critVal * critVal);
 }
 

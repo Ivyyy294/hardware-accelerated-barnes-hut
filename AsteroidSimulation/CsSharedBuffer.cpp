@@ -19,7 +19,8 @@ HRESULT CsSharedBuffer::InitDebugShaderParameters(ID3D11Device* device)
 		&& ShaderUtils::CreateUAVBuffer(device, result, m_debugBuffer, &m_uavDebugBuffer, 1024)
 		&& ShaderUtils::CreateStagingBuffer(device, result, &m_dUint32Buffer, sizeof(uint32_t), m_maxCapacity)
 		&& ShaderUtils::CreateStagingBuffer(device, result, &m_dFloatBuffer, sizeof(float), m_maxCapacity)
-		&& ShaderUtils::CreateStagingBuffer(device, result, &m_dFloat3Buffer, sizeof(XMFLOAT3), m_maxCapacity);
+		&& ShaderUtils::CreateStagingBuffer(device, result, &m_dFloat3Buffer, sizeof(XMFLOAT3), m_maxCapacity)
+		&& ShaderUtils::CreateStagingBuffer(device, result, &m_dFloat4Buffer, sizeof(XMFLOAT4), m_maxCapacity);
 
 	return result;
 }
@@ -167,14 +168,10 @@ HRESULT CsSharedBuffer::InitBarnesHutShaderParameters(ID3D11Device* device)
 		&& ShaderUtils::CreateResourceBuffer(device, result, &m_forceBuffer, sizeof(XMFLOAT3), m_maxParticleCount)
 		&& ShaderUtils::CreateStagingBuffer(device, result, &m_outForceBuffer, sizeof(XMFLOAT3), m_maxParticleCount)
 		&& ShaderUtils::CreateUAVBuffer(device, result, m_forceBuffer, &m_uavForceBuffer, m_maxParticleCount)
-		//Cell width
-		&& ShaderUtils::CreateResourceBuffer(device, result, &m_cellWidthBuffer, sizeof(float), m_maxCapacity)
-		&& ShaderUtils::CreateResourceViewBuffer(device, result, m_cellWidthBuffer, &m_srvCellWidthBuffer, m_maxCapacity)
-		&& ShaderUtils::CreateUAVBuffer(device, result, m_cellWidthBuffer, &m_uavCellWidthBuffer, m_maxCapacity)
-		//Cell center
-		&& ShaderUtils::CreateResourceBuffer(device, result, &m_cellCenterBuffer, sizeof(XMFLOAT3), m_maxCapacity)
-		&& ShaderUtils::CreateResourceViewBuffer(device, result, m_cellCenterBuffer, &m_srvCellCenterBuffer, m_maxCapacity)
-		&& ShaderUtils::CreateUAVBuffer(device, result, m_cellCenterBuffer, &m_uavCellCenterBuffer, m_maxCapacity);
+		//Cell Data
+		&& ShaderUtils::CreateResourceBuffer(device, result, &m_cellGeoDataBuffer, sizeof(XMFLOAT4), m_maxCapacity, 0)
+		&& ShaderUtils::CreateResourceViewBuffer(device, result, m_cellGeoDataBuffer, &m_srvCellGeoDataBuffer, m_maxCapacity, DXGI_FORMAT_R32G32B32A32_FLOAT)
+		&& ShaderUtils::CreateUAVBuffer(device, result, m_cellGeoDataBuffer, &m_uavCellGeoDataBuffer, m_maxCapacity, DXGI_FORMAT_R32G32B32A32_FLOAT);
 
 	return result;
 }
@@ -244,6 +241,7 @@ void CsSharedBuffer::ReleaseShaderParameters()
 	ShaderUtils::SafeRelease(&m_dUint32Buffer);
 	ShaderUtils::SafeRelease(&m_dFloatBuffer);
 	ShaderUtils::SafeRelease(&m_dFloat3Buffer);
+	ShaderUtils::SafeRelease(&m_dFloat4Buffer);
 
 	ShaderUtils::SafeRelease(&m_outputBuffer);
 	ShaderUtils::SafeRelease(&m_settingsBuffer);
@@ -310,13 +308,9 @@ void CsSharedBuffer::ReleaseShaderParameters()
 	ShaderUtils::SafeRelease(&m_uavCombinedMassBuffer);
 	ShaderUtils::SafeRelease(&m_srvCombinedMassBuffer);
 
-	ShaderUtils::SafeRelease(&m_cellWidthBuffer);
-	ShaderUtils::SafeRelease(&m_uavCellWidthBuffer);
-	ShaderUtils::SafeRelease(&m_srvCellWidthBuffer);
-
-	ShaderUtils::SafeRelease(&m_cellCenterBuffer);
-	ShaderUtils::SafeRelease(&m_uavCellCenterBuffer);
-	ShaderUtils::SafeRelease(&m_srvCellCenterBuffer);
+	ShaderUtils::SafeRelease(&m_cellGeoDataBuffer);
+	ShaderUtils::SafeRelease(&m_uavCellGeoDataBuffer);
+	ShaderUtils::SafeRelease(&m_srvCellGeoDataBuffer);
 
 	ShaderUtils::SafeRelease(&m_liBuffer);
 	ShaderUtils::SafeRelease(&m_uavLiBuffer);
@@ -385,8 +379,7 @@ void CsSharedBuffer::ClearUavBuffer()
 	m_deviceContext->ClearUnorderedAccessViewUint(m_uavLiBuffer, clearValues);
 	m_deviceContext->ClearUnorderedAccessViewUint(m_uavLcBuffer, clearValues);
 	m_deviceContext->ClearUnorderedAccessViewUint(m_uavDebugBuffer, clearValues);
-	m_deviceContext->ClearUnorderedAccessViewUint(m_uavCellWidthBuffer, clearValues);
-	m_deviceContext->ClearUnorderedAccessViewUint(m_uavCellCenterBuffer, clearValues);
+	m_deviceContext->ClearUnorderedAccessViewUint(m_uavCellGeoDataBuffer, clearValues);
 }
 
 void CsSharedBuffer::SwapParticleBuffer()
@@ -410,7 +403,7 @@ void CsSharedBuffer::RecordBufferSnapshot()
 	RecordBufferSnapshot <uint32_t> (m_dUint32Buffer, m_liBuffer, "LI", m_maxCapacity);
 	RecordBufferSnapshot <uint32_t> (m_dUint32Buffer, m_lcBuffer, "LC", m_maxCapacity);
 	RecordBufferSnapshot <float> (m_dFloatBuffer, m_combinedMassBuffer, "CM", m_maxCapacity);
-	RecordBufferSnapshot <float> (m_dFloatBuffer, m_cellWidthBuffer, "CW", m_maxCapacity);
+	RecordBufferSnapshot <float> (m_dFloatBuffer, m_cellGeoDataBuffer, "CW", m_maxCapacity);
 	RecordBufferSnapshot <uint32_t> (m_dUint32Buffer, m_counterBuffer, "n", 2);
 
 	//m_deviceContext->CopyResource (dest, source);

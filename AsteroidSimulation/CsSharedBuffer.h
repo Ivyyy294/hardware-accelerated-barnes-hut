@@ -28,6 +28,7 @@ public:
 	ID3D11Buffer* m_dUint32Buffer{ nullptr };
 	ID3D11Buffer* m_dFloatBuffer{ nullptr };
 	ID3D11Buffer* m_dFloat3Buffer{ nullptr };
+	ID3D11Buffer* m_dFloat4Buffer{ nullptr };
 
 	//Settings buffer
 	ID3D11Buffer* m_settingsBuffer{ nullptr };
@@ -130,13 +131,9 @@ public:
 	ID3D11Buffer* m_outForceBuffer{ nullptr };
 	ID3D11UnorderedAccessView* m_uavForceBuffer = nullptr;
 
-	ID3D11Buffer* m_cellWidthBuffer{ nullptr };
-	ID3D11UnorderedAccessView* m_uavCellWidthBuffer = nullptr;
-	ID3D11ShaderResourceView* m_srvCellWidthBuffer = nullptr;
-
-	ID3D11Buffer* m_cellCenterBuffer{ nullptr };
-	ID3D11UnorderedAccessView* m_uavCellCenterBuffer = nullptr;
-	ID3D11ShaderResourceView* m_srvCellCenterBuffer = nullptr;
+	ID3D11Buffer* m_cellGeoDataBuffer{ nullptr };
+	ID3D11UnorderedAccessView* m_uavCellGeoDataBuffer = nullptr;
+	ID3D11ShaderResourceView* m_srvCellGeoDataBuffer = nullptr;
 
 //Methods
 public:

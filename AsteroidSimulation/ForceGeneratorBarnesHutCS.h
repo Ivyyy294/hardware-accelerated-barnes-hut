@@ -59,8 +59,7 @@ private:
 	float m_maxCoord = 0.f;
 	uint32_t m_counterBuffer[3] = {1,0,1};
 
-	float* m_cellWidth = nullptr;
-	XMFLOAT3* m_cellCenter = nullptr;
+	XMFLOAT4* m_cellGeoData = nullptr;
 	XMFLOAT3* m_cellCom = nullptr;
 	uint32_t* m_cellCo = nullptr;
 	uint32_t* m_cellLc = nullptr;

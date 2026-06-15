@@ -9,8 +9,7 @@ ForceGeneratorBarnesHutCS::ForceGeneratorBarnesHutCS()
 	, m_buffer (m_maxParticleCount)
 {
 	const uint32_t maxCapacity = m_buffer.MaxCapacity();
-	m_cellWidth = new float[maxCapacity];
-	m_cellCenter = new XMFLOAT3 [maxCapacity];
+	m_cellGeoData = new XMFLOAT4 [maxCapacity];
 	m_cellCom = new XMFLOAT3 [maxCapacity];
 	m_cellCo = new uint32_t [maxCapacity];
 	m_cellLc = new uint32_t [maxCapacity];
@@ -18,8 +17,7 @@ ForceGeneratorBarnesHutCS::ForceGeneratorBarnesHutCS()
 
 ForceGeneratorBarnesHutCS::~ForceGeneratorBarnesHutCS()
 {
-	delete[] m_cellWidth;
-	delete[] m_cellCenter;
+	delete[] m_cellGeoData;
 	delete[] m_cellCom;
 	delete[] m_cellCo;
 	delete[] m_cellLc;
@@ -172,9 +170,9 @@ void ForceGeneratorBarnesHutCS::OnDrawGizmo()
 	{
 		if (m_cellCo[i] == 0 && m_cellLc[i] > 0)
 		{
-			Vector3 center (m_cellCenter[i].x, m_cellCenter[i].y, m_cellCenter[i].z);
+			Vector3 center (m_cellGeoData[i].x, m_cellGeoData[i].y, m_cellGeoData[i].z);
 
-			Vector3 halfExtends (m_cellWidth[i] * 0.5f, m_cellWidth[i] * 0.5f, m_cellWidth[i] * 0.5f);
+			Vector3 halfExtends (m_cellGeoData[i].w * 0.5f, m_cellGeoData[i].w * 0.5f, m_cellGeoData[i].w * 0.5f);
 			Gizmo::AddCube (center, halfExtends, Color::Green, Transform::Space::WORLD);
 
 			Vector3 com (m_cellCom[i].x, m_cellCom[i].y, m_cellCom[i].z);
@@ -366,32 +364,19 @@ void ForceGeneratorBarnesHutCS::CopyCounterBuffer()
 
 void ForceGeneratorBarnesHutCS::CopyCellData()
 {
-	//Copy cellWidth
-	m_deviceContext->CopyResource(m_buffer.m_dFloatBuffer, m_buffer.m_cellWidthBuffer);
+	//Copy cell geo data
+	m_deviceContext->CopyResource(m_buffer.m_dFloat4Buffer, m_buffer.m_cellGeoDataBuffer);
 
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
-	HRESULT hr = m_deviceContext->Map(m_buffer.m_dFloatBuffer, 0, D3D11_MAP_READ, 0, &mappedResource);
+	HRESULT hr = m_deviceContext->Map(m_buffer.m_dFloat4Buffer, 0, D3D11_MAP_READ, 0, &mappedResource);
 
 	const uint32_t maxCapacity = m_buffer.MaxCapacity();
 
 	if (SUCCEEDED(hr))
 	{
-		float* dataPtr = (float*)mappedResource.pData;
-		memcpy(m_cellWidth, dataPtr, sizeof(float) * maxCapacity);
-		m_deviceContext->Unmap(m_buffer.m_dFloatBuffer, 0);
-	}
-
-	//Copy cell center
-	m_deviceContext->CopyResource(m_buffer.m_dFloat3Buffer, m_buffer.m_cellCenterBuffer);
-
-	mappedResource;
-	hr = m_deviceContext->Map(m_buffer.m_dFloat3Buffer, 0, D3D11_MAP_READ, 0, &mappedResource);
-
-	if (SUCCEEDED(hr))
-	{
-		XMFLOAT3* dataPtr = (XMFLOAT3*)mappedResource.pData;
-		memcpy(m_cellCenter, dataPtr, sizeof(XMFLOAT3) * maxCapacity);
-		m_deviceContext->Unmap(m_buffer.m_dFloat3Buffer, 0);
+		XMFLOAT4* dataPtr = (XMFLOAT4*)mappedResource.pData;
+		memcpy(m_cellGeoData, dataPtr, sizeof(XMFLOAT4) * maxCapacity);
+		m_deviceContext->Unmap(m_buffer.m_dFloat4Buffer, 0);
 	}
 
 	//Copy cell com
