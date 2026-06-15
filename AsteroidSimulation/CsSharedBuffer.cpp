@@ -402,8 +402,10 @@ void CsSharedBuffer::ClearUavBuffer()
 	m_deviceContext->ClearUnorderedAccessViewUint(m_uavDebugBuffer, clearValues);
 
 	FLOAT clearValuesF[4] = { 0.f, 0.f, 0.f, 0.f };
-	m_deviceContext->ClearUnorderedAccessViewUint(m_uavCellMpDataBuffer, clearValues);
-	m_deviceContext->ClearUnorderedAccessViewUint(m_uavCellGeoDataBuffer, clearValues);
+	m_deviceContext->ClearUnorderedAccessViewFloat(m_uavCellGeoDataBuffer, clearValuesF);
+
+	FLOAT clearValuesF2[4] = { -1.f, -1.f, -1.f, -1.f };
+	m_deviceContext->ClearUnorderedAccessViewFloat(m_uavCellMpDataBuffer, clearValuesF2);
 }
 
 void CsSharedBuffer::SwapParticleBuffer()
@@ -427,7 +429,7 @@ void CsSharedBuffer::RecordBufferSnapshot()
 	RecordBufferSnapshot <uint32_t> (m_dUint32Buffer, m_liBuffer, "LI", m_maxCapacity);
 	RecordBufferSnapshot <uint32_t> (m_dUint32Buffer, m_lcBuffer, "LC", m_maxCapacity);
 	RecordBufferSnapshotXMFLOAT4 (m_dFloat4Buffer, m_cellMpDataBuffer, "CM", m_maxCapacity, 3);
-	RecordBufferSnapshotXMFLOAT4 (m_dFloat4Buffer, m_cellGeoDataBuffer, "CM", m_maxCapacity, 3);
+	RecordBufferSnapshotXMFLOAT4 (m_dFloat4Buffer, m_cellGeoDataBuffer, "CW", m_maxCapacity, 3);
 	RecordBufferSnapshot <uint32_t> (m_dUint32Buffer, m_counterBuffer, "n", 2);
 
 	//m_deviceContext->CopyResource (dest, source);

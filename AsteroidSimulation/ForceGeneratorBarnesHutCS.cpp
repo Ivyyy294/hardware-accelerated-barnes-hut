@@ -307,9 +307,40 @@ void ForceGeneratorBarnesHutCS::BuildOctree(uint32_t elementCount)
 void ForceGeneratorBarnesHutCS::CallculateForces(uint32_t elementCount)
 {
 	uint32_t nCount = m_counterBuffer[0] + m_counterBuffer[1];
-	uint32_t groupCount = (elementCount + 255) / 256;
+	uint32_t groupCount = (nCount + 63) / 64;
 	m_buffer.SetBhSettingsParameter (elementCount, m_maxCoord * 2.f, IvyyyPhysic::GravitationalConstant(), m_theta);
-	m_csBarnesHut_MP.Dispatch(nCount, 1, 1);
+
+	//Get tree depth
+	m_deviceContext->CopySubresourceRegion(m_buffer.m_dUint32Buffer, 0, 0, 0, 0, m_buffer.m_loBuffer, 0, nullptr);
+	D3D11_MAPPED_SUBRESOURCE mappedResource;
+	HRESULT hr = m_deviceContext->Map(m_buffer.m_dUint32Buffer, 0, D3D11_MAP_READ, 0, &mappedResource);
+
+	int maxDepth = 0;
+
+	if (SUCCEEDED(hr))
+	{
+		const uint32_t size = 11;
+		uint32_t data[size];
+
+		memcpy(&data[0], mappedResource.pData, sizeof(uint32_t) * size);
+		m_deviceContext->Unmap(m_buffer.m_dUint32Buffer, 0);
+
+		for (int i = 0; i < size; ++i)
+		{
+			if (data[i] < data[i+1])
+				maxDepth++;
+			else
+				break;
+		}
+	}
+	else
+	{
+		MsgBox::ShowError("Failed to map loBuffer!");
+		IvyyyEngine::Exit();
+	}
+
+	m_csBarnesHut_MP.Dispatch(groupCount, 1, 1, maxDepth);
+
 	m_csBarnesHut_CF.Dispatch(nCount, 1, 1);
 }
 

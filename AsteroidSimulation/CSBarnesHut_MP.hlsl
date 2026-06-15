@@ -2,7 +2,7 @@
 #include "CSZOrder.hlsli"
 
 #define L 10
-#define NUM_THREADS 256
+#define NUM_THREADS 64
 
 cbuffer SettingsBuffer : register(b0)
 {
@@ -29,90 +29,85 @@ RWBuffer<uint> liBuffer : register(u1);
 RWBuffer<uint> lcBuffer : register(u2);
 RWBuffer<float4> cellGeoData : register(u3);
 
-groupshared bool gAbort;
-
-groupshared uint gIndexBegin;
-groupshared uint gIndexEnd;
-groupshared uint gCount;
-groupshared float4 gLocalComMass[NUM_THREADS];
-
 [numthreads(NUM_THREADS, 1, 1)]
 void main(uint3 GTid : SV_GroupThreadID,
           uint3 Gid : SV_GroupID)
 {
-    if (GTid.x == 0)
-    {
-        const uint ni = counterBuffer[1];
-        const uint nl = counterBuffer[0];
-        const uint n = ni + nl;
-        gAbort = Gid.x >= n;
-    }
+    const uint n = counterBuffer[1] + counterBuffer[0];
     
-    GroupMemoryBarrierWithGroupSync();
+    const uint index = Gid.x * NUM_THREADS + GTid.x;
     
-    if (gAbort)
+    //Abort if index is out of bounds
+    if (index >= n)
         return;
     
-    const uint index = Gid.x;
+    //Abort if mass was already calculted in earlier pass
+    if (cellMpData[index].w >= 0.f)
+        return;
 
-    if (GTid.x == 0)
-    {
-        uint ws = nkBuffer[index];
-        uint level = GetTreeLevelFromWs(ws);
-        uint prefix = ws - (1 << (3 * level));
-        uint range = 3 * (L - level);
+    //Init cell width
+    const uint ws = nkBuffer[index];
+    const uint level = GetTreeLevelFromWs(ws);
+    const uint prefix = ws - (1 << (3 * level));
+    const uint range = 3 * (L - level);
+    const float cellWidth = globallCellWidth / (1 << level);
+
+    //Init cell geo center
+    float3 boundsMin = globallCellWidth * -0.5f;
+    float3 boundsMax = globallCellWidth * 0.5f;    
+    cellGeoData[index] = float4(DecodeWSKey(ws, level, boundsMin, boundsMax), cellWidth);
     
-        uint begin = prefix << range;
-        uint end = (prefix + 1) << range;
-        
-        float cellWidth = globallCellWidth / (1 << level);
+    //Init li and lc buffer
+    const uint begin = prefix << range;
+    const uint end = (prefix + 1) << range;
+    uint indexBegin = BinarySearch(begin, keyBuffer, pCount);
+    uint indexEnd = BinarySearch(end, keyBuffer, pCount);
+    uint count = indexEnd - indexBegin;
+    liBuffer[index] = indexBegin;
+    lcBuffer[index] = count;
     
-        float3 boundsMin = globallCellWidth * -0.5f;
-        float3 boundsMax = globallCellWidth * 0.5f;
-    
-        cellGeoData[index] = float4(DecodeWSKey(ws, level, boundsMin, boundsMax), cellWidth);
-        
-        gIndexBegin = BinarySearch(begin, keyBuffer, pCount);
-        gIndexEnd = BinarySearch(end, keyBuffer, pCount);
-        gCount = gIndexEnd - gIndexBegin;
-        
-        liBuffer[index] = gIndexBegin;
-        lcBuffer[index] = gCount;
-    }
-    
-    GroupMemoryBarrierWithGroupSync();
-        
     float4 localComMass = 0.f;
     
-    for (uint i = gIndexBegin + GTid.x; i < gIndexEnd; i += NUM_THREADS)
+    //internal node
+    if (coBuffer[index] > 0)
     {
-        const float iMass = massBuffer[i];
-        localComMass.w += iMass;
-        
-        const float3 iPos = posBuffer[i];
-        localComMass.x += iPos.x * iMass;
-        localComMass.y += iPos.y * iMass;
-        localComMass.z += iPos.z * iMass;
-    }
-    
-    gLocalComMass[GTid.x] = localComMass;
-    
-    GroupMemoryBarrierWithGroupSync();
-    
-    if (GTid.x == 0)
-    {
-        float3 com = 0.f;
-        float mass = 0.f;
-        
-        for (uint i = 0; i < NUM_THREADS; ++i)
+        [unroll]
+        for (uint i = 0; i < 8; ++i)
         {
-            com += gLocalComMass[i].xyz;
-            mass += gLocalComMass[i].w;
+            const uint childIndex = coBuffer[index] + i;
+            const float iMass = cellMpData[childIndex].w;
+
+            //Early exit if one child is not ready yet
+            if (iMass < 0.f)
+                return;
+            
+            localComMass.w += iMass;
+        
+            const float3 iPos = cellMpData[childIndex].xyz;
+            localComMass.x += iPos.x * iMass;
+            localComMass.y += iPos.y * iMass;
+            localComMass.z += iPos.z * iMass;
         }
-        
-        if (mass > 0.f)
-            com = com / mass;
-        
-        cellMpData[index] = float4(com, mass);
     }
+    //Leaf node
+    else
+    {
+        //max nCrit = 64 particle per node
+        [unroll(64)]
+        for (uint i = indexBegin; i < indexEnd; ++i)
+        {
+            const float iMass = massBuffer[i];
+            localComMass.w += iMass;
+        
+            const float3 iPos = posBuffer[i];
+            localComMass.x += iPos.x * iMass;
+            localComMass.y += iPos.y * iMass;
+            localComMass.z += iPos.z * iMass;
+        }
+    }
+        
+    if (localComMass.w > 0.f)
+        localComMass.xyz = localComMass.xyz / localComMass.w;
+        
+    cellMpData[index] = localComMass;
 }
