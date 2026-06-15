@@ -24,10 +24,11 @@ StructuredBuffer<uint> coBuffer : register(t6);
 StructuredBuffer<uint> counterBuffer : register(t7);
 
 //Multipole data
-RWBuffer<float4> cellMpData : register(u0);
-RWStructuredBuffer<uint> liBuffer : register(u1);
-RWStructuredBuffer<uint> lcBuffer : register(u2);
-RWBuffer<float4> cellGeoData : register(u3);
+RWBuffer<float> cellMass : register(u0);
+RWStructuredBuffer<float3> cellCom : register(u1);
+RWStructuredBuffer<uint> liBuffer : register(u2);
+RWStructuredBuffer<uint> lcBuffer : register(u3);
+RWBuffer<float4> cellGeoData : register(u4);
 
 [numthreads(NUM_THREADS, 1, 1)]
 void main(uint3 GTid : SV_GroupThreadID,
@@ -42,7 +43,7 @@ void main(uint3 GTid : SV_GroupThreadID,
         return;
     
     //Abort if mass was already calculted in earlier pass
-    if (cellMpData[index].w >= 0.f)
+    if (cellMass[index] >= 0.f)
         return;
 
     //Init cell width
@@ -75,7 +76,7 @@ void main(uint3 GTid : SV_GroupThreadID,
         for (uint i = 0; i < 8; ++i)
         {
             const uint childIndex = coBuffer[index] + i;
-            const float iMass = cellMpData[childIndex].w;
+            const float iMass = cellMass[childIndex];
 
             //Early exit if one child is not ready yet
             if (iMass < 0.f)
@@ -83,7 +84,7 @@ void main(uint3 GTid : SV_GroupThreadID,
             
             localComMass.w += iMass;
         
-            const float3 iPos = cellMpData[childIndex].xyz;
+            const float3 iPos = cellCom[childIndex];
             localComMass.x += iPos.x * iMass;
             localComMass.y += iPos.y * iMass;
             localComMass.z += iPos.z * iMass;
@@ -109,5 +110,6 @@ void main(uint3 GTid : SV_GroupThreadID,
     if (localComMass.w > 0.f)
         localComMass.xyz = localComMass.xyz / localComMass.w;
         
-    cellMpData[index] = localComMass;
+    cellMass[index] = localComMass.w;
+    cellCom[index] = localComMass.xyz;
 }

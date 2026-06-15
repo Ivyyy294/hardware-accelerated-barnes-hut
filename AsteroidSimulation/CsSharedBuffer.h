@@ -28,6 +28,7 @@ public:
 
 	ID3D11Buffer* m_dUint32Buffer{ nullptr };
 	ID3D11Buffer* m_dFloatBuffer{ nullptr };
+	ID3D11Buffer* m_dFloat3Buffer{ nullptr };
 	ID3D11Buffer* m_dFloat4Buffer{ nullptr };
 
 	//Settings buffer
@@ -96,7 +97,8 @@ public:
 	//Barnes hut buffer
 	ID3D11Buffer* m_bhSettingsBuffer{ nullptr };
 
-	UavSrvBuffer m_cellMpData;
+	UavSrvBuffer m_cellMass;
+	UavSrvBuffer m_cellCom;
 
 	ID3D11Buffer* m_forceBuffer{ nullptr };
 	ID3D11Buffer* m_outForceBuffer{ nullptr };

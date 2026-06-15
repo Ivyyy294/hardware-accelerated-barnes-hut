@@ -20,10 +20,11 @@ void CsBarnesHut_MP::BindShaderParameters(ID3D11DeviceContext* deviceContext)
 	deviceContext->CSSetShaderResources(6, 1, &m_sharedBuffer->m_co.m_srv);
 	deviceContext->CSSetShaderResources(7, 1, &m_sharedBuffer->m_srvCounterBuffer);
 
-	deviceContext->CSSetUnorderedAccessViews(0, 1, &m_sharedBuffer->m_cellMpData.m_uav, nullptr);
-	deviceContext->CSSetUnorderedAccessViews(1, 1, &m_sharedBuffer->m_li.m_uav, nullptr);
-	deviceContext->CSSetUnorderedAccessViews(2, 1, &m_sharedBuffer->m_lc.m_uav, nullptr);
-	deviceContext->CSSetUnorderedAccessViews(3, 1, &m_sharedBuffer->m_cellGeoData.m_uav, nullptr);
+	deviceContext->CSSetUnorderedAccessViews(0, 1, &m_sharedBuffer->m_cellMass.m_uav, nullptr);
+	deviceContext->CSSetUnorderedAccessViews(1, 1, &m_sharedBuffer->m_cellCom.m_uav, nullptr);
+	deviceContext->CSSetUnorderedAccessViews(2, 1, &m_sharedBuffer->m_li.m_uav, nullptr);
+	deviceContext->CSSetUnorderedAccessViews(3, 1, &m_sharedBuffer->m_lc.m_uav, nullptr);
+	deviceContext->CSSetUnorderedAccessViews(4, 1, &m_sharedBuffer->m_cellGeoData.m_uav, nullptr);
 	deviceContext->CSSetUnorderedAccessViews(7, 1, &m_sharedBuffer->m_uavDebugBuffer, nullptr);
 }
 
@@ -48,6 +49,7 @@ void CsBarnesHut_MP::UnbindShaderParameters(ID3D11DeviceContext* deviceContext)
 	deviceContext->CSSetUnorderedAccessViews(1, 1, &nullUAV, nullptr);
 	deviceContext->CSSetUnorderedAccessViews(2, 1, &nullUAV, nullptr);
 	deviceContext->CSSetUnorderedAccessViews(3, 1, &nullUAV, nullptr);
+	deviceContext->CSSetUnorderedAccessViews(4, 1, &nullUAV, nullptr);
 	deviceContext->CSSetUnorderedAccessViews(7, 1, &nullUAV, nullptr);
 }
 

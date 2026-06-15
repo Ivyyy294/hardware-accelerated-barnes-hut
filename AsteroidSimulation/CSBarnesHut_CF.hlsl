@@ -24,7 +24,8 @@ struct ParticleData
 
 struct NodeData
 {
-    float4 comMass[NUM_THREADS];
+    float mass[NUM_THREADS];
+    float3 com[NUM_THREADS];
     uint index[NUM_THREADS];
     int minSqrDistInt[NUM_THREADS];
     bool criterium[NUM_THREADS];
@@ -47,10 +48,11 @@ StructuredBuffer<uint> nkBuffer : register(t3);
 StructuredBuffer<uint> coBuffer : register(t4);
 
 //Multipole data
-Buffer<float4> cellMpData : register(t5);
-StructuredBuffer<uint> liBuffer : register(t6);
-StructuredBuffer<uint> lcBuffer : register(t7);
-Buffer<float4> cellGeoData : register(t8);
+Buffer<float4> cellMass : register(t5);
+StructuredBuffer<float3> cellCom : register(t6);
+StructuredBuffer<uint> liBuffer : register(t7);
+StructuredBuffer<uint> lcBuffer : register(t8);
+Buffer<float4> cellGeoData : register(t9);
 
 RWStructuredBuffer<float3> forceBuffer : register(u0);
 
@@ -90,7 +92,8 @@ void GetNodeData(in const uint slot, in const uint nodeIndex)
     const uint nk = nkBuffer[nodeIndex];
     const uint level = GetTreeLevelFromWs(nk);
     gNodeData.index[slot] = nodeIndex;
-    gNodeData.comMass[slot] = cellMpData[nodeIndex];
+    gNodeData.mass[slot] = cellMass[nodeIndex];
+    gNodeData.com[slot] = cellCom[nodeIndex];
     gNodeData.criterium[slot] = false;
     gNodeData.minSqrDistInt[slot] = 0xFFFFFFFF;
 }
@@ -119,14 +122,14 @@ void SetCriteriumForNode(const uint nodeDataIndex)
     uint nodeIndex = gNodeData.index[nodeDataIndex];
     
     float minSqrDist = UintToFloat(gNodeData.minSqrDistInt[nodeDataIndex]);
-    float delta = distance(gNodeData.comMass[nodeDataIndex].xyz, cellGeoData[nodeIndex].xyz);
+    float delta = distance(gNodeData.com[nodeDataIndex], cellGeoData[nodeIndex].xyz);
     float critVal = (cellGeoData[nodeIndex].w / theta) + delta;
     gNodeData.criterium[nodeDataIndex] = minSqrDist > (critVal * critVal);
 }
 
 void SetMinDistForNode(const uint nodeDataIndex, const ParticleData pData)
 {
-    float3 direction = gNodeData.comMass[nodeDataIndex].xyz - pData.pos;
+    float3 direction = gNodeData.com[nodeDataIndex] - pData.pos;
     float sqrDistance = dot(direction, direction);
         
     GroupMemoryBarrierWithGroupSync();
@@ -231,13 +234,13 @@ void main(uint3 GTid : SV_GroupThreadID,
             //apply from node
             if (gNodeData.criterium[j])
             {
-                float3 direction = gNodeData.comMass[j].xyz - pData.pos;
+                float3 direction = gNodeData.com[j] - pData.pos;
                 float sqrDistance = dot(direction, direction);
                 
                 float invDist = rsqrt(sqrDistance + EPS2);
                 float invDist3 = invDist * invDist * invDist;
 
-                pData.force += (gNodeData.comMass[j].w * direction) * invDist3;
+                pData.force += (gNodeData.mass[j] * direction) * invDist3;
             }
             //apply particle of node
             else if (isInternalNode == false)

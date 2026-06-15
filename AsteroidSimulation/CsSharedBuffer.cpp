@@ -19,6 +19,7 @@ HRESULT CsSharedBuffer::InitDebugShaderParameters(ID3D11Device* device)
 		&& ShaderUtils::CreateUAVBuffer(device, result, m_debugBuffer, &m_uavDebugBuffer, 1024)
 		&& ShaderUtils::CreateStagingBuffer(device, result, &m_dUint32Buffer, sizeof(uint32_t), m_maxCapacity)
 		&& ShaderUtils::CreateStagingBuffer(device, result, &m_dFloatBuffer, sizeof(float), m_maxCapacity)
+		&& ShaderUtils::CreateStagingBuffer(device, result, &m_dFloat3Buffer, sizeof(XMFLOAT3), m_maxCapacity)
 		&& ShaderUtils::CreateStagingBuffer(device, result, &m_dFloat4Buffer, sizeof(XMFLOAT4), m_maxCapacity);
 
 	return result;
@@ -138,7 +139,8 @@ HRESULT CsSharedBuffer::InitBarnesHutShaderParameters(ID3D11Device* device)
 
 	bool ok = ShaderUtils::CreateConstBuffer(device, result, &m_bhSettingsBuffer, sizeof(BhSettings))
 		//Cell Multipole Data
-		&& m_cellMpData.Init(device, result, sizeof(XMFLOAT4), m_maxCapacity, 0, DXGI_FORMAT_R32G32B32A32_FLOAT)
+		&& m_cellMass.Init(device, result, sizeof(float), m_maxCapacity, 0, DXGI_FORMAT_R32_FLOAT)
+		&& m_cellCom.Init(device, result, sizeof(XMFLOAT3), m_maxCapacity)
 		//Force
 		&& ShaderUtils::CreateResourceBuffer(device, result, &m_forceBuffer, sizeof(XMFLOAT3), m_maxParticleCount)
 		&& ShaderUtils::CreateStagingBuffer(device, result, &m_outForceBuffer, sizeof(XMFLOAT3), m_maxParticleCount)
@@ -246,6 +248,7 @@ void CsSharedBuffer::ReleaseShaderParameters()
 	ShaderUtils::SafeRelease(&m_debugBuffer);
 	ShaderUtils::SafeRelease(&m_dUint32Buffer);
 	ShaderUtils::SafeRelease(&m_dFloatBuffer);
+	ShaderUtils::SafeRelease(&m_dFloat3Buffer);
 	ShaderUtils::SafeRelease(&m_dFloat4Buffer);
 
 	ShaderUtils::SafeRelease(&m_outputBuffer);
@@ -293,7 +296,8 @@ void CsSharedBuffer::ReleaseShaderParameters()
 	m_lo.Release();
 	m_co.Release();
 
-	m_cellMpData.Release();
+	m_cellMass.Release();
+	m_cellCom.Release();
 	m_cellGeoData.Release();
 
 	m_li.Release();
@@ -348,7 +352,7 @@ void CsSharedBuffer::ClearUavBuffer()
 	m_deviceContext->ClearUnorderedAccessViewFloat(m_cellGeoData.m_uav, clearValuesF);
 
 	FLOAT clearValuesF2[4] = { -1.f, -1.f, -1.f, -1.f };
-	m_deviceContext->ClearUnorderedAccessViewFloat(m_cellMpData.m_uav, clearValuesF2);
+	m_deviceContext->ClearUnorderedAccessViewFloat(m_cellMass.m_uav, clearValuesF2);
 }
 
 void CsSharedBuffer::SwapParticleBuffer()
@@ -371,7 +375,7 @@ void CsSharedBuffer::RecordBufferSnapshot()
 	RecordBufferSnapshot <uint32_t> (m_dUint32Buffer, m_co.m_buffer, "CO", m_maxCapacity);
 	RecordBufferSnapshot <uint32_t> (m_dUint32Buffer, m_li.m_buffer, "LI", m_maxCapacity);
 	RecordBufferSnapshot <uint32_t> (m_dUint32Buffer, m_lc.m_buffer, "LC", m_maxCapacity);
-	RecordBufferSnapshotXMFLOAT4 (m_dFloat4Buffer, m_cellMpData.m_buffer, "CM", m_maxCapacity, 3);
+	RecordBufferSnapshot <float> (m_dFloatBuffer, m_cellMass.m_buffer, "CM", m_maxCapacity);
 	RecordBufferSnapshotXMFLOAT4 (m_dFloat4Buffer, m_cellGeoData.m_buffer, "CW", m_maxCapacity, 3);
 	RecordBufferSnapshot <uint32_t> (m_dUint32Buffer, m_counterBuffer, "n", 2);
 
