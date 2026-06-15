@@ -38,7 +38,7 @@ bool ShaderUtils::CreateResourceBuffer(ID3D11Device* device, HRESULT& result, ID
 	bufferDesc.ByteWidth = byteStride * elementCount;
 	bufferDesc.Usage = D3D11_USAGE_DEFAULT;
 	bufferDesc.CPUAccessFlags = 0;
-	bufferDesc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
+	bufferDesc.MiscFlags = miscFlag;
 	bufferDesc.StructureByteStride = byteStride;
 
 	result = device->CreateBuffer(&bufferDesc, initalData, buffer);
