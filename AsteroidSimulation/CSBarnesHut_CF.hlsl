@@ -3,6 +3,7 @@
 
 #define NUM_THREADS 64
 #define L 10
+#define EPS2 0.0025f
 
 cbuffer SettingsBuffer : register(b0)
 {
@@ -235,10 +236,11 @@ void main(uint3 GTid : SV_GroupThreadID,
             {
                 float3 direction = gNodeData.comMass[j].xyz - pData.pos;
                 float sqrDistance = dot(direction, direction);
-                const float distance = sqrDistance * rsqrt(sqrDistance);
                 
-                if (sqrDistance >= 0.001f)
-                    pData.force += (gNodeData.comMass[j].w * direction) / (sqrDistance * distance);
+                float invDist = rsqrt(sqrDistance + EPS2);
+                float invDist3 = invDist * invDist * invDist;
+
+                pData.force += (gNodeData.comMass[j].w * direction) * invDist3;
             }
             //apply particle of node
             else if (isInternalNode == false)
@@ -262,18 +264,15 @@ void main(uint3 GTid : SV_GroupThreadID,
                 
                 GroupMemoryBarrierWithGroupSync();
                 
-                float3 tmpForce = 0.f;
-                
                 for (uint pIndex = 0; pIndex < gNodeParticleData.count; ++pIndex)
                 {
                     float3 forceDirection = gNodeParticleData.posMass[pIndex].xyz - pData.pos;
                     const float sqrDistance = dot(forceDirection, forceDirection);
-                    const float distance = sqrDistance * rsqrt(sqrDistance);
+                    
+                    float invDist = rsqrt(sqrDistance + EPS2);
+                    float invDist3 = invDist * invDist * invDist;
     
-                    if (sqrDistance < 0.001f)
-                        continue;
-    
-                    pData.force += (gNodeParticleData.posMass[pIndex].w * forceDirection) / (sqrDistance * distance);
+                    pData.force += (gNodeParticleData.posMass[pIndex].w * forceDirection) * invDist3;
                 }
             }
         }
