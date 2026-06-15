@@ -25,8 +25,8 @@ StructuredBuffer<uint> counterBuffer : register(t7);
 
 //Multipole data
 RWBuffer<float4> cellMpData : register(u0);
-RWStructuredBuffer<uint> liBuffer : register(u1);
-RWStructuredBuffer<uint> lcBuffer : register(u2);
+RWBuffer<uint> liBuffer : register(u1);
+RWBuffer<uint> lcBuffer : register(u2);
 RWBuffer<float4> cellGeoData : register(u3);
 
 groupshared bool gAbort;

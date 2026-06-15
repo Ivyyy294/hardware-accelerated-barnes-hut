@@ -139,13 +139,13 @@ HRESULT CsSharedBuffer::InitCornerStoneShaderParameters(ID3D11Device* device)
 		&& ShaderUtils::CreateResourceViewBuffer(device, result, m_coBuffer, &m_srvCoBuffer, m_maxCapacity)
 		&& ShaderUtils::CreateUAVBuffer(device, result, m_coBuffer, &m_uavCoBuffer, m_maxCapacity)
 		//LI Buffer
-		&& ShaderUtils::CreateResourceBuffer(device, result, &m_liBuffer, sizeof(uint32_t), m_maxCapacity)
-		&& ShaderUtils::CreateResourceViewBuffer(device, result, m_liBuffer, &m_srvLiBuffer, m_maxCapacity)
-		&& ShaderUtils::CreateUAVBuffer(device, result, m_liBuffer, &m_uavLiBuffer, m_maxCapacity)
+		&& ShaderUtils::CreateResourceBuffer(device, result, &m_liBuffer, sizeof(uint32_t), m_maxCapacity, 0)
+		&& ShaderUtils::CreateResourceViewBuffer(device, result, m_liBuffer, &m_srvLiBuffer, m_maxCapacity, DXGI_FORMAT_R32_UINT)
+		&& ShaderUtils::CreateUAVBuffer(device, result, m_liBuffer, &m_uavLiBuffer, m_maxCapacity, DXGI_FORMAT_R32_UINT)
 		//LC Buffer
-		&& ShaderUtils::CreateResourceBuffer(device, result, &m_lcBuffer, sizeof(uint32_t), m_maxCapacity)
-		&& ShaderUtils::CreateResourceViewBuffer(device, result, m_lcBuffer, &m_srvLcBuffer, m_maxCapacity)
-		&& ShaderUtils::CreateUAVBuffer(device, result, m_lcBuffer, &m_uavLcBuffer, m_maxCapacity);
+		&& ShaderUtils::CreateResourceBuffer(device, result, &m_lcBuffer, sizeof(uint32_t), m_maxCapacity, 0)
+		&& ShaderUtils::CreateResourceViewBuffer(device, result, m_lcBuffer, &m_srvLcBuffer, m_maxCapacity, DXGI_FORMAT_R32_UINT)
+		&& ShaderUtils::CreateUAVBuffer(device, result, m_lcBuffer, &m_uavLcBuffer, m_maxCapacity, DXGI_FORMAT_R32_UINT);
 
 	return result;
 }
