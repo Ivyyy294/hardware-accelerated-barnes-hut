@@ -235,15 +235,10 @@ void main(uint3 GTid : SV_GroupThreadID,
             {
                 float3 direction = gNodeData.comMass[j].xyz - pData.pos;
                 float sqrDistance = dot(direction, direction);
-    
+                const float distance = sqrDistance * rsqrt(sqrDistance);
+                
                 if (sqrDistance >= 0.001f)
-                {
-                    float forceMag = ugc * ((gNodeData.comMass[j].w * pData.mass) / sqrDistance);
-    
-                    const float3 forceDirection = normalize(direction);
-    
-                    pData.force += forceDirection * forceMag;
-                }
+                    pData.force += (gNodeData.comMass[j].w * direction) / (sqrDistance * distance);
             }
             //apply particle of node
             else if (isInternalNode == false)
@@ -267,23 +262,23 @@ void main(uint3 GTid : SV_GroupThreadID,
                 
                 GroupMemoryBarrierWithGroupSync();
                 
+                float3 tmpForce = 0.f;
+                
                 for (uint pIndex = 0; pIndex < gNodeParticleData.count; ++pIndex)
                 {
                     float3 forceDirection = gNodeParticleData.posMass[pIndex].xyz - pData.pos;
                     const float sqrDistance = dot(forceDirection, forceDirection);
+                    const float distance = sqrDistance * rsqrt(sqrDistance);
     
                     if (sqrDistance < 0.001f)
                         continue;
     
-                    forceDirection = normalize(forceDirection);
-                    float forceMag = ugc * ((gNodeParticleData.posMass[pIndex].w * pData.mass) / sqrDistance);
-    
-                    pData.force += forceDirection * forceMag;
+                    pData.force += (gNodeParticleData.posMass[pIndex].w * forceDirection) / (sqrDistance * distance);
                 }
             }
         }
     }
     
     if (pData.isParticle)
-        forceBuffer[pData.destIndex] = pData.force;
+        forceBuffer[pData.destIndex] = (ugc * pData.mass) * pData.force;
 }
