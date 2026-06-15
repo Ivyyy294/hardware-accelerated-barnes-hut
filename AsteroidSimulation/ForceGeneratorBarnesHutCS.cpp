@@ -202,15 +202,18 @@ void ForceGeneratorBarnesHutCS::PreCalculateForcesInternal()
 	BuildOctree (capacity);
 
 	CallculateForces (capacity);
-
 	CopyForceData();
+}
 
+void ForceGeneratorBarnesHutCS::DoPostWork()
+{
 	if (Gizmo::Draw)
 		CopyCellData();
 
+	RecordExecutionTime();
+
 	if (Session::Me().m_logDebugInfo)
 	{
-		RecordExecutionTime();
 		m_buffer.RecordBufferSnapshot();
 		CopyTestData();
 	}
@@ -277,12 +280,9 @@ void ForceGeneratorBarnesHutCS::BuildOctree(uint32_t elementCount)
 	m_deviceContext->CopyResource(m_buffer.m_inNkBuffer, m_buffer.m_outNkBuffer);
 
 	//record sort time before sorting nk
-	if (Session::Me().m_logDebugInfo)
-	{
-		m_sortTimeKeyMs = m_csRadixSort_1.GetExecutionTimeMs()
-		+ m_csRadixSort_2.GetExecutionTimeMs()
-		+ m_csRadixSort_3.GetExecutionTimeMs();
-	}
+	m_sortTimeKeyMs = m_csRadixSort_1.GetExecutionTimeMs()
+	+ m_csRadixSort_2.GetExecutionTimeMs()
+	+ m_csRadixSort_3.GetExecutionTimeMs();
 
 	//Sort NK
 	uint32_t nCount = m_counterBuffer[0] + m_counterBuffer[1];

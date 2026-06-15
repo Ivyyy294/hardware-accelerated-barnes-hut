@@ -80,6 +80,7 @@ public:
 
 private:
 	void PreCalculateForcesInternal() override;
+	void DoPostWork() override;
 	void SetShaderParameter();
 
 	void CallculateMortonKeys (uint32_t elementCount);

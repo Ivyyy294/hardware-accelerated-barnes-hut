@@ -82,4 +82,6 @@ void ForceGeneratorBase::PreCalculateForces()
 	double elapsed = ms.count();
 
 	Session::Me().m_forceCalcTimeFile.WriteLine(std::to_string(elapsed));
+
+	DoPostWork();
 }

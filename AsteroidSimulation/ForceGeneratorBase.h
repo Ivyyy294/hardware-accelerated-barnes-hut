@@ -22,6 +22,7 @@ public:
 	void PreCalculateForces();
 protected:
 	virtual void PreCalculateForcesInternal() = 0;
+	virtual void DoPostWork(){};
 	float GetMaxCoordinate();
 };
 
