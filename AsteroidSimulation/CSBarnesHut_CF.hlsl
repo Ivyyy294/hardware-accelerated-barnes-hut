@@ -222,7 +222,7 @@ void main(uint3 GTid : SV_GroupThreadID,
             }
         }
         
-        GroupMemoryBarrier();
+        GroupMemoryBarrierWithGroupSync();
         
         //Apply nodes
 
