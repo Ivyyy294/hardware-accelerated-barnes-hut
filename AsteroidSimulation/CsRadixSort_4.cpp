@@ -14,7 +14,7 @@ void CsRadixSort_4::BindShaderParameters(ID3D11DeviceContext* deviceContext)
 
 	deviceContext->CSSetConstantBuffers(0, 1, &m_sharedBuffer->m_settingsBuffer);
 
-	deviceContext->CSSetShaderResources(0, 1, &m_sharedBuffer->m_srvEclusivePrefixSumBuffer);
+	deviceContext->CSSetShaderResources(0, 1, &m_sharedBuffer->m_exclusivePrefixSum.m_srv);
 	deviceContext->CSSetShaderResources(1, 1, &m_srvKeyBuffer);
 
 	deviceContext->CSSetUnorderedAccessViews(0, 1, &m_uavScatterCountersBuffer, nullptr);

@@ -152,6 +152,9 @@
     <ClCompile Include="StellarObject.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="UavSrvBuffer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">
@@ -276,6 +279,9 @@
     </ClInclude>
     <ClInclude Include="StellarObject.h">
       <Filter>01_GameObjects</Filter>
+    </ClInclude>
+    <ClInclude Include="UavSrvBuffer.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

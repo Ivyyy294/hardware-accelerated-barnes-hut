@@ -177,6 +177,7 @@
     <ClCompile Include="ShaderUtils.cpp" />
     <ClCompile Include="SpatialOctree.cpp" />
     <ClCompile Include="StellarObject.cpp" />
+    <ClCompile Include="UavSrvBuffer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Asteroid.h" />
@@ -220,6 +221,7 @@
     <ClInclude Include="ShaderUtils.h" />
     <ClInclude Include="SpatialOctree.h" />
     <ClInclude Include="StellarObject.h" />
+    <ClInclude Include="UavSrvBuffer.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="color.hlsl">

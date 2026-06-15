@@ -2,6 +2,7 @@
 
 #include "CSSettings.h"
 #include "Session.h"
+#include "UavSrvBuffer.h"
 
 struct BhSettings
 {
@@ -60,13 +61,8 @@ public:
 	ID3D11ShaderResourceView* m_srvNewToOldIndexBuffer = nullptr;
 
 	//Sorting Buffer
-	ID3D11Buffer* m_globalHistogramBuffer{ nullptr };
-	ID3D11UnorderedAccessView* m_uavGlobalHistogramBuffer = nullptr;
-	ID3D11ShaderResourceView* m_srvGlobalHistogramBuffer = nullptr;
-
-	ID3D11Buffer* m_exclusivePrefixSumBuffer{ nullptr };
-	ID3D11UnorderedAccessView* m_uavExclusivePrefixSumBuffer = nullptr;
-	ID3D11ShaderResourceView* m_srvEclusivePrefixSumBuffer = nullptr;
+	UavSrvBuffer m_globalHistogram;
+	UavSrvBuffer m_exclusivePrefixSum;
 
 	//Corner stone buffer
 	ID3D11Buffer* m_inKBuffer{ nullptr };
@@ -75,18 +71,11 @@ public:
 	ID3D11UnorderedAccessView* m_uavKBuffer = nullptr;
 
 	//Leaf node particle count
-	ID3D11Buffer* m_nBuffer{ nullptr };
-	ID3D11UnorderedAccessView* m_uavNBuffer = nullptr;
-	ID3D11ShaderResourceView* m_srvNBuffer = nullptr;
+	UavSrvBuffer m_n;
 
 	//Auxiliary array for node transformations
-	ID3D11Buffer* m_o1Buffer{ nullptr };
-	ID3D11ShaderResourceView* m_srvO1Buffer = nullptr;
-	ID3D11UnorderedAccessView* m_uavO1Buffer = nullptr;
-
-	ID3D11Buffer* m_o2Buffer{ nullptr };
-	ID3D11UnorderedAccessView* m_uavO2Buffer = nullptr;
-	ID3D11ShaderResourceView* m_srvO2Buffer = nullptr;
+	UavSrvBuffer m_o1;
+	UavSrvBuffer m_o2;
 
 	ID3D11Buffer* m_counterBuffer{ nullptr };
 	ID3D11Buffer* m_stagingCounterBuffer{ nullptr };
@@ -99,36 +88,21 @@ public:
 	ID3D11UnorderedAccessView* m_uavNkBuffer = nullptr;
 	ID3D11ShaderResourceView* m_srvNkBuffer = nullptr;
 
-	ID3D11Buffer* m_loBuffer{ nullptr };
-	ID3D11UnorderedAccessView* m_uavLoBuffer = nullptr;
-	ID3D11ShaderResourceView* m_srvLoBuffer = nullptr;
-
-	ID3D11Buffer* m_coBuffer{ nullptr };
-	ID3D11UnorderedAccessView* m_uavCoBuffer = nullptr;
-	ID3D11ShaderResourceView* m_srvCoBuffer = nullptr;
-
-	ID3D11Buffer* m_liBuffer{ nullptr };
-	ID3D11UnorderedAccessView* m_uavLiBuffer = nullptr;
-	ID3D11ShaderResourceView* m_srvLiBuffer = nullptr;
-
-	ID3D11Buffer* m_lcBuffer{ nullptr };
-	ID3D11UnorderedAccessView* m_uavLcBuffer = nullptr;
-	ID3D11ShaderResourceView* m_srvLcBuffer = nullptr;
+	UavSrvBuffer m_lo;
+	UavSrvBuffer m_co;
+	UavSrvBuffer m_li;
+	UavSrvBuffer m_lc;
 
 	//Barnes hut buffer
 	ID3D11Buffer* m_bhSettingsBuffer{ nullptr };
 
-	ID3D11Buffer* m_cellMpDataBuffer{ nullptr };
-	ID3D11UnorderedAccessView* m_uavCellMpDataBuffer = nullptr;
-	ID3D11ShaderResourceView* m_srvCellMpDataBuffer = nullptr;
+	UavSrvBuffer m_cellMpData;
 
 	ID3D11Buffer* m_forceBuffer{ nullptr };
 	ID3D11Buffer* m_outForceBuffer{ nullptr };
 	ID3D11UnorderedAccessView* m_uavForceBuffer = nullptr;
 
-	ID3D11Buffer* m_cellGeoDataBuffer{ nullptr };
-	ID3D11UnorderedAccessView* m_uavCellGeoDataBuffer = nullptr;
-	ID3D11ShaderResourceView* m_srvCellGeoDataBuffer = nullptr;
+	UavSrvBuffer m_cellGeoData;
 
 //Methods
 public:

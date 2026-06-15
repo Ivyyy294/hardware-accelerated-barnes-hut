@@ -311,7 +311,7 @@ void ForceGeneratorBarnesHutCS::CallculateForces(uint32_t elementCount)
 	m_buffer.SetBhSettingsParameter (elementCount, m_maxCoord * 2.f, IvyyyPhysic::GravitationalConstant(), m_theta);
 
 	//Get tree depth
-	m_deviceContext->CopySubresourceRegion(m_buffer.m_dUint32Buffer, 0, 0, 0, 0, m_buffer.m_loBuffer, 0, nullptr);
+	m_deviceContext->CopySubresourceRegion(m_buffer.m_dUint32Buffer, 0, 0, 0, 0, m_buffer.m_lo.m_buffer, 0, nullptr);
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
 	HRESULT hr = m_deviceContext->Map(m_buffer.m_dUint32Buffer, 0, D3D11_MAP_READ, 0, &mappedResource);
 
@@ -396,7 +396,7 @@ void ForceGeneratorBarnesHutCS::CopyCounterBuffer()
 void ForceGeneratorBarnesHutCS::CopyCellData()
 {
 	//Copy cell geo data
-	m_deviceContext->CopyResource(m_buffer.m_dFloat4Buffer, m_buffer.m_cellGeoDataBuffer);
+	m_deviceContext->CopyResource(m_buffer.m_dFloat4Buffer, m_buffer.m_cellGeoData.m_buffer);
 
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
 	HRESULT hr = m_deviceContext->Map(m_buffer.m_dFloat4Buffer, 0, D3D11_MAP_READ, 0, &mappedResource);
@@ -411,7 +411,7 @@ void ForceGeneratorBarnesHutCS::CopyCellData()
 	}
 
 	//Copy cell com
-	m_deviceContext->CopyResource(m_buffer.m_dFloat4Buffer, m_buffer.m_cellMpDataBuffer);
+	m_deviceContext->CopyResource(m_buffer.m_dFloat4Buffer, m_buffer.m_cellMpData.m_buffer);
 
 	mappedResource;
 	hr = m_deviceContext->Map(m_buffer.m_dFloat4Buffer, 0, D3D11_MAP_READ, 0, &mappedResource);
@@ -424,7 +424,7 @@ void ForceGeneratorBarnesHutCS::CopyCellData()
 	}
 
 	//Copy cell co
-	m_deviceContext->CopyResource(m_buffer.m_dUint32Buffer, m_buffer.m_coBuffer);
+	m_deviceContext->CopyResource(m_buffer.m_dUint32Buffer, m_buffer.m_co.m_buffer);
 
 	mappedResource;
 	hr = m_deviceContext->Map(m_buffer.m_dUint32Buffer, 0, D3D11_MAP_READ, 0, &mappedResource);
@@ -437,7 +437,7 @@ void ForceGeneratorBarnesHutCS::CopyCellData()
 	}
 
 	//Copy cell lc
-	m_deviceContext->CopyResource(m_buffer.m_dUint32Buffer, m_buffer.m_lcBuffer);
+	m_deviceContext->CopyResource(m_buffer.m_dUint32Buffer, m_buffer.m_lc.m_buffer);
 
 	mappedResource;
 	hr = m_deviceContext->Map(m_buffer.m_dUint32Buffer, 0, D3D11_MAP_READ, 0, &mappedResource);

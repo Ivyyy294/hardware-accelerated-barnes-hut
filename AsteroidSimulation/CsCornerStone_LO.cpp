@@ -10,7 +10,7 @@ void CsCornerStone_LO::BindShaderParameters(ID3D11DeviceContext* deviceContext)
 {
 	deviceContext->CSSetShaderResources(0, 1, &m_sharedBuffer->m_srvCounterBuffer);
 	deviceContext->CSSetShaderResources(1, 1, &m_sharedBuffer->m_srvNkBuffer);
-	deviceContext->CSSetUnorderedAccessViews(0, 1, &m_sharedBuffer->m_uavLoBuffer, nullptr);
+	deviceContext->CSSetUnorderedAccessViews(0, 1, &m_sharedBuffer->m_lo.m_uav, nullptr);
 	deviceContext->CSSetUnorderedAccessViews(7, 1, &m_sharedBuffer->m_uavDebugBuffer, nullptr);
 }
 

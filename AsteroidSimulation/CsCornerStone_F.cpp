@@ -14,7 +14,7 @@ void CsCornerStone_F::BindShaderParameters(ID3D11DeviceContext* deviceContext)
 	deviceContext->CSSetShaderResources (1, 1, &m_sharedBuffer->m_srvKBuffer);
 	deviceContext->CSSetShaderResources (2, 1, &m_sharedBuffer->m_srvCounterBuffer);
 
-	deviceContext->CSSetUnorderedAccessViews (0, 1, &m_sharedBuffer->m_uavNBuffer, nullptr);
+	deviceContext->CSSetUnorderedAccessViews (0, 1, &m_sharedBuffer->m_n.m_uav, nullptr);
 	deviceContext->CSSetUnorderedAccessViews (7, 1, &m_sharedBuffer->m_uavDebugBuffer, nullptr);
 }
 

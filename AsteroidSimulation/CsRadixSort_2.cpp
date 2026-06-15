@@ -9,10 +9,10 @@ CsRadixSort_2::CsRadixSort_2()
 void CsRadixSort_2::BindShaderParameters(ID3D11DeviceContext* deviceContext)
 {
 	UINT clearValues[4] = { 0, 0, 0, 0 };
-	deviceContext->ClearUnorderedAccessViewUint(m_sharedBuffer->m_uavExclusivePrefixSumBuffer, clearValues);
+	deviceContext->ClearUnorderedAccessViewUint(m_sharedBuffer->m_exclusivePrefixSum.m_uav, clearValues);
 
-	deviceContext->CSSetShaderResources(0, 1, &m_sharedBuffer->m_srvGlobalHistogramBuffer);
-	deviceContext->CSSetUnorderedAccessViews(0, 1, &m_sharedBuffer->m_uavExclusivePrefixSumBuffer, nullptr);
+	deviceContext->CSSetShaderResources(0, 1, &m_sharedBuffer->m_globalHistogram.m_srv);
+	deviceContext->CSSetUnorderedAccessViews(0, 1, &m_sharedBuffer->m_exclusivePrefixSum.m_uav, nullptr);
 	deviceContext->CSSetUnorderedAccessViews(7, 1, &m_sharedBuffer->m_uavDebugBuffer, nullptr);
 }
 
