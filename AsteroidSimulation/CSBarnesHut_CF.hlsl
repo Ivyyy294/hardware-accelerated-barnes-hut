@@ -48,8 +48,8 @@ StructuredBuffer<uint> coBuffer : register(t4);
 
 //Multipole data
 Buffer<float4> cellMpData : register(t5);
-Buffer<uint> liBuffer : register(t6);
-Buffer<uint> lcBuffer : register(t7);
+StructuredBuffer<uint> liBuffer : register(t6);
+StructuredBuffer<uint> lcBuffer : register(t7);
 Buffer<float4> cellGeoData : register(t8);
 
 RWStructuredBuffer<float3> forceBuffer : register(u0);

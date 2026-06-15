@@ -118,16 +118,16 @@ HRESULT CsSharedBuffer::InitCornerStoneShaderParameters(ID3D11Device* device)
 		//NK Buffer
 		&& ShaderUtils::CreateResourceBuffer(device, result, &m_inNkBuffer, sizeof(uint32_t), m_maxCapacity)
 		&& ShaderUtils::CreateResourceBuffer(device, result, &m_outNkBuffer, sizeof(uint32_t), m_maxCapacity)
-		&& ShaderUtils::CreateResourceViewBuffer(device, result, m_inNkBuffer, &m_srvNkBuffer, m_maxCapacity)
+		&& ShaderUtils::CreateResourceViewBuffer(device, result, m_inNkBuffer, s&m_srvNkBuffer, m_maxCapacity)
 		&& ShaderUtils::CreateUAVBuffer(device, result, m_outNkBuffer, &m_uavNkBuffer, m_maxCapacity)
 		//LO Buffer
 		&& m_lo.Init(device, result, sizeof(uint32_t), 12)
 		//CO Buffer
 		&& m_co.Init(device, result, sizeof(uint32_t), m_maxCapacity)
 		//LI Buffer
-		&& m_li.Init(device, result, sizeof(uint32_t), m_maxCapacity, 0, DXGI_FORMAT_R32_UINT)
+		&& m_li.Init(device, result, sizeof(uint32_t), m_maxCapacity)
 		//LC Buffer
-		&& m_lc.Init(device, result, sizeof(uint32_t), m_maxCapacity, 0, DXGI_FORMAT_R32_UINT);
+		&& m_lc.Init(device, result, sizeof(uint32_t), m_maxCapacity);
 
 	return result;
 }
