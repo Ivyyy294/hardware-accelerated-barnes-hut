@@ -10,7 +10,7 @@ ForceGeneratorBarnesHutCS::ForceGeneratorBarnesHutCS()
 {
 	const uint32_t maxCapacity = m_buffer.MaxCapacity();
 	m_cellGeoData = new XMFLOAT4 [maxCapacity];
-	m_cellCom = new XMFLOAT3 [maxCapacity];
+	m_cellMpData = new XMFLOAT4 [maxCapacity];
 	m_cellCo = new uint32_t [maxCapacity];
 	m_cellLc = new uint32_t [maxCapacity];
 }
@@ -18,7 +18,7 @@ ForceGeneratorBarnesHutCS::ForceGeneratorBarnesHutCS()
 ForceGeneratorBarnesHutCS::~ForceGeneratorBarnesHutCS()
 {
 	delete[] m_cellGeoData;
-	delete[] m_cellCom;
+	delete[] m_cellMpData;
 	delete[] m_cellCo;
 	delete[] m_cellLc;
 }
@@ -175,7 +175,7 @@ void ForceGeneratorBarnesHutCS::OnDrawGizmo()
 			Vector3 halfExtends (m_cellGeoData[i].w * 0.5f, m_cellGeoData[i].w * 0.5f, m_cellGeoData[i].w * 0.5f);
 			Gizmo::AddCube (center, halfExtends, Color::Green, Transform::Space::WORLD);
 
-			Vector3 com (m_cellCom[i].x, m_cellCom[i].y, m_cellCom[i].z);
+			Vector3 com (m_cellMpData[i].x, m_cellMpData[i].y, m_cellMpData[i].z);
 			Gizmo::AddCube (com, Vector3(0.1f, 0.1f, 0.1f), Color::Red, Transform::Space::WORLD);
 
 			Gizmo::AddLine (center, com, Color::Red, Transform::Space::WORLD);
@@ -380,16 +380,16 @@ void ForceGeneratorBarnesHutCS::CopyCellData()
 	}
 
 	//Copy cell com
-	m_deviceContext->CopyResource(m_buffer.m_dFloat3Buffer, m_buffer.m_centerMassBuffer);
+	m_deviceContext->CopyResource(m_buffer.m_dFloat4Buffer, m_buffer.m_cellMpDataBuffer);
 
 	mappedResource;
-	hr = m_deviceContext->Map(m_buffer.m_dFloat3Buffer, 0, D3D11_MAP_READ, 0, &mappedResource);
+	hr = m_deviceContext->Map(m_buffer.m_dFloat4Buffer, 0, D3D11_MAP_READ, 0, &mappedResource);
 
 	if (SUCCEEDED(hr))
 	{
-		XMFLOAT3* dataPtr = (XMFLOAT3*)mappedResource.pData;
-		memcpy(m_cellCom, dataPtr, sizeof(XMFLOAT3) * maxCapacity);
-		m_deviceContext->Unmap(m_buffer.m_dFloat3Buffer, 0);
+		XMFLOAT4* dataPtr = (XMFLOAT4*)mappedResource.pData;
+		memcpy(m_cellMpData, dataPtr, sizeof(XMFLOAT4) * maxCapacity);
+		m_deviceContext->Unmap(m_buffer.m_dFloat4Buffer, 0);
 	}
 
 	//Copy cell co

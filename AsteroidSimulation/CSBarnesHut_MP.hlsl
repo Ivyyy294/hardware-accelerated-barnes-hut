@@ -24,11 +24,10 @@ StructuredBuffer<uint> coBuffer : register(t6);
 StructuredBuffer<uint> counterBuffer : register(t7);
 
 //Multipole data
-RWStructuredBuffer<float3> centerOfMass : register(u0);
-RWStructuredBuffer<float> combinedMass : register(u1);
-RWStructuredBuffer<uint> liBuffer : register(u2);
-RWStructuredBuffer<uint> lcBuffer : register(u3);
-RWBuffer<float4> cellGeoData : register(u4);
+RWBuffer<float4> cellMpData : register(u0);
+RWStructuredBuffer<uint> liBuffer : register(u1);
+RWStructuredBuffer<uint> lcBuffer : register(u2);
+RWBuffer<float4> cellGeoData : register(u3);
 
 groupshared bool gAbort;
 
@@ -114,7 +113,6 @@ void main(uint3 GTid : SV_GroupThreadID,
         if (mass > 0.f)
             com = com / mass;
         
-        combinedMass[index] = mass;
-        centerOfMass[index] = com;
+        cellMpData[index] = float4(com, mass);
     }
 }

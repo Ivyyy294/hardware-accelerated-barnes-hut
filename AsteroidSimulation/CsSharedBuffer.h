@@ -27,7 +27,6 @@ public:
 
 	ID3D11Buffer* m_dUint32Buffer{ nullptr };
 	ID3D11Buffer* m_dFloatBuffer{ nullptr };
-	ID3D11Buffer* m_dFloat3Buffer{ nullptr };
 	ID3D11Buffer* m_dFloat4Buffer{ nullptr };
 
 	//Settings buffer
@@ -119,13 +118,9 @@ public:
 	//Barnes hut buffer
 	ID3D11Buffer* m_bhSettingsBuffer{ nullptr };
 
-	ID3D11Buffer* m_centerMassBuffer{ nullptr };
-	ID3D11UnorderedAccessView* m_uavCenterMassBuffer = nullptr;
-	ID3D11ShaderResourceView* m_srvCenterMassBuffer = nullptr;
-
-	ID3D11Buffer* m_combinedMassBuffer{ nullptr };
-	ID3D11UnorderedAccessView* m_uavCombinedMassBuffer = nullptr;
-	ID3D11ShaderResourceView* m_srvCombinedMassBuffer = nullptr;
+	ID3D11Buffer* m_cellMpDataBuffer{ nullptr };
+	ID3D11UnorderedAccessView* m_uavCellMpDataBuffer = nullptr;
+	ID3D11ShaderResourceView* m_srvCellMpDataBuffer = nullptr;
 
 	ID3D11Buffer* m_forceBuffer{ nullptr };
 	ID3D11Buffer* m_outForceBuffer{ nullptr };
@@ -162,6 +157,8 @@ private:
 
 	template <typename T>
 	void RecordBufferSnapshot (ID3D11Buffer* dest, ID3D11Buffer* source, const string name, const size_t count);
+
+	void RecordBufferSnapshotXMFLOAT4 (ID3D11Buffer* dest, ID3D11Buffer* source, const string name, const size_t count, int valIndex);
 };
 
 template<typename T>

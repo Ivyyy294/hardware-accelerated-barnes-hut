@@ -47,11 +47,10 @@ StructuredBuffer<uint> nkBuffer : register(t3);
 StructuredBuffer<uint> coBuffer : register(t4);
 
 //Multipole data
-StructuredBuffer<float3> centerOfMass : register(t5);
-StructuredBuffer<float> combinedMass : register(t6);
-StructuredBuffer<uint> liBuffer : register(t7);
-StructuredBuffer<uint> lcBuffer : register(t8);
-Buffer<float4> cellGeoData : register(t9);
+Buffer<float4> cellMpData : register(t5);
+StructuredBuffer<uint> liBuffer : register(t6);
+StructuredBuffer<uint> lcBuffer : register(t7);
+Buffer<float4> cellGeoData : register(t8);
 
 RWStructuredBuffer<float3> forceBuffer : register(u0);
 
@@ -91,8 +90,7 @@ void GetNodeData(in const uint slot, in const uint nodeIndex)
     const uint nk = nkBuffer[nodeIndex];
     const uint level = GetTreeLevelFromWs(nk);
     gNodeData.index[slot] = nodeIndex;
-    gNodeData.comMass[slot].xyz = centerOfMass[nodeIndex];
-    gNodeData.comMass[slot].w = combinedMass[nodeIndex];
+    gNodeData.comMass[slot] = cellMpData[nodeIndex];
     gNodeData.criterium[slot] = false;
     gNodeData.minSqrDistInt[slot] = 0xFFFFFFFF;
 }

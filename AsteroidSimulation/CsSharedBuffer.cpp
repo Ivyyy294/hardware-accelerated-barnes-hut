@@ -19,7 +19,6 @@ HRESULT CsSharedBuffer::InitDebugShaderParameters(ID3D11Device* device)
 		&& ShaderUtils::CreateUAVBuffer(device, result, m_debugBuffer, &m_uavDebugBuffer, 1024)
 		&& ShaderUtils::CreateStagingBuffer(device, result, &m_dUint32Buffer, sizeof(uint32_t), m_maxCapacity)
 		&& ShaderUtils::CreateStagingBuffer(device, result, &m_dFloatBuffer, sizeof(float), m_maxCapacity)
-		&& ShaderUtils::CreateStagingBuffer(device, result, &m_dFloat3Buffer, sizeof(XMFLOAT3), m_maxCapacity)
 		&& ShaderUtils::CreateStagingBuffer(device, result, &m_dFloat4Buffer, sizeof(XMFLOAT4), m_maxCapacity);
 
 	return result;
@@ -156,14 +155,10 @@ HRESULT CsSharedBuffer::InitBarnesHutShaderParameters(ID3D11Device* device)
 	HRESULT result;
 
 	bool ok = ShaderUtils::CreateConstBuffer(device, result, &m_bhSettingsBuffer, sizeof(BhSettings))
-		//Center of Mass
-		&& ShaderUtils::CreateResourceBuffer(device, result, &m_centerMassBuffer, sizeof(XMFLOAT3), m_maxCapacity)
-		&& ShaderUtils::CreateResourceViewBuffer(device, result, m_centerMassBuffer, &m_srvCenterMassBuffer, m_maxCapacity)
-		&& ShaderUtils::CreateUAVBuffer(device, result, m_centerMassBuffer, &m_uavCenterMassBuffer, m_maxCapacity)
-		//Combined Mass
-		&& ShaderUtils::CreateResourceBuffer(device, result, &m_combinedMassBuffer, sizeof(float), m_maxCapacity)
-		&& ShaderUtils::CreateResourceViewBuffer(device, result, m_combinedMassBuffer, &m_srvCombinedMassBuffer, m_maxCapacity)
-		&& ShaderUtils::CreateUAVBuffer(device, result, m_combinedMassBuffer, &m_uavCombinedMassBuffer, m_maxCapacity)
+		//Cell Multipole Data
+		&& ShaderUtils::CreateResourceBuffer(device, result, &m_cellMpDataBuffer, sizeof(XMFLOAT4), m_maxCapacity, 0)
+		&& ShaderUtils::CreateResourceViewBuffer(device, result, m_cellMpDataBuffer, &m_srvCellMpDataBuffer, m_maxCapacity, DXGI_FORMAT_R32G32B32A32_FLOAT)
+		&& ShaderUtils::CreateUAVBuffer(device, result, m_cellMpDataBuffer, &m_uavCellMpDataBuffer, m_maxCapacity, DXGI_FORMAT_R32G32B32A32_FLOAT)
 		//Force
 		&& ShaderUtils::CreateResourceBuffer(device, result, &m_forceBuffer, sizeof(XMFLOAT3), m_maxParticleCount)
 		&& ShaderUtils::CreateStagingBuffer(device, result, &m_outForceBuffer, sizeof(XMFLOAT3), m_maxParticleCount)
@@ -174,6 +169,39 @@ HRESULT CsSharedBuffer::InitBarnesHutShaderParameters(ID3D11Device* device)
 		&& ShaderUtils::CreateUAVBuffer(device, result, m_cellGeoDataBuffer, &m_uavCellGeoDataBuffer, m_maxCapacity, DXGI_FORMAT_R32G32B32A32_FLOAT);
 
 	return result;
+}
+
+void CsSharedBuffer::RecordBufferSnapshotXMFLOAT4(ID3D11Buffer* dest, ID3D11Buffer* source, const string name, const size_t count, int valIndex)
+{
+	//m_deviceContext->CopyResource (dest, source);
+	m_deviceContext->CopySubresourceRegion(dest, 0, 0, 0, 0, source, 0, nullptr);
+
+	D3D11_MAPPED_SUBRESOURCE mappedResource;
+	HRESULT hr = m_deviceContext->Map(dest, 0, D3D11_MAP_READ, 0, &mappedResource);
+
+	if (SUCCEEDED(hr))
+	{
+		XMFLOAT4* data = (XMFLOAT4*)mappedResource.pData;
+
+		string memDump = name + ";";
+		memDump.reserve(sizeof(XMFLOAT4) * count);
+
+		for (size_t i = 0; i < count; ++i)
+		{
+			if (valIndex == 0)
+				memDump += std::to_string(data[i].x) + ";";
+			else if (valIndex == 1)
+				memDump += std::to_string(data[i].y) + ";";
+			else if (valIndex == 2)
+				memDump += std::to_string(data[i].z) + ";";
+			else
+				memDump += std::to_string(data[i].w) + ";";
+		}
+
+		Session::Me().m_gpuMemDumpFile.WriteLine(memDump);
+
+		m_deviceContext->Unmap(dest, 0);
+	}
 }
 
 
@@ -240,7 +268,6 @@ void CsSharedBuffer::ReleaseShaderParameters()
 	ShaderUtils::SafeRelease(&m_debugBuffer);
 	ShaderUtils::SafeRelease(&m_dUint32Buffer);
 	ShaderUtils::SafeRelease(&m_dFloatBuffer);
-	ShaderUtils::SafeRelease(&m_dFloat3Buffer);
 	ShaderUtils::SafeRelease(&m_dFloat4Buffer);
 
 	ShaderUtils::SafeRelease(&m_outputBuffer);
@@ -300,13 +327,9 @@ void CsSharedBuffer::ReleaseShaderParameters()
 	ShaderUtils::SafeRelease(&m_uavCoBuffer);
 	ShaderUtils::SafeRelease(&m_srvCoBuffer);
 
-	ShaderUtils::SafeRelease(&m_centerMassBuffer);
-	ShaderUtils::SafeRelease(&m_uavCenterMassBuffer);
-	ShaderUtils::SafeRelease(&m_srvCenterMassBuffer);
-
-	ShaderUtils::SafeRelease(&m_combinedMassBuffer);
-	ShaderUtils::SafeRelease(&m_uavCombinedMassBuffer);
-	ShaderUtils::SafeRelease(&m_srvCombinedMassBuffer);
+	ShaderUtils::SafeRelease(&m_cellMpDataBuffer);
+	ShaderUtils::SafeRelease(&m_uavCellMpDataBuffer);
+	ShaderUtils::SafeRelease(&m_srvCellMpDataBuffer);
 
 	ShaderUtils::SafeRelease(&m_cellGeoDataBuffer);
 	ShaderUtils::SafeRelease(&m_uavCellGeoDataBuffer);
@@ -373,12 +396,13 @@ void CsSharedBuffer::ClearUavBuffer()
 	m_deviceContext->ClearUnorderedAccessViewUint(m_uavNkBuffer, clearValues);
 	m_deviceContext->ClearUnorderedAccessViewUint(m_uavLoBuffer, clearValues);
 	m_deviceContext->ClearUnorderedAccessViewUint(m_uavCoBuffer, clearValues);
-	m_deviceContext->ClearUnorderedAccessViewUint(m_uavCombinedMassBuffer, clearValues);
-	m_deviceContext->ClearUnorderedAccessViewUint(m_uavCenterMassBuffer, clearValues);
 	m_deviceContext->ClearUnorderedAccessViewUint(m_uavNewToOldIndexBuffer, clearValues);
 	m_deviceContext->ClearUnorderedAccessViewUint(m_uavLiBuffer, clearValues);
 	m_deviceContext->ClearUnorderedAccessViewUint(m_uavLcBuffer, clearValues);
 	m_deviceContext->ClearUnorderedAccessViewUint(m_uavDebugBuffer, clearValues);
+
+	FLOAT clearValuesF[4] = { 0.f, 0.f, 0.f, 0.f };
+	m_deviceContext->ClearUnorderedAccessViewUint(m_uavCellMpDataBuffer, clearValues);
 	m_deviceContext->ClearUnorderedAccessViewUint(m_uavCellGeoDataBuffer, clearValues);
 }
 
@@ -402,8 +426,8 @@ void CsSharedBuffer::RecordBufferSnapshot()
 	RecordBufferSnapshot <uint32_t> (m_dUint32Buffer, m_coBuffer, "CO", m_maxCapacity);
 	RecordBufferSnapshot <uint32_t> (m_dUint32Buffer, m_liBuffer, "LI", m_maxCapacity);
 	RecordBufferSnapshot <uint32_t> (m_dUint32Buffer, m_lcBuffer, "LC", m_maxCapacity);
-	RecordBufferSnapshot <float> (m_dFloatBuffer, m_combinedMassBuffer, "CM", m_maxCapacity);
-	RecordBufferSnapshot <float> (m_dFloatBuffer, m_cellGeoDataBuffer, "CW", m_maxCapacity);
+	RecordBufferSnapshotXMFLOAT4 (m_dFloat4Buffer, m_cellMpDataBuffer, "CM", m_maxCapacity, 3);
+	RecordBufferSnapshotXMFLOAT4 (m_dFloat4Buffer, m_cellGeoDataBuffer, "CM", m_maxCapacity, 3);
 	RecordBufferSnapshot <uint32_t> (m_dUint32Buffer, m_counterBuffer, "n", 2);
 
 	//m_deviceContext->CopyResource (dest, source);
