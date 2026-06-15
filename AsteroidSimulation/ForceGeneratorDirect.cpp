@@ -30,24 +30,17 @@ void ForceGeneratorDirect::PreCalculateForcesChunked(const size_t startIndex, co
 
 		for (size_t j = 0; j < m_objects.size(); ++j)
 		{
-			if (i == j)
-				continue;
-
 			PhysicObject* physicObj = m_objects[j];
 
-			Vector3 diff = physicObj->GetTransform()->GetPosition() - pPos;
-			Vector3 direction = diff.Normalized();
-			float distance = diff.Magnitude();
+			Vector3 direction = physicObj->GetTransform()->GetPosition() - pPos;
+			float sqrDistance = direction.SquareMagnitude();
+			float invDistance = 1.f / sqrtf(sqrDistance + 0.0025f);
+			float invDistance3 = invDistance * invDistance * invDistance;
 
-			if (distance < 0.01f)
-				continue;
-
-			float force = Ivyyy::IvyyyPhysic::GravitationalConstant() * ((pMass * physicObj->GetMass()) / (distance * distance));
-
-			Vector3 forceVec = direction * force;
-			pForce += forceVec;
+			pForce += physicObj->GetMass() * direction * invDistance3;
 		}
 
+		pForce = Ivyyy::IvyyyPhysic::GravitationalConstant() * pMass * pForce;
 		m_forceBuffer[i] = { pForce.x, pForce.y, pForce.z };
 	}
 }

@@ -24,6 +24,9 @@ void ForceGeneratorBarnesHut::PreCalculateForcesInternal()
 
 Vector3 ForceGeneratorBarnesHut::CalculateForces(PhysicObject* physicObj)
 {
+	if (physicObj->IsStatic())
+		return Vector3::Zero;
+
 	std::queue<const SpatialOctree*> queue;
 
 	Vector3 pos = physicObj->GetTransform()->GetPosition();
@@ -36,25 +39,17 @@ Vector3 ForceGeneratorBarnesHut::CalculateForces(PhysicObject* physicObj)
 		const SpatialOctree* current = queue.front();
 		queue.pop();
 
-		float sqrDistance = (current->CenterOfMass() - pos).SquareMagnitude();
+		Vector3 direction = current->CenterOfMass() - pos;
+		float sqrDistance = direction.SquareMagnitude();
+
 		float result = (current->Length() * current->Length()) / sqrDistance;
 
 		if (result < m_theta)
 		{
-			if (physicObj->IsStatic())
-				Vector3::Zero;
-
-			Vector3 diff = current->CenterOfMass() - physicObj->GetTransform()->GetPosition();
-			Vector3 direction = diff.Normalized();
-			float distance = diff.Magnitude();
-
-			if (distance > 0.01f)
-			{
-				float force = (Ivyyy::IvyyyPhysic::GravitationalConstant() * current->Mass() * physicObj->GetMass()) / (distance * distance);
-
-				Vector3 forceVec = direction * force;
-				forceSum += forceVec;
-			}
+			float invDistance = 1.f / sqrtf(sqrDistance + 0.0025f);
+			float invDistance3 = invDistance * invDistance * invDistance;
+			
+			forceSum += current->Mass() * direction * invDistance3;
 		}
 		else
 		{
@@ -63,7 +58,7 @@ Vector3 ForceGeneratorBarnesHut::CalculateForces(PhysicObject* physicObj)
 		}
 	}
 
-	return forceSum;
+	return (Ivyyy::IvyyyPhysic::GravitationalConstant() * physicObj->GetMass()) * forceSum;
 }
 
 void ForceGeneratorBarnesHut::PreCalculateForcesChunked(const size_t startIndex, const size_t stride)
