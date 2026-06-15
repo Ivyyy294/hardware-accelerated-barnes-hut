@@ -15,8 +15,7 @@ cbuffer SettingsBuffer : register(b0)
 StructuredBuffer<uint> exclusivePrefixSum : register(t0);
 StructuredBuffer<uint> mortonCodeIn : register(t1);
 
-RWStructuredBuffer<uint> scatterCounters : register(u0);
-RWStructuredBuffer<uint> mortonCodeOut : register(u1);
+RWStructuredBuffer<uint> mortonCodeOut : register(u0);
 
 [numthreads(NUM_THREADS, 1, 1)]
 void main(uint3 DTid : SV_DispatchThreadID,

@@ -13,10 +13,6 @@ public:
 	ID3D11UnorderedAccessView* m_uavKeyBuffer = nullptr;
 	ID3D11ShaderResourceView* m_srvKeyBuffer = nullptr;
 
-private:
-	ID3D11Buffer* m_scatterCountersBuffer{ nullptr };
-	ID3D11UnorderedAccessView* m_uavScatterCountersBuffer = nullptr;
-
 	//Methods
 public:
 	CsRadixSort_4();

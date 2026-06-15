@@ -17,11 +17,10 @@ StructuredBuffer<float3> positionIn : register(t2);
 StructuredBuffer<float> massIn : register(t3);
 StructuredBuffer<uint> newToOldIndexIn : register(t4);
 
-RWStructuredBuffer<uint> scatterCounters : register(u0);
-RWStructuredBuffer<uint> mortonCodeOut : register(u1);
-RWStructuredBuffer<float3> positionOut : register(u2);
-RWStructuredBuffer<float> massOut : register(u3);
-RWStructuredBuffer<uint> newToOldIndexOut : register(u4);
+RWStructuredBuffer<uint> mortonCodeOut : register(u0);
+RWStructuredBuffer<float3> positionOut : register(u1);
+RWStructuredBuffer<float> massOut : register(u2);
+RWStructuredBuffer<uint> newToOldIndexOut : register(u3);
 
 [numthreads(NUM_THREADS, 1, 1)]
 void main(uint3 DTid : SV_DispatchThreadID)
