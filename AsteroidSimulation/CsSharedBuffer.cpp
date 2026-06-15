@@ -342,19 +342,6 @@ void CsSharedBuffer::ClearUavBuffer()
 {
 	//Clear UAV
 	UINT clearValues[4] = { 0, 0, 0, 0 };
-	m_deviceContext->ClearUnorderedAccessViewUint(m_uavMortonCodeBuffer, clearValues);
-	m_deviceContext->ClearUnorderedAccessViewUint(m_uavPositionBuffer, clearValues);
-	m_deviceContext->ClearUnorderedAccessViewUint(m_uavMassBuffer, clearValues);
-	m_deviceContext->ClearUnorderedAccessViewUint(m_globalHistogram.m_uav, clearValues);
-	m_deviceContext->ClearUnorderedAccessViewUint(m_exclusivePrefixSum.m_uav, clearValues);
-	m_deviceContext->ClearUnorderedAccessViewUint(m_n.m_uav, clearValues);
-	m_deviceContext->ClearUnorderedAccessViewUint(m_o2.m_uav, clearValues);
-	m_deviceContext->ClearUnorderedAccessViewUint(m_uavNkBuffer, clearValues);
-	m_deviceContext->ClearUnorderedAccessViewUint(m_lo.m_uav, clearValues);
-	m_deviceContext->ClearUnorderedAccessViewUint(m_co.m_uav, clearValues);
-	m_deviceContext->ClearUnorderedAccessViewUint(m_uavNewToOldIndexBuffer, clearValues);
-	m_deviceContext->ClearUnorderedAccessViewUint(m_li.m_uav, clearValues);
-	m_deviceContext->ClearUnorderedAccessViewUint(m_lc.m_uav, clearValues);
 	m_deviceContext->ClearUnorderedAccessViewUint(m_uavDebugBuffer, clearValues);
 
 	FLOAT clearValuesF[4] = { 0.f, 0.f, 0.f, 0.f };
