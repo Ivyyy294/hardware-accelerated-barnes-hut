@@ -118,7 +118,7 @@ HRESULT CsSharedBuffer::InitCornerStoneShaderParameters(ID3D11Device* device)
 		//NK Buffer
 		&& ShaderUtils::CreateResourceBuffer(device, result, &m_inNkBuffer, sizeof(uint32_t), m_maxCapacity)
 		&& ShaderUtils::CreateResourceBuffer(device, result, &m_outNkBuffer, sizeof(uint32_t), m_maxCapacity)
-		&& ShaderUtils::CreateResourceViewBuffer(device, result, m_inNkBuffer, s&m_srvNkBuffer, m_maxCapacity)
+		&& ShaderUtils::CreateResourceViewBuffer(device, result, m_inNkBuffer, &m_srvNkBuffer, m_maxCapacity)
 		&& ShaderUtils::CreateUAVBuffer(device, result, m_outNkBuffer, &m_uavNkBuffer, m_maxCapacity)
 		//LO Buffer
 		&& m_lo.Init(device, result, sizeof(uint32_t), 12)
