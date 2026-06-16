@@ -29,9 +29,12 @@ void main(uint3 DTid : SV_DispatchThreadID,
     const uint groupId = Gid.x;
     const uint threadId = GTid.x;
     
-    //Clean local histogram
+    //Clean local and global histogram
     for (uint i = threadId; i < histSize; i += NUM_THREADS)
+    {
         localHistogram[i] = 0;
+        globalHistogram[i] = 0;
+    }
  
     //Blocks execution of all threads in a group until all group shared accesses have been completed
     //and all threads in the group have reached this call.

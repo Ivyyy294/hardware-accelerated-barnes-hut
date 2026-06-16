@@ -8,9 +8,6 @@ CsRadixSort_1::CsRadixSort_1()
 
 void CsRadixSort_1::BindShaderParameters(ID3D11DeviceContext* deviceContext)
 {
-	UINT clearValues[4] = { 0, 0, 0, 0 };
-	deviceContext->ClearUnorderedAccessViewUint(m_sharedBuffer->m_globalHistogram.m_uav, clearValues);
-
 	deviceContext->CSSetConstantBuffers(0, 1, &m_sharedBuffer->m_settingsBuffer);
 	deviceContext->CSSetShaderResources(0, 1, &m_srvKeyBuffer);
 	deviceContext->CSSetUnorderedAccessViews(0, 1, &m_sharedBuffer->m_globalHistogram.m_uav, nullptr);
