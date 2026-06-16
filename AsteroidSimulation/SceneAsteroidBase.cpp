@@ -67,9 +67,9 @@ void SceneAsteroidBase::SpawnAsteroids(int num, GameObject* planet)
 		std::uniform_int_distribution<> eRnd(e.x, e.y); // define the range
 		std::normal_distribution<float> massRnd(variables.massRangeAsteroids.x, max(minVal, variables.massRangeAsteroids.y));
 		std::normal_distribution<float> iRnd(variables.iRange.x, max(minVal, variables.iRange.y));
-		std::uniform_int_distribution<> oRnd(0, 360); // define the range
-		std::uniform_int_distribution<> wRnd(0, 360); // define the range
-		std::uniform_int_distribution<> m0Rnd(0, 360); // define the range
+		std::uniform_int_distribution<> oRnd(0, 3600); // define the range
+		std::uniform_int_distribution<> wRnd(0, 3600); // define the range
+		std::uniform_int_distribution<> m0Rnd(0, 3600); // define the range
 
 		for (int j = 0; j < num; ++j)
 		{
@@ -78,9 +78,9 @@ void SceneAsteroidBase::SpawnAsteroids(int num, GameObject* planet)
 			oe.a = dist.y >= minVal ? smaRnd(gen) * 0.1f : dist.x * 0.1f;
 			oe.e = eRnd(gen) * 0.1f;
 			oe.i = variables.iRange.y >= minVal ? iRnd(gen) : variables.iRange.x;
-			oe.o = float (oRnd(gen));
-			oe.w = float (wRnd(gen));
-			oe.m0 = float (m0Rnd(gen));
+			oe.o = float (oRnd(gen)) * 0.1f;
+			oe.w = float (wRnd(gen)) * 0.1f;
+			oe.m0 = float (m0Rnd(gen)) * 0.1f;
 
 			float mass = variables.massRangeAsteroids.y >= minVal ? massRnd(gen) : variables.massRangeAsteroids.x;
 			mass = max(mass, variables.minMassAsteroids);
