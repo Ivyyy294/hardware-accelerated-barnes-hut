@@ -301,7 +301,9 @@ void CsSharedBuffer::ReleaseShaderParameters()
 	m_cellGeoData.Release();
 
 	m_li.Release();
-	m_lo.Release();
+	m_lc.Release();
+
+	m_n.Release();
 }
 
 
