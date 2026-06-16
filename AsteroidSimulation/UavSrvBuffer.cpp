@@ -11,6 +11,15 @@ bool UavSrvBuffer::Init(ID3D11Device* device, HRESULT& result, UINT byteStride, 
 	return ok;
 }
 
+bool UavSrvBuffer::Init(ID3D11Device* device, HRESULT& result, UINT byteStride, UINT elementCount)
+{
+	bool ok = ShaderUtils::CreateResourceBuffer(device, result, &m_buffer, byteStride, elementCount)
+		&& ShaderUtils::CreateResourceViewBuffer(device, result, m_buffer, &m_srv, elementCount)
+		&& ShaderUtils::CreateUAVBuffer(device, result, m_buffer, &m_uav, elementCount);
+
+	return ok;
+}
+
 void UavSrvBuffer::Release()
 {
 	ShaderUtils::SafeRelease(&m_buffer);
