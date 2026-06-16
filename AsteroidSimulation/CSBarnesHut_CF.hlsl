@@ -48,7 +48,7 @@ StructuredBuffer<uint> nkBuffer : register(t3);
 StructuredBuffer<uint> coBuffer : register(t4);
 
 //Multipole data
-Buffer<float4> cellMass : register(t5);
+Buffer<float> cellMass : register(t5);
 StructuredBuffer<float3> cellCom : register(t6);
 StructuredBuffer<uint> liBuffer : register(t7);
 StructuredBuffer<uint> lcBuffer : register(t8);
