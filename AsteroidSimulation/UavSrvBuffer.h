@@ -9,7 +9,7 @@ public:
 	ID3D11ShaderResourceView* m_srv = nullptr;
 //Methods
 public:
-	bool Init(ID3D11Device* device, HRESULT& result, UINT byteStride, UINT elementCount, uint32_t miscFlag = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED, DXGI_FORMAT format = DXGI_FORMAT_UNKNOWN);
+	bool Init(ID3D11Device* device, HRESULT& result, UINT byteStride, UINT elementCount, UINT miscFlag = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED, DXGI_FORMAT format = DXGI_FORMAT_UNKNOWN);
 	void Release();
 };
 
