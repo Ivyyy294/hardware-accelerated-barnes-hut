@@ -27,7 +27,8 @@ struct NodeData
     float mass[NUM_THREADS];
     float3 com[NUM_THREADS];
     uint index[NUM_THREADS];
-    int minSqrDistInt[NUM_THREADS];
+    uint minSqrDistInt[NUM_THREADS];
+    uint childbegin[NUM_THREADS];
     bool criterium[NUM_THREADS];
 };
 
@@ -96,6 +97,7 @@ void GetNodeData(in const uint slot, in const uint nodeIndex)
     gNodeData.com[slot] = cellCom[nodeIndex];
     gNodeData.criterium[slot] = false;
     gNodeData.minSqrDistInt[slot] = 0xFFFFFFFF;
+    gNodeData.childbegin[slot] = coBuffer[nodeIndex];
 }
 
 bool IsTraversalDone(const uint3 GTid)
@@ -210,11 +212,9 @@ void main(uint3 GTid : SV_GroupThreadID,
         {
             SetCriteriumForNode(slot);
             
-            bool isInternalNode = coBuffer[gNodeData.index[slot]] > 0;
-            
-            if (!gNodeData.criterium[slot] && isInternalNode)
+            if (!gNodeData.criterium[slot] && gNodeData.childbegin[slot] > 0)
             {
-                uint first = coBuffer[gNodeData.index[slot]];
+                uint first = gNodeData.childbegin[slot];
 
                 [unroll]
                 for (uint c = 0; c < 8; ++c)
@@ -229,7 +229,7 @@ void main(uint3 GTid : SV_GroupThreadID,
         for (uint j = 0; j < nodeCount; ++j)
         {
             uint currentNodeIndex = gNodeData.index[j];
-            bool isInternalNode = coBuffer[currentNodeIndex] > 0;
+            bool isInternalNode = gNodeData.childbegin[j] > 0;
             
             //apply from node
             if (gNodeData.criterium[j])
