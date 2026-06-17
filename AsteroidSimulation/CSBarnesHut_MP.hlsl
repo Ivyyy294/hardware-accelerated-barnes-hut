@@ -49,16 +49,16 @@ void main(uint3 GTid : SV_GroupThreadID,
     //Init cell width
     const uint ws = nkBuffer[index];
     const uint level = GetTreeLevelFromWs(ws);
-    const uint prefix = ws - (1 << (3 * level));
-    const uint range = 3 * (L - level);
     const float cellWidth = globallCellWidth / (1 << level);
 
     //Init cell geo center
     float3 boundsMin = globallCellWidth * -0.5f;
-    float3 boundsMax = globallCellWidth * 0.5f;    
+    float3 boundsMax = globallCellWidth * 0.5f;
     cellGeoData[index] = float4(DecodeWSKey(ws, level, boundsMin, boundsMax), cellWidth);
     
     //Init li and lc buffer
+    const uint prefix = ws - (1 << (3 * level));
+    const uint range = 3 * (L - level);
     const uint begin = prefix << range;
     const uint end = (prefix + 1) << range;
     uint indexBegin = BinarySearch(begin, keyBuffer, pCount);
