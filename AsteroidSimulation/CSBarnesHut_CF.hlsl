@@ -90,8 +90,6 @@ void GetParticleData(const uint index, bool isParticle, out ParticleData data)
 
 void GetNodeData(in const uint slot, in const uint nodeIndex)
 {
-    const uint nk = nkBuffer[nodeIndex];
-    const uint level = GetTreeLevelFromWs(nk);
     gNodeData.index[slot] = nodeIndex;
     gNodeData.mass[slot] = cellMass[nodeIndex];
     gNodeData.com[slot] = cellCom[nodeIndex];
