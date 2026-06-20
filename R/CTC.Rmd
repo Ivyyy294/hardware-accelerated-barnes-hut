@@ -1,5 +1,5 @@
 ---
-title: "Calculation Time Comparison"
+title: "Force Calculation Time Comparison"
 author: "Lara Gülpen"
 date: "`r Sys.Date()`"
 output: html_document
@@ -69,8 +69,8 @@ frameTimeLong <- melt (frameTime, id.vars = "step"
 shapiroTable
 ```
 
-
-## Bartlett / Levene test of homogeneity of variances
+\newpage
+## Levene test of homogeneity of variances
 ```{r echo=FALSE}
   ggplot(frameTimeLong) +
     aes(x = method, y = time, fill = method) +
@@ -83,11 +83,9 @@ shapiroTable
 ```
 
 ```{r echo=FALSE}
-bartlett.test(time ~ method, data = frameTimeLong)
-```
-```{r echo=FALSE}
 leveneTest(time ~ method, data = frameTimeLong)
 ```
+\newpage
 ## Welch's ANOVA test of significance
 ```{r echo=FALSE}
  ggplot (frameTimeLong) +
@@ -108,7 +106,7 @@ leveneTest(time ~ method, data = frameTimeLong)
 ```{r echo=FALSE}
 oneway.test(time ~ method, data = frameTimeLong, var.equal = FALSE)
 ```
-
+\newpage
 ## Post-Hoc Games Howell
 ```{r echo=FALSE}
   ggplot(frameTimeLong) +
