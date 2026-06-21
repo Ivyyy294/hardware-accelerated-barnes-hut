@@ -23,7 +23,4 @@ Asteroid::Asteroid()
 	auto meshRenderer = AddComponent<MeshRenderer>();
 	meshRenderer->SetMesh (m_mesh);
 	meshRenderer->SetMaterial (m_material);
-
-	//Physics
-	transform.SetLocalScale ({0.05f, 0.05f, 0.05f});
 }

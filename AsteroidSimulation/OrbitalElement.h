@@ -7,7 +7,7 @@ public:
 	float a = 1.f;
 
 	//Eccentricity
-	float e = 1.f;
+	float e = 0.f;
 
 	//Inclination
 	float i = 0.f;
