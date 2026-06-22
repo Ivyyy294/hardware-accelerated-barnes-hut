@@ -2,7 +2,9 @@
 title: "Force Calculation Time Comparison"
 author: "Lara Gülpen"
 date: "`r Sys.Date()`"
-output: html_document
+output:
+  html_document: default
+  word_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -12,18 +14,32 @@ library(ggplot2)
 library(Hmisc)
 library(car)
 library(rstatix)
+library(gt)
+library(webshot2)
+library(broom)
 
-setwd("D:/00_Git/hardware-accelerated-barnes-hut/Out/10000")
+DATA<-"D:/01_Uni/Thesis/BUILD/Data/"
+RESULT<-"D:/01_Uni/Thesis/BUILD/Result/"
+
+BuildDataPath <- function (local_filepath)
+{
+  paste(DATA,local_filepath, sep = "")
+}
+
+CopyFileToResult <- function (filename)
+{
+  file.copy(filename, file.path(RESULT, filename), overwrite = TRUE)
+}
 
 #Load experiment variables
-variablesGpu <- data.table::fread(paste("GPU","/variables.csv", sep = ""),fill = TRUE)
-variablesCpu <- data.table::fread(paste("CPU","/variables.csv", sep = ""),fill = TRUE)
-variablesDirect <- data.table::fread(paste("Direct","/variables.csv", sep = ""),fill = TRUE)
+variablesGpu <- data.table::fread(BuildDataPath("GPU/variables.csv"),fill = TRUE)
+variablesCpu <- data.table::fread(BuildDataPath("CPU/variables.csv"),fill = TRUE)
+variablesDirect <- data.table::fread(BuildDataPath("Direct/variables.csv"),fill = TRUE)
 
 #Load experiment data
-frameTimeGpu <- data.table::fread(paste("GPU","/forceCalcTime.csv", sep = ""), sep = ";")
-frameTimeCpu <- data.table::fread(paste("CPU","/forceCalcTime.csv", sep = ""), sep = ";")
-frameTimeDirect <- data.table::fread(paste("Direct","/forceCalcTime.csv", sep = ""), sep = ";")
+frameTimeGpu <- data.table::fread(BuildDataPath("GPU/forceCalcTime.csv"), sep = ";")
+frameTimeCpu <- data.table::fread(BuildDataPath("CPU/forceCalcTime.csv"), sep = ";")
+frameTimeDirect <- data.table::fread(BuildDataPath("Direct/forceCalcTime.csv"), sep = ";")
   
 ##Check if variables are identical besides method
 variablesOk <- identical(variablesGpu[-1], variablesCpu[-1]) && identical(variablesGpu[-1], variablesDirect[-1]) &&
@@ -46,6 +62,25 @@ frameTimeLong <- melt (frameTime, id.vars = "step"
                        , value.name = "time")
 ```
 
+## Experiment Variables
+```{r include=FALSE}
+  experimentVar<-variablesGpu[-1]
+  setnames(experimentVar, 1, "Variable Name")
+  setnames(experimentVar, 2, "V1")
+  setnames(experimentVar, 3, "V2")
+  gt_table <- gt(experimentVar) %>%
+    tab_header(title="Control-Variables") %>%
+    tab_style(style = list(cell_text(weight = "bold")),locations = cells_column_labels(everything())) %>%
+    fmt_number(rows = 3, decimals = 5) %>%
+    fmt_number(rows = c(2,8,9), decimals = 0) %>%
+    fmt_number(rows = c(1,4,5,6,7,10,11,12), decimals = 2)
+  
+  gtsave(gt_table, "control_variables.png")
+  CopyFileToResult ("control_variables.png")
+```
+![](control_variables.png)
+\newpage
+
 ## Shapiro-Wilk test for normality
 ```{r echo=FALSE}
   ggplot(frameTimeLong) +
@@ -58,18 +93,19 @@ frameTimeLong <- melt (frameTime, id.vars = "step"
     theme_minimal()
 ```
 
-```{r echo=FALSE}
-  shapiroTable <- frameTimeLong[
-    , .(
-      W       = shapiro.test(time)$statistic,
-      p_value = shapiro.test(time)$p.value
-    ),
-    by = method
-  ]
-shapiroTable
+```{r include=FALSE}
+  shapiroTable <- frameTimeLong[, .(W = shapiro.test(time)$statistic, p_value = shapiro.test(time)$p.value), by = method]
+  gt_table <- gt(shapiroTable) %>%
+    tab_header(title="Shapiro-Wilk-Test") %>%
+    tab_style(style = list(cell_text(weight = "bold")),locations = cells_column_labels(everything())) %>%
+    cols_label(method="Method")
+  
+  gtsave(gt_table, "shapiro_test.png")
+  CopyFileToResult ("shapiro_test.png")
 ```
-
+![](shapiro_test.png)
 \newpage
+
 ## Levene test of homogeneity of variances
 ```{r echo=FALSE}
   ggplot(frameTimeLong) +
@@ -82,10 +118,20 @@ shapiroTable
     theme_minimal()
 ```
 
-```{r echo=FALSE}
-leveneTest(time ~ method, data = frameTimeLong)
+```{r include=FALSE}
+  levTest <- leveneTest(time ~ method, data = frameTimeLong)
+  levTestTidy <- tidy(levTest)  
+  
+  gt_table <- gt(levTestTidy) %>%
+    tab_header(title="Levene-Test") %>%
+    tab_style(style = list(cell_text(weight = "bold")),locations = cells_column_labels(everything()))
+    
+  gtsave(gt_table, "levene_test.png")
+  CopyFileToResult ("levene_test.png")
 ```
+![](levene_test.png)
 \newpage
+
 ## Welch's ANOVA test of significance
 ```{r echo=FALSE}
  ggplot (frameTimeLong) +
@@ -103,10 +149,20 @@ leveneTest(time ~ method, data = frameTimeLong)
                  width = 0.2, color = "black")
 ```
 
-```{r echo=FALSE}
-oneway.test(time ~ method, data = frameTimeLong, var.equal = FALSE)
+```{r include=FALSE}
+  oneway.test(time ~ method, data = frameTimeLong, var.equal = FALSE)
+  anova <- oneway.test(time ~ method, data = frameTimeLong, var.equal = FALSE)
+  anovaTidy <- tidy(anova)  
+  gt_table <- gt(anovaTidy) %>%
+    tab_header(title="Welch-ANOVA-Test") %>%
+    tab_style(style = list(cell_text(weight = "bold")),locations = cells_column_labels(everything()))
+    
+  gtsave(gt_table, "welch_anova_test.png")
+  CopyFileToResult ("welch_anova_test.png")
 ```
+![](welch_anova_test.png)
 \newpage
+
 ## Post-Hoc Games Howell
 ```{r echo=FALSE}
   ggplot(frameTimeLong) +
@@ -117,6 +173,13 @@ oneway.test(time ~ method, data = frameTimeLong, var.equal = FALSE)
     ggtitle(sprintf("Force calculation time comparison n = %d", nCount)) +
     theme_minimal()
 ```
-```{r echo=FALSE}
-games_howell_test(time ~ method, data = frameTimeLong)
+```{r include=FALSE}
+  games_howell <- games_howell_test(time ~ method, data = frameTimeLong)
+  gt_table <- gt(games_howell) %>%
+    tab_header(title="Games-Howell-Test") %>%
+    tab_style(style = list(cell_text(weight = "bold")),locations = cells_column_labels(everything()))
+  
+  gtsave(gt_table, "games_howell_test.png")
+  CopyFileToResult ("games_howell_test.png")
 ```
+![](games_howell_test.png)

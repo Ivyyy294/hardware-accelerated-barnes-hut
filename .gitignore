@@ -35,3 +35,9 @@
 x64/
 AsteroidSimulation/shader-error.txt
 /Out
+R/games_howell_test.png
+R/levene_test.png
+R/shapiro_test.png
+R/welch_anova_test.png
+R/control_variables.png
+R/CTC.html
