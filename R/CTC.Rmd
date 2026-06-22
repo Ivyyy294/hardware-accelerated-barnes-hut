@@ -41,11 +41,15 @@ frameTimeGpu <- data.table::fread(BuildDataPath("GPU/forceCalcTime.csv"), sep = 
 frameTimeCpu <- data.table::fread(BuildDataPath("CPU/forceCalcTime.csv"), sep = ";")
 frameTimeDirect <- data.table::fread(BuildDataPath("Direct/forceCalcTime.csv"), sep = ";")
   
-##Check if variables are identical besides method
+#Check if variables are identical besides method
 variablesOk <- identical(variablesGpu[-1], variablesCpu[-1]) && identical(variablesGpu[-1], variablesDirect[-1]) &&
   variablesGpu[[2]][1] == 2 &&
   variablesCpu[[2]][1] == 1 &&
   variablesDirect[[2]][1] == 0
+
+stopifnot(variablesOk)
+
+#Compose frameTime tables
 
 rowCount <- variablesGpu[[2]][9]
 nCount <- variablesGpu[[2]][3] + 1
@@ -60,10 +64,8 @@ frameTimeLong <- melt (frameTime, id.vars = "step"
                        , measure.vars = c("gpu", "cpu", "direct")
                        , variable.name = "method"
                        , value.name = "time")
-```
 
-## Experiment Variables
-```{r include=FALSE}
+#Control Variables
   experimentVar<-variablesGpu[-1]
   setnames(experimentVar, 1, "Variable Name")
   setnames(experimentVar, 2, "V1")
@@ -76,27 +78,21 @@ frameTimeLong <- melt (frameTime, id.vars = "step"
     fmt_number(rows = c(1,4,5,6,7,10,11,12), decimals = 2)
   
   gtsave(gt_table, "control_variables.png")
-  CopyFileToResult ("control_variables.png")
-```
-![](control_variables.png)
-\newpage
-
-## Shapiro-Wilk test for normality
-```{r echo=FALSE}
+  CopyFileToResult ("control_variables.png")#
+  
+#Shapiro-Wilk
   plot <- ggplot(frameTimeLong) +
-    aes(sample = time, color = method) +
-    stat_qq() +
-    stat_qq_line() +
-    facet_wrap(~method, scales = "free") +
-    labs(color = "Method", y = "MS", x ="Method") +
-    ggtitle(sprintf("QQ-Plots per method n = %d", nCount)) +
-    theme_minimal()
+  aes(sample = time, color = method) +
+  stat_qq() +
+  stat_qq_line() +
+  facet_wrap(~method, scales = "free") +
+  labs(color = "Method", y = "MS", x ="Method") +
+  ggtitle(sprintf("QQ-Plots per method n = %d", nCount)) +
+  theme_minimal()
 
   ggsave(filename = "qq.png", plot = plot, width = 10, dpi=600)
   CopyFileToResult ("qq.png")
-```
-
-```{r include=FALSE}
+  
   shapiroTable <- frameTimeLong[, .(W = shapiro.test(time)$statistic, p_value = shapiro.test(time)$p.value), by = method]
   gt_table <- gt(shapiroTable) %>%
     tab_header(title="Shapiro-Wilk-Test") %>%
@@ -105,26 +101,20 @@ frameTimeLong <- melt (frameTime, id.vars = "step"
   
   gtsave(gt_table, "shapiro_test.png")
   CopyFileToResult ("shapiro_test.png")
-```
-![](shapiro_test.png)
-\newpage
-
-## Levene test of homogeneity of variances
-```{r echo=FALSE}
+  
+#Levene test
   plot <- ggplot(frameTimeLong) +
-    aes(x = method, y = time, fill = method) +
-    geom_boxplot(alpha = 0.5, outlier.shape = NA) +
-    geom_jitter(alpha = 0.2, width = 0.1, size = 0.7) +
-    facet_wrap(~method, scales = "free_y") +
-    labs(fill = "Method", y = "MS", x ="Method") +
-    ggtitle(sprintf("Box-Plots per method n = %d", nCount)) +
-    theme_minimal()
+  aes(x = method, y = time, fill = method) +
+  geom_boxplot(alpha = 0.5, outlier.shape = NA) +
+  geom_jitter(alpha = 0.2, width = 0.1, size = 0.7) +
+  facet_wrap(~method, scales = "free_y") +
+  labs(fill = "Method", y = "MS", x ="Method") +
+  ggtitle(sprintf("Box-Plots per method n = %d", nCount)) +
+  theme_minimal()
 
   ggsave(filename = "box.png", plot = plot, width = 10, dpi=600)
   CopyFileToResult ("box.png")
-```
-
-```{r include=FALSE}
+  
   levTest <- leveneTest(time ~ method, data = frameTimeLong)
   levTestTidy <- tidy(levTest)  
   
@@ -134,13 +124,9 @@ frameTimeLong <- melt (frameTime, id.vars = "step"
     
   gtsave(gt_table, "levene_test.png")
   CopyFileToResult ("levene_test.png")
-```
-![](levene_test.png)
-\newpage
-
-## Welch's ANOVA test of significance
-```{r echo=FALSE}
- plot <- ggplot (frameTimeLong) +
+  
+#Welch-ANOVA
+  plot <- ggplot (frameTimeLong) +
     aes(x = method, y = time, color = method) +
     geom_jitter(alpha = 0.3, width = 0.5) +
     scale_y_log10(breaks = scales::log_breaks(n = 10)) +
@@ -156,9 +142,7 @@ frameTimeLong <- melt (frameTime, id.vars = "step"
 
   ggsave(filename = "jitter.png", plot = plot, width = 10, dpi=600)
   CopyFileToResult ("jitter.png")
-```
-
-```{r include=FALSE}
+  
   oneway.test(time ~ method, data = frameTimeLong, var.equal = FALSE)
   anova <- oneway.test(time ~ method, data = frameTimeLong, var.equal = FALSE)
   anovaTidy <- tidy(anova)  
@@ -168,12 +152,8 @@ frameTimeLong <- melt (frameTime, id.vars = "step"
     
   gtsave(gt_table, "welch_anova_test.png")
   CopyFileToResult ("welch_anova_test.png")
-```
-![](welch_anova_test.png)
-\newpage
-
-## Post-Hoc Games Howell
-```{r echo=FALSE}
+  
+#Games-Howel
   plot <- ggplot(frameTimeLong) +
     aes(x = step, y = time, color = method) +
     geom_line(linewidth = 1, alpha = 0.8) +
@@ -184,8 +164,7 @@ frameTimeLong <- melt (frameTime, id.vars = "step"
 
   ggsave(filename = "line.png", plot = plot, width = 10, dpi=600)
   CopyFileToResult ("line.png")
-```
-```{r include=FALSE}
+
   games_howell <- games_howell_test(time ~ method, data = frameTimeLong)
   gt_table <- gt(games_howell) %>%
     tab_header(title="Games-Howell-Test") %>%
@@ -194,4 +173,26 @@ frameTimeLong <- melt (frameTime, id.vars = "step"
   gtsave(gt_table, "games_howell_test.png")
   CopyFileToResult ("games_howell_test.png")
 ```
+
+## Experiment Variables
+![](control_variables.png)
+\newpage
+
+## Shapiro-Wilk test for normality
+![](qq.png)
+![](shapiro_test.png)
+\newpage
+
+## Levene test of homogeneity of variances
+![](box.png)
+![](levene_test.png)
+\newpage
+
+## Welch's ANOVA test of significance
+![](jitter.png)
+![](welch_anova_test.png)
+\newpage
+
+## Post-Hoc Games Howell
+![](line.png)
 ![](games_howell_test.png)
