@@ -83,7 +83,7 @@ frameTimeLong <- melt (frameTime, id.vars = "step"
 
 ## Shapiro-Wilk test for normality
 ```{r echo=FALSE}
-  ggplot(frameTimeLong) +
+  plot <- ggplot(frameTimeLong) +
     aes(sample = time, color = method) +
     stat_qq() +
     stat_qq_line() +
@@ -91,6 +91,9 @@ frameTimeLong <- melt (frameTime, id.vars = "step"
     labs(color = "Method", y = "MS", x ="Method") +
     ggtitle(sprintf("QQ-Plots per method n = %d", nCount)) +
     theme_minimal()
+
+  ggsave(filename = "qq.png", plot = plot, width = 10, dpi=600)
+  CopyFileToResult ("qq.png")
 ```
 
 ```{r include=FALSE}
@@ -108,7 +111,7 @@ frameTimeLong <- melt (frameTime, id.vars = "step"
 
 ## Levene test of homogeneity of variances
 ```{r echo=FALSE}
-  ggplot(frameTimeLong) +
+  plot <- ggplot(frameTimeLong) +
     aes(x = method, y = time, fill = method) +
     geom_boxplot(alpha = 0.5, outlier.shape = NA) +
     geom_jitter(alpha = 0.2, width = 0.1, size = 0.7) +
@@ -116,6 +119,9 @@ frameTimeLong <- melt (frameTime, id.vars = "step"
     labs(fill = "Method", y = "MS", x ="Method") +
     ggtitle(sprintf("Box-Plots per method n = %d", nCount)) +
     theme_minimal()
+
+  ggsave(filename = "box.png", plot = plot, width = 10, dpi=600)
+  CopyFileToResult ("box.png")
 ```
 
 ```{r include=FALSE}
@@ -134,7 +140,7 @@ frameTimeLong <- melt (frameTime, id.vars = "step"
 
 ## Welch's ANOVA test of significance
 ```{r echo=FALSE}
- ggplot (frameTimeLong) +
+ plot <- ggplot (frameTimeLong) +
     aes(x = method, y = time, color = method) +
     geom_jitter(alpha = 0.3, width = 0.5) +
     scale_y_log10(breaks = scales::log_breaks(n = 10)) +
@@ -147,6 +153,9 @@ frameTimeLong <- melt (frameTime, id.vars = "step"
     stat_summary(fun.data = mean_cl_normal, 
                  geom = "errorbar", 
                  width = 0.2, color = "black")
+
+  ggsave(filename = "jitter.png", plot = plot, width = 10, dpi=600)
+  CopyFileToResult ("jitter.png")
 ```
 
 ```{r include=FALSE}
@@ -165,13 +174,16 @@ frameTimeLong <- melt (frameTime, id.vars = "step"
 
 ## Post-Hoc Games Howell
 ```{r echo=FALSE}
-  ggplot(frameTimeLong) +
+  plot <- ggplot(frameTimeLong) +
     aes(x = step, y = time, color = method) +
     geom_line(linewidth = 1, alpha = 0.8) +
     scale_y_log10(breaks = scales::log_breaks(n = 10)) +
     labs(color = "Method", y = "MS", x = "Fixed Time Step") +
     ggtitle(sprintf("Force calculation time comparison n = %d", nCount)) +
     theme_minimal()
+
+  ggsave(filename = "line.png", plot = plot, width = 10, dpi=600)
+  CopyFileToResult ("line.png")
 ```
 ```{r include=FALSE}
   games_howell <- games_howell_test(time ~ method, data = frameTimeLong)
