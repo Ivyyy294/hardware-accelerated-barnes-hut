@@ -4,6 +4,7 @@ author: "Lara Gülpen"
 date: "`r Sys.Date()`"
 output:
   html_document: default
+  pdf_document: default
   word_document: default
 ---
 
@@ -17,6 +18,9 @@ library(rstatix)
 library(gt)
 library(webshot2)
 library(broom)
+library(pwr)
+library(modeest)
+library(dplyr)
 
 DATA<-"D:/01_Uni/Thesis/BUILD/Data/"
 RESULT<-"D:/01_Uni/Thesis/BUILD/Result/"
@@ -29,6 +33,13 @@ BuildDataPath <- function (local_filepath)
 CopyFileToResult <- function (filename)
 {
   file.copy(filename, file.path(RESULT, filename), overwrite = TRUE)
+}
+
+get_mode <- function(x)
+{
+  ux <- unique(x)
+  tab <- tabulate(match(x, ux))
+  ux[which.max(tab)]
 }
 
 #Load experiment variables
@@ -79,8 +90,29 @@ frameTimeLong <- melt (frameTime, id.vars = "step"
   
   gtsave(gt_table, "control_variables.png")
   CopyFileToResult ("control_variables.png")#
+ 
+#Hardware
+  hardware <- data.frame(CPU="Intel Core i5-4670k", GPU = "Radeon RX 480", RAM="2x4GB DDR3-1333")
   
-#Shapiro-Wilk
+  gt_table <- gt(hardware) %>%
+    tab_header(title="HARDWARE") %>%
+    tab_style(style = list(cell_text(weight = "bold")),locations = cells_column_labels(everything()))
+    
+  gtsave(gt_table, "hardware.png")
+  CopyFileToResult ("hardware.png")
+  
+#Sample Size
+  anovaStatus <- unclass(pwr.anova.test(k = 3, f = 0.1, n=NULL, sig.level = 0.05, power = 0.9))
+  anovaStatusTidy <- as.data.frame(anovaStatus) 
+
+  gt_table <- gt(anovaStatusTidy) %>%
+    tab_header(title="ANOVA-Power") %>%
+    tab_style(style = list(cell_text(weight = "bold")),locations = cells_column_labels(everything()))
+    
+  gtsave(gt_table, "anova_power.png")
+  CopyFileToResult ("anova_power.png")
+
+#QQ plot
   plot <- ggplot(frameTimeLong) +
   aes(sample = time, color = method) +
   stat_qq() +
@@ -93,6 +125,65 @@ frameTimeLong <- melt (frameTime, id.vars = "step"
   ggsave(filename = "qq.png", plot = plot, width = 10, dpi=600)
   CopyFileToResult ("qq.png")
   
+#Box plot
+  plot <- ggplot(frameTimeLong) +
+  aes(x = method, y = time, fill = method) +
+  geom_boxplot(alpha = 0.5, outlier.shape = NA) +
+  #geom_jitter(alpha = 0.2, width = 0.1, size = 0.7) +
+  facet_wrap(~method, scales = "free_y") +
+  labs(fill = "Method", y = "MS", x ="Method") +
+  ggtitle(sprintf("Box-Plots per method n = %d", nCount)) +
+  theme_minimal()
+
+  ggsave(filename = "box.png", plot = plot, width = 10, dpi=600)
+  CopyFileToResult ("box.png")
+  
+#Jitter Plot
+    plot <- ggplot (frameTimeLong) +
+      aes(x = method, y = time, color = method) +
+      geom_jitter(alpha = 0.3, width = 0.5) +
+      scale_y_log10(breaks = scales::log_breaks(n = 10)) +
+      labs(color = "Method", y = "MS", x ="Method") +
+      ggtitle(sprintf("Force calculation time comparison n = %d", nCount)) +
+      theme_minimal()+
+      ##show mean per group
+      stat_summary(fun = mean, geom = "point", 
+                   size = 3, color = "black", shape = 18)+
+      stat_summary(fun.data = mean_cl_normal, 
+                   geom = "errorbar", 
+                   width = 0.2, color = "black")
+  
+    ggsave(filename = "jitter.png", plot = plot, width = 10, dpi=600)
+    CopyFileToResult ("jitter.png")
+#Line Plot
+    plot <- ggplot(frameTimeLong) +
+    aes(x = step, y = time, color = method) +
+    geom_line(linewidth = 1, alpha = 0.8) +
+    scale_y_log10(breaks = scales::log_breaks(n = 10)) +
+    labs(color = "Method", y = "MS", x = "Fixed Time Step") +
+    ggtitle(sprintf("Force calculation time comparison n = %d", nCount)) +
+    theme_minimal()
+
+    ggsave(filename = "line.png", plot = plot, width = 10, dpi=600)
+    CopyFileToResult ("line.png")
+    
+#Mean, Median, Mode Plot
+frameTimeStats <- frameTimeLong |> 
+  group_by(method) |> 
+  summarise(
+    mean   = mean(time),
+    median = median(time),
+    mode   = get_mode(time)
+  )
+
+gt_table <- gt(frameTimeStats) %>%
+    tab_header(title="Mean-Median-Mode") %>%
+    tab_style(style = list(cell_text(weight = "bold")),locations = cells_column_labels(everything()))
+    
+gtsave(gt_table, "mean_median_mode.png")
+CopyFileToResult ("mean_median_mode.png")
+
+#Shapiro-Wilk
   shapiroTable <- frameTimeLong[, .(W = shapiro.test(time)$statistic, p_value = shapiro.test(time)$p.value), by = method]
   gt_table <- gt(shapiroTable) %>%
     tab_header(title="Shapiro-Wilk-Test") %>%
@@ -103,18 +194,6 @@ frameTimeLong <- melt (frameTime, id.vars = "step"
   CopyFileToResult ("shapiro_test.png")
   
 #Levene test
-  plot <- ggplot(frameTimeLong) +
-  aes(x = method, y = time, fill = method) +
-  geom_boxplot(alpha = 0.5, outlier.shape = NA) +
-  geom_jitter(alpha = 0.2, width = 0.1, size = 0.7) +
-  facet_wrap(~method, scales = "free_y") +
-  labs(fill = "Method", y = "MS", x ="Method") +
-  ggtitle(sprintf("Box-Plots per method n = %d", nCount)) +
-  theme_minimal()
-
-  ggsave(filename = "box.png", plot = plot, width = 10, dpi=600)
-  CopyFileToResult ("box.png")
-  
   levTest <- leveneTest(time ~ method, data = frameTimeLong)
   levTestTidy <- tidy(levTest)  
   
@@ -125,43 +204,41 @@ frameTimeLong <- melt (frameTime, id.vars = "step"
   gtsave(gt_table, "levene_test.png")
   CopyFileToResult ("levene_test.png")
   
-#Welch-ANOVA
-  plot <- ggplot (frameTimeLong) +
-    aes(x = method, y = time, color = method) +
-    geom_jitter(alpha = 0.3, width = 0.5) +
-    scale_y_log10(breaks = scales::log_breaks(n = 10)) +
-    labs(color = "Method", y = "MS", x ="Method") +
-    ggtitle(sprintf("Force calculation time comparison n = %d", nCount)) +
-    theme_minimal()+
-    ##show mean per group
-    stat_summary(fun = mean, geom = "point", 
-                 size = 3, color = "black", shape = 18)+
-    stat_summary(fun.data = mean_cl_normal, 
-                 geom = "errorbar", 
-                 width = 0.2, color = "black")
-
-  ggsave(filename = "jitter.png", plot = plot, width = 10, dpi=600)
-  CopyFileToResult ("jitter.png")
+#Parametric ANOVA
+  aovModel <- aov(time ~ method, data = frameTimeLong)
+  aovTidy <- tidy (aovModel)
   
-  oneway.test(time ~ method, data = frameTimeLong, var.equal = FALSE)
-  anova <- oneway.test(time ~ method, data = frameTimeLong, var.equal = FALSE)
-  anovaTidy <- tidy(anova)  
-  gt_table <- gt(anovaTidy) %>%
-    tab_header(title="Welch-ANOVA-Test") %>%
+  gt_table <- gt(aovTidy) %>%
+    tab_header(title="ANOVA-TEST") %>%
+    tab_style(style = list(cell_text(weight = "bold")),locations = cells_column_labels(everything()))
+    
+  gtsave(gt_table, "anova_test.png")
+  CopyFileToResult ("anova_test.png")
+  
+#Tukey HSD
+  tukeyHsd <- TukeyHSD(aovModel, conf.level=.95)
+  tukeyHsdTidy <- tidy(tukeyHsd)
+  
+  gt_table <- gt(tukeyHsdTidy) %>%
+  tab_header(title="TUKEY-HSD-TEST") %>%
+  tab_style(style = list(cell_text(weight = "bold")),locations = cells_column_labels(everything()))
+    
+  gtsave(gt_table, "tukey_hsd_test.png")
+  CopyFileToResult ("tukey_hsd_test.png")
+  
+#Non-Paramteric ANOVA
+  welchAnova <- oneway.test(time ~ method, data = frameTimeLong, var.equal = FALSE)
+  welchAnovaTidy <- tidy(welchAnova)  
+
+  gt_table <- gt(welchAnovaTidy) %>%
+    tab_header(title="WELCH-ANOVA-TEST") %>%
     tab_style(style = list(cell_text(weight = "bold")),locations = cells_column_labels(everything()))
     
   gtsave(gt_table, "welch_anova_test.png")
   CopyFileToResult ("welch_anova_test.png")
+
   
 #Games-Howel
-  plot <- ggplot(frameTimeLong) +
-    aes(x = step, y = time, color = method) +
-    geom_line(linewidth = 1, alpha = 0.8) +
-    scale_y_log10(breaks = scales::log_breaks(n = 10)) +
-    labs(color = "Method", y = "MS", x = "Fixed Time Step") +
-    ggtitle(sprintf("Force calculation time comparison n = %d", nCount)) +
-    theme_minimal()
-
   ggsave(filename = "line.png", plot = plot, width = 10, dpi=600)
   CopyFileToResult ("line.png")
 
@@ -173,26 +250,32 @@ frameTimeLong <- melt (frameTime, id.vars = "step"
   gtsave(gt_table, "games_howell_test.png")
   CopyFileToResult ("games_howell_test.png")
 ```
-
-## Experiment Variables
-![](control_variables.png)
+![](anova_power.png)
+![](control_variables.png){width=50%}
 \newpage
 
-## Shapiro-Wilk test for normality
+## Normal Distribution
 ![](qq.png)
-![](shapiro_test.png)
+![](shapiro_test.png){width=50%}
 \newpage
 
-## Levene test of homogeneity of variances
+## Variance
 ![](box.png)
-![](levene_test.png)
+![](levene_test.png){width=50%}
 \newpage
 
-## Welch's ANOVA test of significance
+## Plots
 ![](jitter.png)
-![](welch_anova_test.png)
+![](line.png)
+![](mean_median_mode.png){width=50%}
+
+## Parametric ANOVA
+
+![](anova_test.png){width=75%}
+![](tukey_hsd_test.png){width=75%}
 \newpage
 
-## Post-Hoc Games Howell
-![](line.png)
-![](games_howell_test.png)
+## Non-Parametric ANOVA
+
+![](welch_anova_test.png){width=75%}
+![](games_howell_test.png){width=75%}
