@@ -3,10 +3,10 @@ library(data.table)
 library(ggplot2)
 library(Hmisc)
 
-setwd("D:/00_Git/hardware-accelerated-barnes-hut/Out/10241")
+setwd("D:/01_Uni/Thesis/BUILD/Data")
 
 variablesGpu <- data.table::fread(paste("GPU","/variables.csv", sep = ""),fill = TRUE)
-nCount <- variablesGpu[[2]][4] + 1
+nCount <- variablesGpu[[2]][3] + 1
 
 frameTime <- data.table::fread(paste("GPU","/shader.csv", sep = ""), sep = ";")
 frameTime [, step := .I]

@@ -95,7 +95,7 @@ frameTimeLong <- melt (frameTime, id.vars = "step"
   hardware <- data.frame(CPU="Intel Core i5-4670k", GPU = "Radeon RX 480", RAM="2x4GB DDR3-1333")
   
   gt_table <- gt(hardware) %>%
-    tab_header(title="HARDWARE") %>%
+    tab_header(title="Hardware") %>%
     tab_style(style = list(cell_text(weight = "bold")),locations = cells_column_labels(everything()))
     
   gtsave(gt_table, "hardware.png")
@@ -167,7 +167,30 @@ frameTimeLong <- melt (frameTime, id.vars = "step"
     ggsave(filename = "line.png", plot = plot, width = 10, dpi=600)
     CopyFileToResult ("line.png")
     
-#Mean, Median, Mode Plot
+#Shader execution Plot
+  nCount <- variablesGpu[[2]][3] + 1
+  
+  frameTime <- data.table::fread(BuildDataPath("GPU/shader.csv"), sep = ";")
+  frameTime [, step := .I]
+  
+  frameLong <- melt(frameTime, id.vars = "step", variable.name = "series", value.name = "value")
+  
+  plot <- ggplot(frameLong, aes(x = step, y = value, color = series, shape = series)) +
+  geom_line(size = 0.5) +
+  geom_point(data = subset(frameLong, step %% 20 == 0), size = 1.5) +
+  scale_y_log10(breaks = scales::log_breaks(n = 10)) +
+  scale_color_manual(values = rainbow(length(unique(frameLong$series)))) +
+  #scale_color_viridis_d(option = "turbo") +
+  scale_shape_manual(values = 0:(length(unique(frameLong$series))-1)) +
+  labs(color = "Shader", shape = "Shader",
+       y = "MS", x = "Fixed Time Step") +
+  ggtitle(sprintf("Shader Execution Time n = %d", nCount)) +
+  theme_minimal()
+    
+  ggsave(filename = "shader.png", plot = plot, width = 10, dpi=600)
+  CopyFileToResult ("shader.png")
+  
+#Mean, Median, Mode Table
 frameTimeStats <- frameTimeLong |> 
   group_by(method) |> 
   summarise(
@@ -209,7 +232,7 @@ CopyFileToResult ("mean_median_mode.png")
   aovTidy <- tidy (aovModel)
   
   gt_table <- gt(aovTidy) %>%
-    tab_header(title="ANOVA-TEST") %>%
+    tab_header(title="ANOVA-Test") %>%
     tab_style(style = list(cell_text(weight = "bold")),locations = cells_column_labels(everything()))
     
   gtsave(gt_table, "anova_test.png")
@@ -220,7 +243,7 @@ CopyFileToResult ("mean_median_mode.png")
   tukeyHsdTidy <- tidy(tukeyHsd)
   
   gt_table <- gt(tukeyHsdTidy) %>%
-  tab_header(title="TUKEY-HSD-TEST") %>%
+  tab_header(title="Tukey-HSD-Test") %>%
   tab_style(style = list(cell_text(weight = "bold")),locations = cells_column_labels(everything()))
     
   gtsave(gt_table, "tukey_hsd_test.png")
@@ -231,7 +254,7 @@ CopyFileToResult ("mean_median_mode.png")
   welchAnovaTidy <- tidy(welchAnova)  
 
   gt_table <- gt(welchAnovaTidy) %>%
-    tab_header(title="WELCH-ANOVA-TEST") %>%
+    tab_header(title="Welch-ANOVA-Test") %>%
     tab_style(style = list(cell_text(weight = "bold")),locations = cells_column_labels(everything()))
     
   gtsave(gt_table, "welch_anova_test.png")
@@ -279,3 +302,7 @@ CopyFileToResult ("mean_median_mode.png")
 
 ![](welch_anova_test.png){width=75%}
 ![](games_howell_test.png){width=75%}
+\newpage
+
+## Shader execution Time
+![](shader.png)
