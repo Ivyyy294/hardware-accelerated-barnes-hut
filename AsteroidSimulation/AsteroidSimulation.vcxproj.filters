@@ -155,6 +155,9 @@
     <ClCompile Include="UavSrvBuffer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="PlanetData.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">
@@ -283,6 +286,9 @@
     <ClInclude Include="UavSrvBuffer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="PlanetData.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="color.hlsl">
@@ -348,6 +354,9 @@
       <Filter>04_HLSL</Filter>
     </None>
     <None Include="variables.csv">
+      <Filter>06_Variables</Filter>
+    </None>
+    <None Include="planets.csv">
       <Filter>06_Variables</Filter>
     </None>
   </ItemGroup>

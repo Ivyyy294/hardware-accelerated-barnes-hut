@@ -39,11 +39,26 @@ void SceneAsteroidBase::Init()
 
 	//Add Sun
 	Planet* sun = AddGameObject <Planet>();
-	sun->SetData (Color(252, 120, 1), Session::Me().m_variables.centralMass, 2.0f);
+	PlanetData sunData;
+	sunData.color = Color(252, 120, 1);
+	sunData.mass = Session::Me().m_variables.centralMass;
+	sunData.radius = 2.0f;
+	sun->SetData (sunData);
 	OnOrbitalBodySpawned (sun);
 
 	//Add Asteroids
 	SpawnAsteroids (m_sVar.numAsteroids, sun);
+
+	//Spawn Planet
+	Session::Me().m_planetData = PlanetData::GetPlanetData();
+
+	for(const PlanetData& i : Session::Me().m_planetData)
+	{
+		Planet* p = AddGameObject<Planet>();
+		p->SetData(i);
+		p->SetOrbit(i.orbitalElement, sun->GetComponent<PhysicObject>().get());
+		OnOrbitalBodySpawned(p);
+	}
 
 	Session::Me().m_variables.Log();
 }

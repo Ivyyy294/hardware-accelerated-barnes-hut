@@ -153,6 +153,7 @@
     <ClCompile Include="ForceGeneratorDirect.cpp" />
     <ClCompile Include="KeplerOrbit.cpp" />
     <ClCompile Include="OrbitalElement.cpp" />
+    <ClCompile Include="PlanetData.cpp" />
     <ClCompile Include="SceneBarnesHutCS.cpp" />
     <ClCompile Include="ForceGeneratorBarnesHut.cpp" />
     <ClCompile Include="SceneBarnesHut.cpp" />
@@ -201,6 +202,7 @@
     <ClInclude Include="ForceGeneratorDirect.h" />
     <ClInclude Include="KeplerOrbit.h" />
     <ClInclude Include="OrbitalElement.h" />
+    <ClInclude Include="PlanetData.h" />
     <ClInclude Include="SceneBarnesHutCS.h" />
     <ClInclude Include="ForceGeneratorBarnesHut.h" />
     <ClInclude Include="SceneBarnesHut.h" />
@@ -374,6 +376,7 @@
     <None Include="CSUtils.hlsli" />
     <None Include="CSDoubleBuffer.hlsli" />
     <None Include="CSZOrder.hlsli" />
+    <None Include="planets.csv" />
     <None Include="variables.csv" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

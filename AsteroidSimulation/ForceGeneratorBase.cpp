@@ -27,7 +27,7 @@ void ForceGeneratorBase::FixedUpdate()
 
 ForceGeneratorBase::ForceGeneratorBase()
 	: m_theta (Session::Me().m_variables.theta)
-	, m_maxParticleCount(Session::Me().m_variables.numAsteroids + 1)
+	, m_maxParticleCount(Session::Me().m_variables.numAsteroids + 1 + Session::Me().m_planetData.size())
 {
 	m_forceBuffer = new XMFLOAT3[m_maxParticleCount];
 }

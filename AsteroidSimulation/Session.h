@@ -2,6 +2,7 @@
 
 #include "SessionVariables.h"
 #include "SessionFile.h"
+#include "PlanetData.h"
 
 class Session
 {
@@ -14,6 +15,7 @@ public:
 	SessionFile m_gpuMemDumpFile;
 	SessionFile m_shaderTimeFile;
 	SessionFile m_forceCalcTimeFile;
+	vector<PlanetData> m_planetData;
 
 	bool m_logDebugInfo = false;
 

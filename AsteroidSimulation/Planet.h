@@ -1,7 +1,7 @@
 #pragma once
 #include "ColorMaterial.h"
-#include<IvyyyGameObject.h>
 #include "StellarObject.h"
+#include "PlanetData.h"
 
 class Planet :
     public StellarObject
@@ -12,6 +12,6 @@ class Planet :
 //Methods
 public:
 	Planet();
-	void SetData(const Color& color, const float mass, const float size);
+	void SetData(const PlanetData& data);
 };
 

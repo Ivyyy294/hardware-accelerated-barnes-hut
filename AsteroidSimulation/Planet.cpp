@@ -23,9 +23,9 @@ Planet::Planet()
 	transform.SetLocalScale({ 2.0f, 2.0f, 2.0f });
 }
 
-void Planet::SetData(const Color& color, const float mass, const float size)
+void Planet::SetData(const PlanetData& data)
 {
-	m_material->SetColor(color);
+	m_material->SetColor(data.color);
 
-	SetPhysicalProperties (mass, size);
+	SetPhysicalProperties (data.mass, data.radius);
 }
