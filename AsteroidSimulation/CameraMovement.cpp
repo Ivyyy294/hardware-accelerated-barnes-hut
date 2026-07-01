@@ -47,7 +47,7 @@ void CameraMovement::Update()
 
 	//Time
 	float scale = Time::TimeScale();
-	float maxTimeWarp = 10.f;
+	float maxTimeWarp = 20.f;
 
 	if (Input::KeyPressed(Key::KEY_D))
 		scale += Time::UnscaledDeltaTime() * 2.f;
