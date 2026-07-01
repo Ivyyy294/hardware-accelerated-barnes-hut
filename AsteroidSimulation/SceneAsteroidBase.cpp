@@ -42,7 +42,7 @@ void SceneAsteroidBase::Init()
 	PlanetData sunData;
 	sunData.color = Color(252, 120, 1);
 	sunData.mass = Session::Me().m_variables.centralMass;
-	sunData.radius = 2.0f;
+	sunData.radius = 5.0f;
 	sun->SetData (sunData);
 	OnOrbitalBodySpawned (sun);
 	PhysicObject* soi = sun->GetComponent<PhysicObject>().get();
