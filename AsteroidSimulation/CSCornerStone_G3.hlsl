@@ -22,7 +22,7 @@ void main(uint3 GTid : SV_GroupThreadID,
         counterBuffer[2] = 0;
     }
     
-    GroupMemoryBarrierWithGroupSync();
+    DeviceMemoryBarrierWithGroupSync();
     
     if (index <= kSize)
     {
@@ -45,13 +45,7 @@ void main(uint3 GTid : SV_GroupThreadID,
         if (oVal != 1)
             InterlockedAdd(counterBuffer[2], 1);
     
-        GroupMemoryBarrierWithGroupSync();
-    
         if (index < kSize)
             InterlockedAdd(counterBuffer[0], oVal);
     }
-    
-    GroupMemoryBarrierWithGroupSync();
-    //debugBuffer[index] = kSize;
-    //outKBuffer[0] = counterBuffer[0];
 }

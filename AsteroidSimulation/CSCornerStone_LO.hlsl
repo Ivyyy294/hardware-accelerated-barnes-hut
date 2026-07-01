@@ -15,8 +15,6 @@ void main(uint3 GTid : SV_GroupThreadID,
 {
     uint index = Gid.x * NUM_THREADS + GTid.x;
     
-    //debugBuffer[index] = nkBuffer[index];
-    
     if (index > L + 2)
         return;
     
@@ -26,14 +24,10 @@ void main(uint3 GTid : SV_GroupThreadID,
     
     uint bufferSize = counterBuffer[0];
     uint searchVal = 1 << 3 * index;
-    //debugBuffer[index] = searchVal;
     
     uint indexFirstNodeOnLevel = BinarySearch(searchVal, nkBuffer, n);
     loBuffer[index] = indexFirstNodeOnLevel;
     
     if (index > L)
         loBuffer[index] = n;
-    
-    GroupMemoryBarrierWithGroupSync();
-    //debugBuffer[index] = loBuffer[index];
 }

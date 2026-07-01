@@ -48,18 +48,14 @@ void main(uint3 GTid : SV_GroupThreadID,
     uint ni = (kSize - 1) / 7;
     
     uint index = Gid.x * NUM_THREADS + GTid.x;
-    //debugBuffer[index] = ni;
-    //return;
 
-    if (index >= kSize)
-        return;
-    
-    //debugBuffer[index] = 999;
-    
     if (index == 0)
         counterBuffer[1] = ni;
     
-    GroupMemoryBarrierWithGroupSync();
+    DeviceMemoryBarrierWithGroupSync();
+    
+    if (index >= kSize)
+        return;
     
     //Add leaf node to K'
     uint k = kBuffer[index];
@@ -72,7 +68,6 @@ void main(uint3 GTid : SV_GroupThreadID,
     uint leafLevel = 10 - octalBitsCount;
     uint wsKey = GetWsKey(k, leafLevel);
     nkBuffer[ni + index] = wsKey;
-    //debugBuffer[ni + index] = nkBuffer[ni + index];
     
     if (index >= kSize - 1)
         return;
@@ -86,14 +81,8 @@ void main(uint3 GTid : SV_GroupThreadID,
     if (!isInternalNode)
         return;
     
-    GroupMemoryBarrierWithGroupSync();
-    
     const uint wsInt = GetWsKey(k, internalLevel);
     int internalKeyDelta = GetIndernalDelta(k, d);
     uint internalIndex = (index + internalKeyDelta) / 7;
     nkBuffer[internalIndex] = wsInt;
-    GroupMemoryBarrierWithGroupSync();
-    //debugBuffer[index] = internalIndex;
-    
-    //nkBuffer[0] = 1999;
 }

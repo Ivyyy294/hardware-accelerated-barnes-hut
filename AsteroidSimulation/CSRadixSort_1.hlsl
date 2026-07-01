@@ -36,9 +36,7 @@ void main(uint3 DTid : SV_DispatchThreadID,
         globalHistogram[i] = 0;
     }
  
-    //Blocks execution of all threads in a group until all group shared accesses have been completed
-    //and all threads in the group have reached this call.
-    GroupMemoryBarrierWithGroupSync();
+    AllMemoryBarrierWithGroupSync();
     
     for (uint tileIndex = groupId; tileIndex * tileSize < elementCount; tileIndex += dispatchGroupCount)
     {

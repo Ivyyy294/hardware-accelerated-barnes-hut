@@ -22,5 +22,4 @@ void main(uint3 GTid : SV_GroupThreadID,
         localCounter += inOBuffer[i];
     
     outOBuffer[index] = localCounter;
-    //debugBuffer[index] = outOBuffer[index];
 }
