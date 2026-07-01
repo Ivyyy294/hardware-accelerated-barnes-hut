@@ -3,7 +3,7 @@ theta;0.8
 numAsteroids;10000
 ugc;0.000050
 fixedDeltaTime;0.02
-distRange;50.0;5
+distRange;60.0;2
 eRange;0.0;0.05
 iRange;0.0;2
 maxFixedFrames;0
