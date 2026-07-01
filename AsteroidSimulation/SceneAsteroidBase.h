@@ -4,6 +4,7 @@
 #include "Asteroid.h"
 #include "SessionVariables.h"
 #include "ForceGeneratorBase.h"
+#include "PlanetData.h"
 
 class SceneAsteroidBase :
     public Scene
@@ -22,6 +23,7 @@ protected:
 	void AdjustFixedUpdateLoop (ForceGeneratorBase* forceGenerator);
 
 private:
-	void SpawnAsteroids(int num, GameObject* planet);
+	void SpawnAsteroids(int num, PhysicObject* soi);
+	void SpawnPlanet (const PlanetData& pData, PhysicObject* soi);
 };
 

@@ -45,33 +45,24 @@ void SceneAsteroidBase::Init()
 	sunData.radius = 2.0f;
 	sun->SetData (sunData);
 	OnOrbitalBodySpawned (sun);
+	PhysicObject* soi = sun->GetComponent<PhysicObject>().get();
 
 	//Add Asteroids
-	SpawnAsteroids (m_sVar.numAsteroids, sun);
+	SpawnAsteroids (m_sVar.numAsteroids, soi);
 
-	//Spawn Planet
-	Session::Me().m_planetData = PlanetData::GetPlanetData();
-
+	//Spawn Planets
 	for(const PlanetData& i : Session::Me().m_planetData)
-	{
-		Planet* p = AddGameObject<Planet>();
-		p->SetData(i);
-		p->SetOrbit(i.orbitalElement, sun->GetComponent<PhysicObject>().get());
-		OnOrbitalBodySpawned(p);
-	}
+		SpawnPlanet(i, soi);
 
 	Session::Me().m_variables.Log();
 }
 
-void SceneAsteroidBase::SpawnAsteroids(int num, GameObject* planet)
+void SceneAsteroidBase::SpawnAsteroids(int num, PhysicObject* soi)
 {
-		PhysicObject* soi = planet->GetComponent<PhysicObject>().get();
-
 		SessionVariables variables = Session::Me().m_variables;
 
 		Vector2 dist = variables.distRange * 10.f;
 		Vector2 e = variables.eRange * 10.f;
-
 
 		const float minVal = 0.001f;
 
@@ -107,6 +98,14 @@ void SceneAsteroidBase::SpawnAsteroids(int num, GameObject* planet)
 
 			OnOrbitalBodySpawned(asteroid);
 		}
+}
+
+void SceneAsteroidBase::SpawnPlanet(const PlanetData& pData, PhysicObject* soi)
+{
+	Planet* p = AddGameObject<Planet>();
+	p->SetData(pData);
+	p->SetOrbit(pData.orbitalElement, soi);
+	OnOrbitalBodySpawned(p);
 }
 
 void SceneAsteroidBase::AdjustFixedUpdateLoop(ForceGeneratorBase* forceGenerator)

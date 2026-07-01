@@ -30,6 +30,7 @@ int WINAPI WinMain (_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance,
 	}
 
 	Session::Me().m_variables = variables;
+	Session::Me().m_planetData = PlanetData::GetPlanetData();
 
 	if (SessionLogger::Me().StartSession(variables.outDir))
 	{
