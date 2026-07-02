@@ -20,8 +20,7 @@ RWStructuredBuffer<uint> globalHistogram : register(u0);
 groupshared uint localHistogram[NUM_DIGITS * NUM_BINS];
 
 [numthreads(NUM_THREADS, 1, 1)]
-void main(uint3 DTid : SV_DispatchThreadID,
-          uint3 GTid : SV_GroupThreadID,
+void main(uint3 GTid : SV_GroupThreadID,
           uint3 Gid : SV_GroupID)
 {
     const uint tileSize = ITEM_PER_THREAD * NUM_THREADS;
