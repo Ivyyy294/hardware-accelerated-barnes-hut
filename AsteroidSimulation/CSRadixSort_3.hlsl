@@ -23,9 +23,10 @@ RWStructuredBuffer<float> massOut : register(u2);
 RWStructuredBuffer<uint> newToOldIndexOut : register(u3);
 
 [numthreads(NUM_THREADS, 1, 1)]
-void main(uint3 DTid : SV_DispatchThreadID)
+void main(uint3 GTid : SV_GroupThreadID,
+          uint3 Gid : SV_GroupID)
 {
-    uint index = DTid.x;
+    uint index = Gid.x * NUM_THREADS + GTid.x;
 
     if (index >= elementCount)
         return;
@@ -68,6 +69,4 @@ void main(uint3 DTid : SV_DispatchThreadID)
         massOut[dstIndex] = mass;
         newToOldIndexOut[dstIndex] = oldIndex;
     }
-    
-    //debugBuffer[index] = newToOldIndexOut[index];
 }
