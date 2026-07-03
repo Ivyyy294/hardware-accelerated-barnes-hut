@@ -53,8 +53,6 @@ void main(uint3 GTid : SV_GroupThreadID,
             rank++;
     }
     
-    GroupMemoryBarrierWithGroupSync();
-    
     //Get histogram index
     uint histIndex = digitPlace * NUM_BINS + digit;
     

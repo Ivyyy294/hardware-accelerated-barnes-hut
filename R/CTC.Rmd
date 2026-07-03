@@ -22,8 +22,8 @@ library(pwr)
 library(modeest)
 library(dplyr)
 
-DATA<-"D:/01_Uni/Thesis/BUILD/Data/"
-RESULT<-"D:/01_Uni/Thesis/BUILD/Result/"
+DATA<-"D:/01_Uni/Thesis/BUILD/03.07.2026/Data/"
+RESULT<-"D:/01_Uni/Thesis/BUILD/03.07.2026/Result/"
 
 BuildDataPath <- function (local_filepath)
 {
@@ -92,7 +92,7 @@ frameTimeLong <- melt (frameTime, id.vars = "step"
   CopyFileToResult ("control_variables.png")#
  
 #Hardware
-  hardware <- data.frame(CPU="Intel Core i5-4670k", GPU = "Radeon RX 480", RAM="2x4GB DDR3-1333")
+  hardware <- data.frame(CPU="AMD Ryzen 9 8940HX", GPU = "NVIDIA GeForce RTX 5070 Laptop", RAM="2x16GB DDR5-5600")
   
   gt_table <- gt(hardware) %>%
     tab_header(title="Hardware") %>%
@@ -262,9 +262,6 @@ CopyFileToResult ("mean_median_mode.png")
 
   
 #Games-Howel
-  ggsave(filename = "line.png", plot = plot, width = 10, dpi=600)
-  CopyFileToResult ("line.png")
-
   games_howell <- games_howell_test(time ~ method, data = frameTimeLong)
   gt_table <- gt(games_howell) %>%
     tab_header(title="Games-Howell-Test") %>%
