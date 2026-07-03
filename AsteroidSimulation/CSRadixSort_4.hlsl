@@ -45,8 +45,6 @@ void main(uint3 GTid : SV_GroupThreadID,
             rank++;
     }
     
-    GroupMemoryBarrierWithGroupSync();
-    
     //Get histogram index
     uint histIndex = digitPlace * NUM_BINS + digit;
     
@@ -55,9 +53,5 @@ void main(uint3 GTid : SV_GroupThreadID,
 
     //Scatter
     if (dstIndex < elementCount)
-    {
         mortonCodeOut[dstIndex] = key;
-    }
-    
-    GroupMemoryBarrierWithGroupSync();
 }
