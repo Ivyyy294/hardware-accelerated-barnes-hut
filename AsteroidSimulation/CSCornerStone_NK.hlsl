@@ -84,5 +84,10 @@ void main(uint3 GTid : SV_GroupThreadID,
     const uint wsInt = GetWsKey(k, internalLevel);
     int internalKeyDelta = GetIndernalDelta(k, d);
     uint internalIndex = (index + internalKeyDelta) / 7;
-    nkBuffer[internalIndex] = wsInt;
+    
+    if (internalIndex < 0 || internalIndex >= 1 << 30)
+        return;
+    
+    uint oVal = 0;
+    InterlockedExchange(nkBuffer[internalIndex], wsInt, oVal);
 }
