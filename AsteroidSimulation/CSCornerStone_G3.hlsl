@@ -8,7 +8,7 @@ StructuredBuffer<uint> inO2Buffer : register(t2);
 RWStructuredBuffer<uint> outKBuffer : register(u0);
 RWStructuredBuffer<uint> counterBuffer : register(u1);
 
-[numthreads(256, 1, 1)]
+[numthreads(NUM_THREADS, 1, 1)]
 void main(uint3 GTid : SV_GroupThreadID,
           uint3 Gid : SV_GroupID)
 {
