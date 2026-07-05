@@ -272,9 +272,11 @@ void ForceGeneratorBarnesHutCS::BuildOctree(uint32_t elementCount)
 		CopyCounterBuffer();
 	}
 
-	groupCount = (elementCount + 255) / 256;
-
+	//Recalculate groupCount based on updated m_counterBuffer[0]
+	groupCount = (m_counterBuffer[0] + 1 + 255) / 256;
 	m_csCornerStone_NK.Dispatch(groupCount, 1, 1);
+
+	//Copy counter buffer to update m_counterBuffer[1]
 	CopyCounterBuffer();
 
 	m_deviceContext->CopyResource(m_buffer.m_inNkBuffer, m_buffer.m_outNkBuffer);
