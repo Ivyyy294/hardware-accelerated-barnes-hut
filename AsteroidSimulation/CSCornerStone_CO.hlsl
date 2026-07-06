@@ -23,7 +23,7 @@ uint GetChildIndex(const uint nkVal, const uint n)
     
     uint firstChildIndex = BinarySearchRange(firstChildValue, nkBuffer, childLeafLevelOffset, childIndexLimit);
     
-    if (nkBuffer[firstChildIndex] != firstChildValue)
+    if (nkBuffer[firstChildIndex] != firstChildValue || firstChildIndex >= n)
         firstChildIndex = 0;
     
     return firstChildIndex;
