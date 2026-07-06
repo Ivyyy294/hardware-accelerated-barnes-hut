@@ -1,7 +1,7 @@
 #include "CSUtils.hlsli"
 
 #define L 10
-#define NUM_THREADS 256
+#define NUM_THREADS 12
 
 StructuredBuffer<uint> counterBuffer : register(t0);
 StructuredBuffer<uint> nkBuffer : register(t1);
