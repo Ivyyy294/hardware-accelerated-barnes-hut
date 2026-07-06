@@ -11,9 +11,9 @@ void main(uint3 GTid : SV_GroupThreadID,
           uint3 Gid : SV_GroupID)
 {
     uint index = Gid.x * NUM_THREADS + GTid.x;
-    uint kSize = counterBuffer[0];
+    uint nl = counterBuffer[0];
     
-    if (index > kSize)
+    if (index > nl)
         return;
     
     uint localCounter = 0;

@@ -44,17 +44,15 @@ int GetIndernalDelta (uint ki, uint d)
 void main(uint3 GTid : SV_GroupThreadID,
           uint3 Gid : SV_GroupID)
 {
-    uint kSize = counterBuffer[0];
-    uint ni = (kSize - 1) / 7;
+    uint nl = counterBuffer[0];
+    uint ni = (nl - 1) / 7;
     
     uint index = Gid.x * NUM_THREADS + GTid.x;
 
     if (index == 0)
         counterBuffer[1] = ni;
     
-    DeviceMemoryBarrierWithGroupSync();
-    
-    if (index >= kSize)
+    if (index >= nl)
         return;
     
     //Add leaf node to K'
@@ -69,7 +67,7 @@ void main(uint3 GTid : SV_GroupThreadID,
     uint wsKey = GetWsKey(k, leafLevel);
     nkBuffer[ni + index] = wsKey;
     
-    if (index >= kSize - 1)
+    if (index >= nl - 1)
         return;
     
     //Add internal nodes to K'

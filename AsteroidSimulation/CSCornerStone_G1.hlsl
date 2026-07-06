@@ -20,10 +20,10 @@ void main(uint3 GTid : SV_GroupThreadID,
     //Thread index
     uint index = Gid.x * NUM_THREADS + GTid.x;
     
-    uint kSize = counterBuffer[0];
+    uint nl = counterBuffer[0];
  
     //Early exit
-    if (index > kSize)
+    if (index > nl)
         return;
 
     uint nVal = nBuffer[index];

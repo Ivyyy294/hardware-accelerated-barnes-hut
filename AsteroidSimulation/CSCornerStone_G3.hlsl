@@ -14,7 +14,7 @@ void main(uint3 GTid : SV_GroupThreadID,
 {
     uint index = Gid.x * NUM_THREADS + GTid.x;
     
-    uint kSize = counterBuffer[0];
+    uint nl = counterBuffer[0];
     
     if (index == 0)
     {
@@ -24,7 +24,7 @@ void main(uint3 GTid : SV_GroupThreadID,
     
     DeviceMemoryBarrierWithGroupSync();
     
-    if (index <= kSize)
+    if (index <= nl)
     {
         uint kVal = inKBuffer[index];
         uint oVal = inOBuffer[index];
@@ -45,7 +45,7 @@ void main(uint3 GTid : SV_GroupThreadID,
         if (oVal != 1)
             InterlockedAdd(counterBuffer[2], 1);
     
-        if (index < kSize)
+        if (index < nl)
             InterlockedAdd(counterBuffer[0], oVal);
     }
 }
