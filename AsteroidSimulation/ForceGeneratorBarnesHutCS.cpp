@@ -249,16 +249,16 @@ void ForceGeneratorBarnesHutCS::DispatchRadixSort(uint32_t elementCount)
 
 void ForceGeneratorBarnesHutCS::BuildOctree(uint32_t elementCount)
 {
-	//Repeat max L times, L = 10
-
-	uint32_t groupCount = (elementCount + 255) / 256;
-	
-	//Assure we run rebalancing loop once
-	CopyCounterBuffer();
+	//Assures we run the rebalancing loop once
 	m_counterBuffer[2] = 1;
 
+	uint32_t groupCount = 0;
+
+	//Repeat max L times, L = 10
 	for (uint32_t i = 0; i < 10 && m_counterBuffer[2] > 0; ++i)
 	{
+		groupCount = (m_counterBuffer[0] + 1 + 255) / 256;
+
 		m_buffer.SetSettingParameter (elementCount, 0);
 		m_csCornerStone_F.Dispatch(groupCount,1,1);
 
@@ -272,7 +272,11 @@ void ForceGeneratorBarnesHutCS::BuildOctree(uint32_t elementCount)
 		CopyCounterBuffer();
 	}
 
+	//Recalculate groupCount based on updated m_counterBuffer[0]
+	groupCount = (m_counterBuffer[0] + 1 + 255) / 256;
 	m_csCornerStone_NK.Dispatch(groupCount, 1, 1);
+
+	//Copy counter buffer to update m_counterBuffer[1]
 	CopyCounterBuffer();
 
 	m_deviceContext->CopyResource(m_buffer.m_inNkBuffer, m_buffer.m_outNkBuffer);

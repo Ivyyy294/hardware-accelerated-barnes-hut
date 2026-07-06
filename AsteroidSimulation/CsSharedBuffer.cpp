@@ -6,8 +6,10 @@
 CsSharedBuffer::CsSharedBuffer(uint32_t maxParticleCount)
 	: m_deviceContext (D3D::Instance().GetDeviceContext())
 	, m_maxParticleCount (maxParticleCount)
-	, m_maxCapacity (maxParticleCount+ maxParticleCount)
 {
+	UINT nlReq = maxParticleCount;
+	UINT niReq = (maxParticleCount + 6 - 1) / 7;
+	m_maxCapacity = nlReq + niReq;
 }
 
 HRESULT CsSharedBuffer::InitDebugShaderParameters(ID3D11Device* device)
