@@ -93,7 +93,7 @@ void SceneAsteroidBase::SpawnAsteroids(int num, PhysicObject* soi)
 			float size = mass / variables.massRangeAsteroids.x;
 
 			Asteroid* asteroid = AddGameObject <Asteroid>();
-			asteroid->SetPhysicalProperties(mass, 0.075f * size);
+			asteroid->SetPhysicalProperties(mass, 0.05f * size);
 			asteroid->SetOrbit (oe, soi);
 
 			OnOrbitalBodySpawned(asteroid);
