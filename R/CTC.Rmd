@@ -21,9 +21,10 @@ library(broom)
 library(pwr)
 library(modeest)
 library(dplyr)
+library(FSA)
 
-DATA<-"D:/01_Uni/Thesis/BUILD/03.07.2026/Data/"
-RESULT<-"D:/01_Uni/Thesis/BUILD/03.07.2026/Result/"
+DATA<-"D:/01_Uni/Thesis/BUILD/21.06.2026/Data/"
+RESULT<-"D:/01_Uni/Thesis/BUILD/21.06.2026/Result/"
 
 BuildDataPath <- function (local_filepath)
 {
@@ -249,7 +250,29 @@ CopyFileToResult ("mean_median_mode.png")
   gtsave(gt_table, "tukey_hsd_test.png")
   CopyFileToResult ("tukey_hsd_test.png")
   
-#Non-Paramteric ANOVA
+  #kruskal
+  kruskal <- kruskal.test(time ~ method, data = frameTimeLong)
+  kruskalTidy <- tidy(kruskal)
+  
+  gt_table <- gt(kruskalTidy) %>%
+    tab_header(title="Kruskal-Test") %>%
+    tab_style(style = list(cell_text(weight = "bold")),locations = cells_column_labels(everything()))
+    
+  gtsave(gt_table, "kruskal_test.png")
+  CopyFileToResult ("kruskal_test.png")
+  
+  #Dunn Test
+  dunn <- dunnTest(time ~ method, data = frameTimeLong, method = "holm")
+  dunnTidy <- dunn$res
+
+  gt_table <- gt(dunnTidy) %>%
+    tab_header(title="Dunn-Test") %>%
+    tab_style(style = list(cell_text(weight = "bold")),locations = cells_column_labels(everything()))
+    
+  gtsave(gt_table, "dunn_test.png")
+  CopyFileToResult ("dunn_test.png")
+  
+  #Welch ANOVA
   welchAnova <- oneway.test(time ~ method, data = frameTimeLong, var.equal = FALSE)
   welchAnovaTidy <- tidy(welchAnova)  
 

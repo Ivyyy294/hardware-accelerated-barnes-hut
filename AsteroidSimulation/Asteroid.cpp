@@ -16,7 +16,7 @@ Asteroid::Asteroid()
 	if (m_material == nullptr)
 	{
 		m_material = std::make_shared<ColorMaterial> ();
-		m_material->SetColor (Color (147, 146, 140));
+		m_material->SetColor (Color (200, 200, 195));
 	}
 
 	//MeshRenderer
