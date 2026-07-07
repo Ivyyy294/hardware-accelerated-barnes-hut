@@ -154,6 +154,7 @@
     <ClCompile Include="KeplerOrbit.cpp" />
     <ClCompile Include="OrbitalElement.cpp" />
     <ClCompile Include="PlanetData.cpp" />
+    <ClCompile Include="PlanetRing.cpp" />
     <ClCompile Include="SceneBarnesHutCS.cpp" />
     <ClCompile Include="ForceGeneratorBarnesHut.cpp" />
     <ClCompile Include="SceneBarnesHut.cpp" />
@@ -203,6 +204,7 @@
     <ClInclude Include="KeplerOrbit.h" />
     <ClInclude Include="OrbitalElement.h" />
     <ClInclude Include="PlanetData.h" />
+    <ClInclude Include="PlanetRing.h" />
     <ClInclude Include="SceneBarnesHutCS.h" />
     <ClInclude Include="ForceGeneratorBarnesHut.h" />
     <ClInclude Include="SceneBarnesHut.h" />
