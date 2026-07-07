@@ -158,6 +158,9 @@
     <ClCompile Include="PlanetData.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="PlanetRing.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">
@@ -288,6 +291,9 @@
     </ClInclude>
     <ClInclude Include="PlanetData.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PlanetRing.h">
+      <Filter>02_Components</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

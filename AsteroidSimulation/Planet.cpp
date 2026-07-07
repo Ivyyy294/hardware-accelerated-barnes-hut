@@ -5,6 +5,7 @@
 #include <IvyyyCircleCollider.h>
 #include <IvyyyPhysicObjectGravityGenerator.h>
 
+
 Planet::Planet()
 	: StellarObject()
 {
@@ -21,6 +22,9 @@ Planet::Planet()
 	m_physicObject->SetMass (25000);
 
 	transform.SetLocalScale({ 2.0f, 2.0f, 2.0f });
+
+	//Ring
+	m_ring = AddComponent<PlanetRing>();	
 }
 
 void Planet::SetData(const PlanetData& data)
@@ -28,4 +32,6 @@ void Planet::SetData(const PlanetData& data)
 	m_material->SetColor(data.color);
 
 	SetPhysicalProperties (data.mass, data.radius);
+
+	m_ring->SetRingData(data.color, data.ringRadius);
 }

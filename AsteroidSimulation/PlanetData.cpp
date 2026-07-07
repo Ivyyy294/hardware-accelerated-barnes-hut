@@ -78,6 +78,17 @@ bool PlanetData::ParsePlanetFromString(const std::string& str, PlanetData& data)
 	strVal = str.substr(splitIndex, endIndex - splitIndex);
 	data.radius = stof(strVal);
 
+
+	//ring radius
+	splitIndex = str.find(";", endIndex) + 1;
+	endIndex = str.find(";", splitIndex);
+
+	if (splitIndex == std::string::npos)
+		return false;
+
+	strVal = str.substr(splitIndex, endIndex - splitIndex);
+	data.ringRadius = stof(strVal);
+
 	//a
 	splitIndex = str.find(";", endIndex) + 1;
 	endIndex = str.find(";", splitIndex);
